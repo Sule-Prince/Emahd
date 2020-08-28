@@ -1,0 +1,14 @@
+.follow-card {
+   min-width: 150px;
+   height: 150px; 
+   color: red;
+   background-color: red;
+}
+
+.follow-card ::after {
+    content: "";
+    width: 50px;
+    height: 50px;
+    background-color: red;
+    position: sticky
+}

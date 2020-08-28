@@ -1,0 +1,20 @@
+.login-or-text {
+	display: inline-block;
+	text-align: center;
+	padding: 0 7%;
+}
+
+.login-or div {
+	display: inline-block;
+	width: 38%;
+	height: 1px;
+	background-color: #ccc;
+}
+
+.login-or {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: medium;
+	color: #bbb;
+}

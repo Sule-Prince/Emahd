@@ -1,0 +1,17 @@
+
+.chat-container {
+    overflow-x: hidden;
+    transform: translateX( calc(-100vw));
+    background: #eee;
+    min-width: 100vw;
+    min-height: 100vh;
+    transition: all .7s .1s cubic-bezier(0, .4, 0, 1);
+}
+
+.openMessage {
+    transform: translateX(0);  
+}
+
+.focus {
+    color: #3f51b5;
+}

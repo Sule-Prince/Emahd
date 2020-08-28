@@ -1,0 +1,203 @@
+import React, { useState } from "react";
+import { makeStyles, Grid, Typography } from "@material-ui/core";
+
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormControl from "@material-ui/core/FormControl";
+
+import IconButton from "@material-ui/core/IconButton";
+import Input from "@material-ui/core/Input";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import EventIcon from "@material-ui/icons/Event";
+
+const useStyles = makeStyles((theme) => ({
+  textField: {
+    margin: theme.spacing(1.3),
+    "& > * ": {
+      width: "100%",
+    },
+  },
+  button: {
+    backgroundColor: theme.palette.primary["main"],
+    color: "#fff",
+    fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+    width: " 100% ",
+  },
+}));
+
+const getData = (name) => {
+  const form = document.getElementsByTagName("form")[0];
+  console.log(form[name].value);
+  return form[name].value;
+};
+
+export default ({ setGender, setDOB, ...props }) => {
+  const classes = useStyles();
+  return (
+    <form>
+      <Grid container>
+        {/* Gender Form */}
+        <Grid container justify="center" item xs={12}>
+          <Grid
+            style={{ marginTop: 35, marginBottom: 10 }}
+            justify="center"
+            container
+            item
+            xs={12}
+          >
+            <Grid item style={{ textAlign: "center" }} xs={12}>
+              <Typography
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: 10,
+                }}
+                variant="body2"
+              >
+                Select your gender
+              </Typography>
+            </Grid>
+
+            <GenderForm classes={classes} />
+          </Grid>
+          {/* End of Gender Form */}
+
+          {/* Date Form */}
+
+          <Grid
+            style={{ marginTop: 25, marginBottom: 10 }}
+            justify="center"
+            container
+            item
+            xs={12}
+          >
+            <Grid item style={{ textAlign: "center" }} xs={12}>
+              <Typography
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: 10,
+                }}
+                variant="body2"
+              >
+                Select your Date Of Birth
+              </Typography>
+            </Grid>
+
+            <DateForm />
+          </Grid>
+
+          {/* End of Date Form */}
+
+          {/* Button */}
+          <Grid item xs={10}>
+            <input
+              className={classes.button}
+              type="button"
+              value="Next"
+              page="6"
+              onClick={(e) => {
+                props.next(e);
+                setGender(getData("gender"));
+                setDOB(getData("DOB"));
+              }}
+            />
+          </Grid>
+        </Grid>
+      </Grid>
+    </form>
+  );
+};
+
+const GenderForm = () => {
+  const [value, setValue] = useState("custom");
+
+  const handleChange = (event) => {
+    setValue(event.target.value);
+  };
+  return (
+    <Grid container item xs={10}>
+      <FormControl style={{ width: "100%" }} component="fieldset">
+        <RadioGroup
+          aria-label="gender"
+          name="gender"
+          value={value}
+          onChange={handleChange}
+        >
+          <Grid
+            style={{ paddingBottom: 5, borderBottom: "1px solid #ccc" }}
+            container
+            item
+            xs={12}
+          >
+            <Typography
+              style={{ alignSelf: "center", flexGrow: 1 }}
+              variant="body2"
+            >
+              Male
+            </Typography>
+            <FormControlLabel
+              value="male"
+              control={<Radio color="primary" size="small" />}
+            />
+          </Grid>
+          <Grid
+            style={{ paddingBottom: 5, borderBottom: "1px solid #ccc" }}
+            container
+            item
+            xs={12}
+          >
+            <Typography
+              style={{ alignSelf: "center", flexGrow: 1 }}
+              variant="body2"
+            >
+              Female
+            </Typography>
+
+            <FormControlLabel
+              value="female"
+              control={<Radio color="primary" size="small" />}
+            />
+          </Grid>
+          <Grid
+            style={{ paddingBottom: 5, borderBottom: "1px solid #ccc" }}
+            container
+            item
+            xs={12}
+          >
+            <Typography
+              style={{ alignSelf: "center", flexGrow: 1 }}
+              variant="body2"
+            >
+              Custom
+            </Typography>
+
+            <FormControlLabel
+              value="custom"
+              control={<Radio color="primary" size="small" />}
+            />
+          </Grid>
+        </RadioGroup>
+      </FormControl>
+    </Grid>
+  );
+};
+
+const DateForm = () => {
+  return (
+    <Grid container item xs={10}>
+      <Input
+        id="DOB"
+        name="DOB"
+        type="date"
+        style={{ width: "100%" }}
+        endAdornment={
+          <InputAdornment position="end">
+            <IconButton aria-label="">
+              <EventIcon color="primary" />
+            </IconButton>
+          </InputAdornment>
+        }
+      />
+    </Grid>
+  );
+};
