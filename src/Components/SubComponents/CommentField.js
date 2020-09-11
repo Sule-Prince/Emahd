@@ -7,11 +7,9 @@ import {
 	IconButton,
 } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
-
+ 
 import { handleAddComment } from "../../utils/handleComment";
 import { useDispatch } from "react-redux";
-
-
 
 const useStyles = makeStyles({
 	commentContainer: {
@@ -30,41 +28,40 @@ const useMuiTextStyles = makeStyles(
 	{ name: "MuiOutlinedInput" }
 );
 
-const CommentField = ({ postId }) => {
+const CommentField = ({ postId, setCommentNo }) => {
 	const classes = useStyles();
 	const textClasses = useMuiTextStyles();
 
-    const [comment, setComment] = useState("");
-    
-    const dispatch = useDispatch()
+	const [comment, setComment] = useState("");
+
+	const dispatch = useDispatch();
 
 	return (
 		<div className={classes.commentContainer}>
 			<TextField
 				className={textClasses.root}
-                // id= {`${postId}-commentField`}
 				label="add a comment"
 				variant="outlined"
-                value= {comment}
+				value={comment}
 				fullWidth
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
-							<IconButton color="primary"
-                                onClick= {() => {
-                                    
-                                    
-                                    handleAddComment(comment, postId, dispatch)
-                                }}
-                            >
+							<IconButton
+								color="primary"
+								onClick={() => {
+									handleAddComment(comment, postId, dispatch, setCommentNo);
+									setComment("")
+								}}
+							>
 								<SendIcon />
 							</IconButton>
 						</InputAdornment>
 					),
 				}}
-                onChange= {(e) => {
-                    setComment(e.target.value)
-                }}
+				onChange={e => {
+					setComment(e.target.value);
+				}}
 			/>
 		</div>
 	);

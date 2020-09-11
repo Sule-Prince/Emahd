@@ -23,25 +23,33 @@ import { useState } from "react";
 import { useStyles } from "../Profile/Components/Account/styles";
 import { useEffect } from "react";
 
-
 import { otherUsersThunk } from "../../redux/otherUserSlice";
 import { axios } from "../../config/axiosConfig";
 import { screamsDataThunk } from "../../redux/screamsSlice";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
 import FollowTab from "../SubComponents/FollowTab";
 
-export default () => {
+export default ({ setSelectedTab }) => {
 	const classes = useStyles();
 	const user = useParams().user;
 	const dispatch = useDispatch();
 
+	const mainUser = useSelector(state => state.user.data.handle);
+	
+	const { push } = useHistory();
 	useEffect(() => {
+		if (user === mainUser) {
+			
+			setSelectedTab(0);
+			push("/");
+			return;
+		}
 		dispatch(otherUsersThunk(user));
 
 		// document.getElementsByTagName("title")[0].innerHTML = user;
 
 		// eslint-disable-next-line
-	}, []);
+	}, [mainUser]);
 
 	const userData = useSelector(state => state.otherUser.userInfo);
 	const screams = useSelector(state => state.otherUser.screams);
@@ -57,7 +65,12 @@ export default () => {
 	return (
 		<div
 			className={classes.root}
-			style={{ position: "fixed", top: 0, backgroundColor: "#fff", zIndex: 1000 }}
+			style={{
+				position: "fixed",
+				top: 0,
+				backgroundColor: "#fff",
+				zIndex: 1000,
+			}}
 		>
 			<Grid direction="column" container>
 				<Grid xs={12} item>
@@ -105,7 +118,7 @@ const Header = ({ classes, handle }) => {
 					>
 						<KeyboardBackspaceIcon />
 					</IconButton>
-					<Typography className={classes.headerName} variant="caption">
+					<Typography className={classes.headerName} variant="body2" component= "span" >
 						{handle}
 					</Typography>
 				</Grid>

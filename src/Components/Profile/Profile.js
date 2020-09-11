@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import {
 	BottomNavigation,
 	BottomNavigationAction,
 	Avatar,
+	Badge,
 } from "@material-ui/core";
 import HomeIcon from "@material-ui/icons/Home";
 import SearchOutlinedIcon from "@material-ui/icons/SearchOutlined";
 import NotificationsIcon from "@material-ui/icons/Notifications";
-// import AvatarSvg from "../assets/graphics/profile_pic.svg";
 import Home from "./Components/Home/Home";
 import Search from "./Components/Search/Search";
-import Notification from "./Components/Notification/Notification";
+import Notification from "./Components/Notification/Notifications";
 import Account from "./Components/Account/Account";
 
 import { useHistory } from "react-router-dom";
@@ -18,29 +18,29 @@ import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import "./Profile.css";
-import { userDataThunk } from "../../redux/userDataSlice";
+import { userDataThunk, notifications } from "../../redux/userDataSlice";
 import { screamsDataThunk } from "../../redux/screamsSlice";
+
+import MySnackBar from "../SubComponents/MySnackBar";
 import { projectFirestore } from "../../firebase/FBConfig";
 
-import MySnackBar from "../SubComponents/MySnackBar"
-
-export default ({ props }) => {
-	const { push } = useHistory();
+const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
+	const user = useSelector(state => state.user.data.handle);
 	const userImg = useSelector(state => state.user.data.imageUrl);
+	const noOfUnread = useSelector( state => state.user.notifications.noOfUnread)
+	const dispatch = useDispatch();
+	const { push, location } = useHistory();
 
-	const screamInputEl = useRef(null);
-
-	const [selectedTab, setSelectedTab] = useState(0);
 	const handleTabChange = (ev, newValue) => {
-		push("/");
+		if (location.pathname !== "/") push("/");
+
 		setSelectedTab(newValue);
+		localStorage.setItem("tabNo", newValue);
 	};
 
 	const AccountTab = () => {
-		setSelectedTab(3);
+		setSelectedTab(0);
 	};
-
-	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -59,19 +59,28 @@ export default ({ props }) => {
 	}, []);
 
 	useEffect(() => {
-		const unsubscribe = projectFirestore
-			.collection("screams")
-			.onSnapshot(async snapshot => {
-				dispatch(screamsDataThunk("/screams"));
-			});
+		let unsubscribe = () => {};
+		if (user) {
+			unsubscribe = projectFirestore
+				.collection("notifications")
+				.doc(user)
+				.onSnapshot(snapshot => {
+					
+					dispatch(notifications(snapshot.data()));
+				});
+		}
 
 		return () => {
 			unsubscribe();
 		};
 
 		// eslint-disable-next-line
-	}, []);
+	}, [user]);
+	useEffect(() => {
+		dispatch(screamsDataThunk());
 
+		// eslint-disable-next-line
+	}, []);
 	return (
 		<div className="profile-page">
 			<MySnackBar />
@@ -82,9 +91,6 @@ export default ({ props }) => {
 					style={{ justifyContent: "space-between" }}
 					variant="fullWidth"
 				>
-					<BottomNavigationAction icon={<HomeIcon />} />
-					<BottomNavigationAction icon={<SearchOutlinedIcon />} />
-					<BottomNavigationAction icon={<NotificationsIcon />} />
 					<BottomNavigationAction
 						icon={
 							<Avatar
@@ -97,15 +103,27 @@ export default ({ props }) => {
 							/>
 						}
 					/>
+					<BottomNavigationAction icon={<SearchOutlinedIcon />} />
+					<BottomNavigationAction
+						icon={
+							<Badge
+								badgeContent= {noOfUnread}
+								color= "primary"
+							>
+								<NotificationsIcon />
+							</Badge>
+						}
+					/>
+
+					<BottomNavigationAction icon={<HomeIcon />} />
 				</BottomNavigation>
-				
 			</div>
-			{selectedTab === 0 && (
-				<Home AccountTab={AccountTab} screamInputEl={screamInputEl} />
-			)}
+			{selectedTab === 0 && <Account />}
 			{selectedTab === 1 && <Search />}
 			{selectedTab === 2 && <Notification />}
-			{selectedTab === 3 && <Account />}
+			{selectedTab === 3 && <Home AccountTab={AccountTab} />}
 		</div>
 	);
 };
+
+export default React.memo(Profile);

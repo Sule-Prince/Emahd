@@ -10,10 +10,10 @@ const useStyles = makeStyles(theme => ({
 		margin: theme.spacing(1, 1, 1, 0)
 	},
 	avatarGrid: {
-		padding: theme.spacing(0, 1, 1, 1),
+		padding: " 4px 12px 8px",
 		"& > *": {
-			height: 32,
-			width: 32,
+			height: 35,
+			width: 35,
 		},
 	},
 	handle: {
@@ -49,11 +49,11 @@ const Comment = ({ comment, createdAt, handle, imgUrl }) => {
 	const classes = useStyles();
 
 	return (
-		<Grid container alignItems="center" item xs={12}>
-			<Grid className={classes.avatarGrid} item>
+		<Grid container  item xs={12}>
+			<Grid className={classes.avatarGrid} item >
 				<Avatar src={imgUrl} />
 			</Grid>
-			<Grid item>
+			<Grid item xs= {9} sm= {10} >
 				<Typography
 					variant="body2"
 					className={classes.handle}

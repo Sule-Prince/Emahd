@@ -14,7 +14,11 @@ const Post = ({ post }) => {
 	const classes = useStyles();
 	return (
 		<Grid item xs={12} className={classes.root}>
-			{post.mediaUrl ? <MediaPost post={post} /> : <TextPost post={post} />}
+			{post && post.mediaUrl ? (
+				<MediaPost post={post} />
+			) : (
+				<TextPost post={post} />
+			)}
 		</Grid>
 	);
 };

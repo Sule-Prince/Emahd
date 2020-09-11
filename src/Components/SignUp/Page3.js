@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles, TextField, Grid, Typography } from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import { courses } from "../assets/courses";
 import { universities } from "../assets/schools";
+import { isEmpty, isAllowedChar } from "../../utils/validators";
 
 const useStyles = makeStyles(theme => ({
 	textField: {
@@ -26,13 +27,29 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const getData = name => {
-	const form = document.getElementsByTagName("form")[0];
-	console.log(form[name].value);
-	return form[name].value;
-};
+export default ({
+	setHandle,
+	setCourse,
+	setUniversity,
+	handle,
+	course,
+	university,
+	...props
+}) => {
+	const [error, setError] = useState({ message: "", hasError: false });
 
-export default ({ setHandle, setCourse, setUniversity, ...props }) => {
+	useEffect(() => {
+		for (let i = 0; i < handle.length; i++) {
+			if (!isAllowedChar(handle[i]))
+				return setError({
+					message:
+						"Username must only contain alphabets, digits, . and _",
+					hasError: true,
+				});
+			setError({ message: "", hasError: false });
+		}
+	}, [handle])
+
 	const classes = useStyles();
 	return (
 		<form>
@@ -59,7 +76,17 @@ export default ({ setHandle, setCourse, setUniversity, ...props }) => {
 						</Grid>
 
 						<Grid className={classes.textField} item xs={10}>
-							<TextField label="User Name" id="handle" />
+							<TextField
+								label="Username"
+								value={handle}
+								error={error.hasError}
+								id="handle"
+								onChange={e => {
+									setHandle(e.target.value);
+									
+								}}
+							/>
+							<div className="error">{error.message}</div>
 						</Grid>
 					</Grid>
 
@@ -88,9 +115,17 @@ export default ({ setHandle, setCourse, setUniversity, ...props }) => {
 								leave as custom if you'd rather not say
 							</Typography>
 						</Grid>
-						<SelectSchoolForm classes={classes} />
+						<SelectSchoolForm
+							university={university}
+							setUniversity={setUniversity}
+							classes={classes}
+						/>
 						<Grid item xs={2}></Grid>
-						<SelectCourseForm classes={classes} />
+						<SelectCourseForm
+							course={course}
+							setCourse={setCourse}
+							classes={classes}
+						/>
 					</Grid>
 					{/*End Select School Form */}
 
@@ -101,10 +136,13 @@ export default ({ setHandle, setCourse, setUniversity, ...props }) => {
 							value="Next"
 							page="3"
 							onClick={e => {
+								if (error.hasError) return;
+								if (isEmpty(handle)) {
+									setError({ message: "Must not be empty", hasError: true });
+									return;
+								}
+
 								props.next(e);
-								setHandle(getData("handle"));
-								setUniversity(getData("university"));
-								setCourse(getData("course"));
 							}}
 						/>
 					</Grid>
@@ -114,7 +152,7 @@ export default ({ setHandle, setCourse, setUniversity, ...props }) => {
 	);
 };
 
-export const SelectSchoolForm = ({ classes }) => {
+export const SelectSchoolForm = ({ classes, university, setUniversity }) => {
 	return (
 		<Grid container justify="center" item xs={5}>
 			<div className={classes.selectForm}>
@@ -124,8 +162,10 @@ export const SelectSchoolForm = ({ classes }) => {
 					fullWidth
 					id="university"
 					name="university"
+					value={university}
 					defaultValue="Custom"
 					helperText="Select your university"
+					onChange={e => setUniversity(e.target.value)}
 				>
 					{universities.map((option, i) => (
 						<MenuItem key={i} value={option}>
@@ -138,7 +178,7 @@ export const SelectSchoolForm = ({ classes }) => {
 	);
 };
 
-export const SelectCourseForm = ({ classes }) => {
+export const SelectCourseForm = ({ classes, course, setCourse }) => {
 	return (
 		<Grid container justify="center" item xs={5}>
 			<div className={classes.selectForm}>
@@ -148,8 +188,10 @@ export const SelectCourseForm = ({ classes }) => {
 					fullWidth
 					id="course"
 					name="course"
+					value={course}
 					defaultValue="Custom"
 					helperText="Select your course"
+					onChange={e => setCourse(e.target.value)}
 				>
 					{courses.map((option, i) => (
 						<MenuItem key={i} value={option}>

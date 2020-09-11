@@ -39,8 +39,15 @@ const useStyles = makeStyles((theme) => ({
         letterSpacing: ".5px",
         fontWeight: theme.typography.fontWeightMedium,
         textTransform: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         width: "95%",
-        height: "20px",
+        // height: "20px",
+        padding: "4px 0px",
+        backgroundColor: theme.palette.primary["main"],
+        borderRadius: 2,
+        color: "#fff",
     }
 }))
 
@@ -95,7 +102,9 @@ const FollowButton = ({ classes }) => {
 
     return (
         <div className={classes.btnContainer}>
-            <Button size="small" color="primary" className={classes.btn} disableElevation variant="contained">Follow</Button>
+            <button size="small" color="primary" className={classes.btn} variant="contained">Follow
+                <span className= "MuiTouchRipple-root"></span>
+            </button>
 
         </div>
     )

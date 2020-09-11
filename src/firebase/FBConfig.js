@@ -1,6 +1,7 @@
 import firebase from "firebase/app";
 import "firebase/storage"
 import "firebase/firestore"
+import "firebase/auth"
 const firebaseConfig = {
 	apiKey: "AIzaSyDErGqFOme5z_zxxIMnsTYY845k1u8JlU8",
 	authDomain: "emahd-fdd9d.firebaseapp.com",
@@ -21,4 +22,4 @@ firebase.firestore().enablePersistence()
 })
 export const projectStorage = firebase.storage()
 export const projectFirestore = firebase.firestore()
-
+export const projectAuth = firebase.auth()

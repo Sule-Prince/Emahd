@@ -1,9 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import Chat from "./Components/Chat/Chat";
 import SignUp from "./Components/SignUp/SignUp";
 import ForgotPsw from "./Components/Login/ForgotPsw";
-// import Dashboard from "./Components/Admin/Dashboard";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import "./index.css";
 import { Provider } from "react-redux";
@@ -12,7 +10,6 @@ import AuthRender from "./Components/AuthRender";
 import OtherUserAccount from "./Components/OtherUsersProfile/OtherUserAccount";
 // import MySnackBar from "./Components/SubComponents/MySnackBar";
 
-// import { ReactQueryDevtools } from "react-query-devtools";
 
 const theme = createMuiTheme({
 	overrides: {
@@ -56,28 +53,43 @@ const theme = createMuiTheme({
 });
 
 const App = () => {
+	const [selectedTab, setSelectedTab] = useState(() => {
+		const tabNo = localStorage.getItem("tabNo");
+		if (tabNo && tabNo >= 0) return parseInt(tabNo);
+		else return 3;
+	});
 	return (
 		<>
-		<Provider store={store}>
-			<ThemeProvider theme={theme}>
-				
-				<Router>
-					<Switch>
-						{/* <Route path="/admin" exact component={Dashboard} /> */}
-						<Route path="/chat" component={Chat} />
-						<Route path="/signup" component={SignUp} />
-						<Route path="/forgot" component={ForgotPsw} />
+			<Provider store={store}>
+				<ThemeProvider theme={theme}>
+					<Router>
+						<Switch>
+							{/* <Route path="/admin" exact component={Dashboard} /> */}
+							{/* <Route path="/chat" component={Chat} /> */}
+							<Route path="/signup" component={SignUp} />
+							<Route path="/forgot" component={ForgotPsw} />
 
-						<Route path="/:user" component={OtherUserAccount} />
-						
-					</Switch>
-					<Route path="/" render={() => <AuthRender />} />
-				</Router>
-				
-			</ThemeProvider>
-		</Provider>
+							<Route
+								path="/:user"
+								render={() => (
+									<OtherUserAccount setSelectedTab={setSelectedTab} />
+								)}
+							/>
+						</Switch>
+						<Route
+							path="/"
+							render={() => (
+								<AuthRender
+									selectedTab={selectedTab}
+									setSelectedTab={setSelectedTab}
+								/>
+							)}
+						/>
+					</Router>
+				</ThemeProvider>
+			</Provider>
 
-		{/* <ReactQueryDevtools /> */}
+			{/* <ReactQueryDevtools /> */}
 		</>
 	);
 };

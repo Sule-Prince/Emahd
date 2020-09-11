@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	Grid,
 	Paper,
@@ -6,8 +6,11 @@ import {
 	IconButton,
 	Card,
 	CardActionArea,
+	Divider,
+	Button,
 } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
+
+import SettingsIcon from "@material-ui/icons/Settings";
 import PhotoCameraIcon from "@material-ui/icons/PhotoCamera";
 
 import FollowCard from "../../../SubComponents/FollowCard";
@@ -20,8 +23,14 @@ import { useStyles } from "./styles";
 import ProfilePic from "./ProfilePic";
 import UserPosts from "./UserPosts/UserPosts";
 import useFileUpload from "../../../../utils/useFileUpload";
+import Settings from "./Settings";
+import Chat from "../../../Chat/Chat";
 
-export default () => {
+const Account = () => {
+	// Styles to be used by the settings Component to display the Settings
+	const [styles, setStyles] = useState("110vw");
+	const [display, setDisplay] = useState(false);
+
 	const classes = useStyles();
 
 	const userData = useSelector(state => state.user.data);
@@ -31,44 +40,84 @@ export default () => {
 	const myPosts = posts[posts.length - 1];
 
 	return (
-		<div className={classes.root}>
-			<Grid direction="column" container>
-				<Grid xs={12} item>
-					<Header classes={classes} handle={userData.handle} />
+		<>
+			<div className={classes.root}>
+				<Settings styles={styles} setStyles={setStyles} />
+
+				<Grid direction="column" container>
+					<Grid xs={12} item>
+						<Header
+							classes={classes}
+							handle={userData.handle}
+							setStyles={setStyles}
+						/>
+					</Grid>
+					<Grid xs={12} item>
+						<CoverPhoto classes={classes} coverPhoto={userData.coverPhoto} />
+					</Grid>
+					<Grid xs={12} item>
+						<ProfilePic classes={classes} imageUrl={userData.imageUrl} />
+					</Grid>
+					<Grid container item xs={12}>
+						<Bio data={userData} />
+					</Grid>
+					<Grid justify="center" container item xs={12}>
+						{display && <Chat setDisplay={setDisplay} />}
+						<Button
+							variant="contained"
+							size="small"
+							onClick={() => setDisplay(true)}
+							style={{
+								width: "92%",
+								fontSize: ".72rem",
+								color: "#2196f3",
+								marginTop: "1rem",
+							}}
+							fullWidth
+						>
+							Messages
+						</Button>
+						<Grid
+							container
+							alignItems="flex-end"
+							item
+							xs={12}
+							style={{ height: 14 }}
+						>
+							<Divider style={{ width: "100%" }} />
+						</Grid>
+					</Grid>
+					<Grid container className={classes.followTab} item xs={12}>
+						<FollowTab />
+					</Grid>
+					<Grid
+						style={{
+							borderBottom: "1px solid #ccc",
+							maxHeight: 230,
+							overflow: "hidden",
+						}}
+						xs={12}
+						item
+					>
+						<UtilsNavBar classes={classes} />
+					</Grid>
+					<Grid container item xs>
+						<UserPosts posts={myPosts} />
+					</Grid>
 				</Grid>
-				<Grid xs={12} item>
-					<CoverPhoto classes={classes} coverPhoto={userData.coverPhoto} />
-				</Grid>
-				<Grid xs={12} item>
-					<ProfilePic classes={classes} imageUrl={userData.imageUrl} />
-				</Grid>
-				<Grid container item xs={12}>
-					<Bio data={userData} />
-				</Grid>
-				<Grid container className={classes.followTab} item xs={12}>
-					<FollowTab />
-				</Grid>
-				<Grid
-					style={{
-						borderBottom: "1px solid #ccc",
-						maxHeight: 230,
-						overflow: "hidden",
-					}}
-					xs={12}
-					item
-				>
-					<UtilsNavBar classes={classes} />
-				</Grid>
-				<Grid container item xs>
-					<UserPosts posts={myPosts} />
-				</Grid>
-			</Grid>
-			<div className={classes.positionFIx}></div>
-		</div>
+				<div className="positionFix"></div>
+			</div>
+		</>
 	);
 };
 
-const Header = ({ classes, handle }) => {
+export default React.memo(Account);
+
+const Header = ({ classes, handle, setStyles }) => {
+	const openSettings = () => {
+		setStyles("0px");
+	};
+
 	return (
 		<Paper square style={{ borderBottom: "1px solid #aaa" }} elevation={0}>
 			<Grid className={classes.headerRoot} container>
@@ -78,8 +127,8 @@ const Header = ({ classes, handle }) => {
 					</Typography>
 				</Grid>
 				<Grid item>
-					<IconButton>
-						<MenuIcon className={classes.menu} />
+					<IconButton onClick={openSettings}>
+						<SettingsIcon color="primary" className={classes.settings} />
 					</IconButton>
 				</Grid>
 			</Grid>
@@ -166,11 +215,21 @@ const Bio = ({ data }) => {
 };
 
 const FollowTab = () => {
+	const { friends, followers, noOfPosts } = useSelector(
+		state => state.user.data
+	);
+
+	let noOfFollowers, noOfFriends;
+	if (friends && followers) {
+		noOfFollowers = followers.length;
+		noOfFriends = friends.length;
+	}
+
 	return (
 		<>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					9
+					{noOfPosts >= 0 ? noOfPosts : "_ _"}
 				</Typography>
 				<Typography variant="caption" color="textSecondary" component="div">
 					Posts
@@ -178,7 +237,7 @@ const FollowTab = () => {
 			</Grid>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					1875
+					{noOfFollowers >= 0 ? noOfFollowers : "_ _"}
 				</Typography>
 				<Typography variant="caption" color="textSecondary" component="div">
 					Followers
@@ -186,7 +245,7 @@ const FollowTab = () => {
 			</Grid>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					135
+					{noOfFriends >= 0 ? noOfFriends : "_ _"}
 				</Typography>
 				<Typography variant="caption" color="textSecondary" component="div">
 					Following

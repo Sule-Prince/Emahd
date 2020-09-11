@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { Grid, makeStyles, Typography } from "@material-ui/core";
 import PswInput from "../SubComponents/PswInput";
+import { isEmpty } from "../../utils/validators";
+
+import getData from "../../utils/getData";
 
 const useStyles = makeStyles(theme => ({
 	textField: {
@@ -14,14 +17,9 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const getData = name => {
-	const form = document.getElementsByTagName("form")[0];
-	console.log(form[name].value);
-	return form[name].value;
-};
-
 export default ({ setPassword, ...props }) => {
 	const [psw, setPsw] = useState("");
+	const [error, setError] = useState({ message: "", hasError: false });
 
 	const classes = useStyles();
 	return (
@@ -47,7 +45,8 @@ export default ({ setPassword, ...props }) => {
 							</Typography>
 						</Grid>
 						<Grid className={classes.textField} item xs={10}>
-							<PswInput password={psw} setPassword={setPsw} />
+							<PswInput password={psw} error={error} setPassword={setPsw} />
+							<div className="error">{error.message}</div>
 						</Grid>
 					</Grid>
 					<Grid item xs={10}>
@@ -57,6 +56,10 @@ export default ({ setPassword, ...props }) => {
 							value="Next"
 							page="5"
 							onClick={e => {
+								if (isEmpty(psw)) {
+									setError({ message: "Must not be empty", hasError: true });
+									return;
+								}
 								props.next(e);
 								setPassword(getData("psw"));
 							}}

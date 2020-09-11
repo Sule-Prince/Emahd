@@ -32,15 +32,14 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const ScreamActions = ({ postId, likeCount, commentCount }) => {
+const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
 	const [isLiked, setIsLiked] = useState(false);
 	const [likes, setLikes] = useState(likeCount);
-	const [commentDialogueBox, setCommentDialogueBox] = useState("110vh");
-	const [openComments, setOpenComments] = useState(false)
+	const [openComments, setOpenComments] = useState(false);
 	const dispatch = useDispatch();
 	const classes = useStyles();
 	const likedPosts = useSelector(state => state.user.likes);
-	console.log(openComments)
+
 	useEffect(() => {
 		if (likedPosts.indexOf(postId) !== -1) {
 			setIsLiked(true);
@@ -50,8 +49,7 @@ const ScreamActions = ({ postId, likeCount, commentCount }) => {
 	}, [likedPosts, postId]);
 
 	const handleOpenComments = () => {
-		setOpenComments(true)
-		setCommentDialogueBox(0);
+		setOpenComments(true);
 	};
 
 	return (
@@ -70,7 +68,7 @@ const ScreamActions = ({ postId, likeCount, commentCount }) => {
 					) : (
 						<IconButton
 							onClick={() => {
-								handleLike(postId, dispatch, setLikes);
+								handleLike(postId, dispatch, setLikes, scream);
 							}}
 						>
 							<FavoriteBorderSharpIcon fontSize="small" />
@@ -114,15 +112,13 @@ const ScreamActions = ({ postId, likeCount, commentCount }) => {
 					</IconButton>
 				</div>
 			</CardActions>
-			{
-				openComments === true ? (
-					<Comments
-				commentDialogueBox={commentDialogueBox}
-				setCommentDialogueBox={setCommentDialogueBox}
-				postId= {postId}
-			/>
-				) : null
-			}
+			{openComments === true ? (
+				<Comments
+					
+					setOpenComments= {setOpenComments}
+					postId={postId}
+				/>
+			) : null}
 		</>
 	);
 };

@@ -7,12 +7,16 @@ const userActions = createSlice({
 			isLoading: false,
 			error: "",
 		},
+		loadingPosts: {
+			isLoading: false,
+			which: "",
+		},
 		snackBar: {
 			type: "success",
 			message: "",
 			duration: null,
 			open: false,
-			loading: false
+			loading: false,
 		},
 	},
 	reducers: {
@@ -29,15 +33,24 @@ const userActions = createSlice({
 			if (action.payload.type) state.snackBar.type = action.payload.type;
 			if (action.payload.duration)
 				state.snackBar.duration = action.payload.duration;
-				if (action.payload.loading) 
+			if (action.payload.loading)
 				state.snackBar.loading = action.payload.loading;
 			state.snackBar.message = action.payload.message;
 			state.snackBar.open = true;
-        },
-        closeSnackBar: ( state ) => {
-            state.snackBar.open = false
-            state.snackBar.loading = false
-        }
+		},
+		closeSnackBar: state => {
+			state.snackBar.open = false;
+			state.snackBar.loading = false;
+			state.snackBar.type = "success";
+		},
+		/* 	openPostSkeleton: (state, action) => {
+			state.loadingPosts.isLoading = true;
+			state.loadingPosts.which = action.payload;
+		},
+		closePostSkeleton: state => {
+			state.loadingPosts.isLoading = false;
+			state.loadingPosts.which = "";
+		}, */
 	},
 });
 
@@ -45,6 +58,8 @@ export const {
 	uploadedProfilePic,
 	uploadingprofilePic,
 	uploadError,
+	openPostSkeleton,
+	closePostSkeleton,
 	openSnackBar,
 	closeSnackBar,
 } = userActions.actions;

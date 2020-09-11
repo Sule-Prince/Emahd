@@ -10,22 +10,28 @@ const useStyles = makeStyles({
 	},
 });
 
-function Alert({ loading, severity, className, ...props }) {
-	if (!loading)
-		return (
-			<MuiAlert elevation={6} severity={severity} variant="filled" {...props} />
-		);
-	else
-		return (
-			<MuiAlert
-				elevation={6}
-				className={className}
-				icon={<CircularProgress size={20} thickness={6} />}
-				variant="filled"
-				{...props}
-			/>
-		);
+function SuccessAlert(props) {
+	return (
+		<MuiAlert elevation={6} variant="filled" severity="success" {...props} />
+	);
 }
+
+function ErrorAlert(props) {
+	return (
+		<MuiAlert elevation={6} variant="filled" severity="error" {...props} />
+	);
+}
+
+const LoadingAlert = props => {
+	return (
+		<MuiAlert
+			elevation={6}
+			icon={<CircularProgress size={20} thickness={6} />}
+			variant="filled"
+			{...props}
+		/>
+	);
+};
 
 const MySnackBar = () => {
 	const open = useSelector(state => state.userActions.snackBar.open);
@@ -47,14 +53,19 @@ const MySnackBar = () => {
 			autoHideDuration={duration}
 			onClose={handleClose}
 		>
-			<Alert
-				onClose={handleClose}
-				className={classes.alert}
-				severity={snackBarType}
-				loading={loading}
-			>
-				{snackBarInfo}
-			</Alert>
+			{loading ? (
+				<LoadingAlert
+					onClose={handleClose}
+					className={classes.alert}
+					severity={snackBarType}
+				>
+					{snackBarInfo}
+				</LoadingAlert>
+			) : snackBarType === "error" ? (
+				<ErrorAlert onClose={handleClose}>{snackBarInfo}</ErrorAlert>
+			) : (
+				<SuccessAlert onClose={handleClose}>{snackBarInfo}</SuccessAlert>
+			)}
 		</Snackbar>
 	);
 };

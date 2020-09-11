@@ -28,11 +28,11 @@ const useStyles = makeStyles(theme => ({
 		},
 	},
 	inputPaper: {
-		height: 358,
+		height: 380,
 		maxWidth: 348,
 		marginTop: "20%",
 		marginBottom: 20,
-		
+
 		"& > *": {
 			margin: theme.spacing(2),
 		},
@@ -120,6 +120,10 @@ const Gallery = ({ classes }) => {
 const InputForm = ({ classes }) => {
 	const [userCred, setUserCred] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState({
+		email: { message: "", hasError: false },
+		password: { message: "", hasError: false },
+	});
 
 	const handleChange = (e, setData) => {
 		setData(e.target.value);
@@ -139,18 +143,31 @@ const InputForm = ({ classes }) => {
 					onChange={e => {
 						handleChange(e, setUserCred);
 					}}
+					error={error.email.hasError}
 					fullWidth
-					label="Phone number, or email"
+					label="Phone number, or email, or handle"
 				/>
+				<div style={{ padding: "3px 6px" }} className="error">
+					{error.email.message}
+				</div>
 			</Grid>
 			<Grid xs item>
-				<PswInput password={password} setPassword={setPassword} />
+				<PswInput
+					password={password}
+					error={error.password}
+					setPassword={setPassword}
+				/>
+				<div style={{ padding: "3px 6px" }} className="error">
+					{error.password.message}
+				</div>
 			</Grid>
 			<Grid item>
 				<AuthButton
 					btnText="Log In"
 					route="/login"
 					userDetails={{ email: userCred, password }}
+					setError={setError}
+					inputError={error}
 				/>
 			</Grid>
 			<Grid xs item className="login-or">

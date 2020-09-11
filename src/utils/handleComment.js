@@ -5,19 +5,21 @@ import { axios } from "../config/axiosConfig";
 export const handleAddComment = async (
 	comment,
 	postId,
-	dispatch,
+    dispatch,
+    setCommentNo,
 	setCommentData
 ) => {
 	dispatch(openSnackBar({ message: "Posting comment", loading: true }));
     let response;
      axios.post(`/post/${postId}/addcomment`, { comment })
     .then((res) => {
+        setCommentNo += 1;
         dispatch(closeSnackBar());
         response = res;
     })
     .then(() => {
         dispatch(
-            openSnackBar({ message: "commented posted!!", duration: 3000 })
+            openSnackBar({ message: "comment posted!!", duration: 3000 })
         )
     })
     .catch( err => {

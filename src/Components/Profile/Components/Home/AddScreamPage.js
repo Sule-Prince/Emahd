@@ -39,6 +39,7 @@ const useStyles = makeStyles(theme => ({
 	media: {
 		height: "100%",
 		width: "100%",
+		overflow: "hidden",
 		objectFit: "cover",
 	},
 }));
@@ -46,7 +47,6 @@ const useStyles = makeStyles(theme => ({
 const AddScreamPage = ({
 	styles,
 	setStyles,
-	screamInputEl,
 	file,
 	setScream,
 	setFile,
@@ -77,9 +77,6 @@ const AddScreamPage = ({
 			className={classes.screamContainer}
 			style={{
 				transform: `translateY(${styles})`,
-			}}
-			onClick={() => {
-				screamInputEl.current.focus();
 			}}
 		>
 			<Grid
@@ -128,7 +125,6 @@ const AddScreamPage = ({
 			</Grid>
 			<div className={classes.inputDiv}>
 				<textarea
-					ref={screamInputEl}
 					value={scream}
 					className={classes.textarea}
 					placeholder="Type something here...."
@@ -154,16 +150,17 @@ const AddScreamPage = ({
 			{mediaUrl && (
 				<Grid container justify="center">
 					<Grid item xs={11}>
-						<Paper style={{ height: "91vw", padding: 10 }} elevation={3}>
+						<Paper style={{ height: "91vw", padding: 10, overflow: "hidden" }} elevation={3}>
 							{fileCodec === "image" ? (
 								<img className={classes.media} src={mediaUrl} alt="post" />
 							) : (
-								<video
+								<div style= {{overflow: "hidden", width: "100%", height: "100%"}}><video
 									controls
-									className={classes.media}
+									className={classes.media} 
+									style= {{ maxWidth: "100%", maxHeight: "100%"}}
 									src={mediaUrl}
 									alt="post"
-								/>
+								/></div>
 							)}
 						</Paper>
 					</Grid>

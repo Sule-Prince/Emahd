@@ -8,7 +8,7 @@ import Page5 from "./Page5";
 import Page6 from "./Page6";
 import Page7 from "./Page7";
 
-export default ({history, ...props}) => {
+export default ({ history, ...props }) => {
 	const [page, setPage] = useState(0);
 
 	// Function to take user to the next page
@@ -18,23 +18,21 @@ export default ({history, ...props}) => {
 	}
 
 	// Set form values to send to the server
-	const [handle, setHandle] = useState(null);
-	const [password, setPassword] = useState(null);
-	const [firstName, setFirstName] = useState(null);
-	const [lastName, setLastName] = useState(null);
-	const [gender, setGender] = useState(null);
-	const [phoneNumber, setPhoneNumber] = useState(null);
-	const [university, setUniversity] = useState(null);
-	const [course, setCourse] = useState(null);
-	const [email, setEmail] = useState(null);
-	const [DOB, setDOB] = useState(null);
+	const [handle, setHandle] = useState("");
+	const [password, setPassword] = useState("");
+	const [firstName, setFirstName] = useState("");
+	const [lastName, setLastName] = useState("");
+	const [gender, setGender] = useState("custom");
+	const [university, setUniversity] = useState("");
+	const [course, setCourse] = useState("");
+	const [email, setEmail] = useState("");
+	const [DOB, setDOB] = useState("");
 	const userDetails = {
 		handle,
 		password,
 		firstName,
 		lastName,
 		gender,
-		phoneNumber,
 		university,
 		course,
 		email,
@@ -66,6 +64,8 @@ export default ({history, ...props}) => {
 				<Page2
 					setLastName={setLastName}
 					setFirstName={setFirstName}
+					firstName={firstName}
+					lastName={lastName}
 					next={next}
 				/>
 			)}
@@ -74,19 +74,18 @@ export default ({history, ...props}) => {
 					setHandle={setHandle}
 					setUniversity={setUniversity}
 					setCourse={setCourse}
+					course={course}
+					university={university}
+					handle={handle}
 					next={next}
 				/>
 			)}
-			{page === 3 && (
-				<Page4
-					setEmail={setEmail}
-					setPhoneNumber={setPhoneNumber}
-					next={next}
-				/>
+			{page === 3 && <Page4 setEmail={setEmail} email={email} next={next} />}
+			{page === 4 && (
+				<Page5 setPassword={setPassword} password={password} next={next} />
 			)}
-			{page === 4 && <Page5 setPassword={setPassword} next={next} />}
 			{page === 5 && (
-				<Page6 setGender={setGender} setDOB={setDOB} next={next} />
+				<Page6 setGender={setGender} setDOB={setDOB} DOB={DOB} gender= {gender} next={next} />
 			)}
 			{page === 6 && (
 				<Page7 userDetails={userDetails} history={history} next={next} />

@@ -1,21 +1,33 @@
-import React from "react";
-import {Paper} from "@material-ui/core"
-import "./Messages.css"
+import React, { useEffect } from 'react';
+
+import { Grid, Typography, Paper, makeStyles } from "@material-ui/core"
+
+const Messages = () => {
 
 
-export default ({messages}) => {
-    let i= 0
-       
+    const [message, setMessage] = useState("");
+	const [messages, setMessages] = useState([]);
+
+
+	useEffect(() => {
+		socket.emit("join", "123456");
+		socket.on("message", data => {
+			console.log(data);
+		});
+
+		return () => {
+			socket.emit("disconnect");
+		};
+	}, []);
+
+    useEffect(() => {
+        
+    }, [])
     return (
-        <div className="my-messages">
-                {
-                    messages.map(message => 
-                        message.isMyMessage ?     
-                            <Paper key={i++} className="my-message" >{message.message}</Paper>
-                      :
-                            <Paper key={i++} className="other-message" >{message.message}</Paper>
-                    )
-                }   
-        </div> 
-    )
+        <Grid container >
+
+        </Grid>
+    );
 }
+
+export default Messages;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	Card,
 	CardActionArea,
@@ -37,9 +37,8 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-
-const MediaPost = ({
-	post: {
+const MediaPost = ({ post: scream }) => {
+	const {
 		mediaUrl,
 		post,
 		postId,
@@ -49,12 +48,13 @@ const MediaPost = ({
 		imageUrl: userImg,
 		handle,
 		mediaType,
-	},
-}) => {
+	} = scream;
 
 	dayjs.extend(relativeTime);
 
 	const classes = useStyles();
+
+	// const [commentNo, setCommentNo] = useState(commentCount);
 
 	return (
 		<div>
@@ -85,6 +85,7 @@ const MediaPost = ({
 
 				{/* Card Actions */}
 				<ScreamActions
+					scream={scream}
 					postId={postId}
 					likeCount={likeCount}
 					commentCount={commentCount}
@@ -100,7 +101,7 @@ const MediaPost = ({
 				</CardContent>
 			</Card>
 			{/* Comment Field  */}
-			<CommentField />
+			<CommentField setCommentNo={commentCount} postId={postId} />
 		</div>
 	);
 };

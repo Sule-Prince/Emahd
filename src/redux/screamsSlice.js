@@ -10,12 +10,22 @@ const initialState = {
 
 export const screamsDataThunk = createAsyncThunk(
 	"post/getData",
-	async (route, { getState, dispatch, rejectWithValue }) => {
+	async (args, { getState, dispatch, rejectWithValue }) => {
 		const posts = getState().posts;
 		if (!posts.isLoading) return;
 		try {
-			const posts = await axios.get(route);
-			return posts.data;
+			const response = await axios.get("/screams");
+			const posts = response.data;
+			posts.forEach( (postArray, firstIndex) => {
+				
+				postArray.forEach( (post, secondIndex) => {
+					const index = [firstIndex, secondIndex]
+					
+					post.index = index;
+					console.log(post)
+				})
+			})
+			return posts;
 		} catch (error) {
             if(posts.retries !== 5) {
                 console.log(posts.retries)

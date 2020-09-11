@@ -7,7 +7,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 
-const PswInput = ({ password, setPassword }) => {
+const PswInput = ({ password, setPassword, error }) => {
 	const [values, setValues] = useState({
 		showPassword: false,
 	});
@@ -31,6 +31,7 @@ const PswInput = ({ password, setPassword }) => {
 				id="password"
 				name="psw"
 				value={password}
+				error= {error.hasError}
 				onChange={e => {
 					handleChange(e, setPassword);
 				}}

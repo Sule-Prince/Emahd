@@ -3,11 +3,13 @@ import { makeStyles } from "@material-ui/core";
 export const useStyles = makeStyles(theme => ({
 	root: {
 		overflowY: "auto",
+		overflowX: "hidden",
 		height: "100vh",
+		width: "100vw"
 	},
 	headerRoot: {
 		position: "-webkit-sticky",
-		height: "50px",
+		height: "45px",
 		alignItems: "center",
 		top: "0",
 	},
@@ -20,10 +22,7 @@ export const useStyles = makeStyles(theme => ({
 	headerName: {
 		fontWeight: theme.typography.fontWeightBold,
 	},
-	menu: {
-		color: theme.palette.grey[400],
-		marginRight: "5px",
-	},
+	
 	coverPhoto: {
 		display: "flex",
 		justifyContent: "center",
@@ -32,19 +31,19 @@ export const useStyles = makeStyles(theme => ({
 		width: "100%",
 		background:
 			"linear-gradient(360deg, #3f51b5 0%, #2196f3 75%, #64b5f6 100%)",
-		height: "35vmax",
+		height: 250,
 		textAlign: "center",
 		"& > *": {
 			color: "#fff",
 		},
 	},
 	avatarContainer: {
-		transform: "translateY(-10vmin)",
+		transform: "translateY(-60px)",
 		zIndex: 1,
 	},
 	avatar: {
-		minHeight: "100px",
-		minWidth: "100px",
+		minHeight: "120px",
+		minWidth: "120px",
 		border: "2px solid #fff",
 	},
 	uploadIconContainer: {
@@ -76,10 +75,7 @@ export const useStyles = makeStyles(theme => ({
 		height: 250,
 		paddingRight: "1rem",
 	},
-	positionFIx: {
-		height: 70,
-		width: "100vw",
-	},
+	
 	// Other User Account Styles
 	loadingRoot: {
 		position: "fixed",

@@ -1,74 +1,38 @@
 import React from "react";
-import { AppBar, Toolbar, Typography, Grid, IconButton, makeStyles} from "@material-ui/core"
+import { Paper, Typography, Grid, IconButton } from "@material-ui/core"
 
-import CssBaseline from '@material-ui/core/CssBaseline';
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
+import CloseIcon from "@material-ui/icons/Close";
+import { useStyles } from "../Profile/Components/Account/styles";
 
-import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 
-const useStyles = makeStyles( theme => ({
-    headerRoot: {
-		position: "-webkit-sticky",
-		height: "50px",
-		alignItems: "center",
-		top: "0",
-	},
-	headerNameContainer: {
-		flexGrow: 1,
-		// fontWeight: theme.typography.fontWeightBold,
-		paddingLeft: "1rem",
-	},
+const Header = ({ setDisplay, data }) => {
+	const classes = useStyles();
 
-	headerName: {
-		fontWeight: theme.typography.fontWeightBold,
-	},
-}))
-
-const Header = ({ showBack, handle, ...props }) => {
-    const classes = useStyles();
-
+	const handleCancelButton = () => {
+		setDisplay(false);
+	};
 	return (
-        <>
-        <CssBaseline />
-        <ElevationScroll >
-          <AppBar style={{ borderBottom: "1px solid #aaa" }} >
-            <Toolbar>
-            <Grid className={classes.headerRoot} container>
+		<Paper style={{ borderBottom: "1px solid #aaa" }} square elevation={0}>
+			<Grid className={classes.headerRoot} container>
 				<Grid className={classes.headerNameContainer} item>
-					{
-                        showBack ? (
-                            <IconButton color= "primary" style= {{ marginRight: 5}}>
-					<KeyboardBackspaceIcon />
+					<IconButton
+						color="primary"
+						onClick={handleCancelButton}
+						style={{ marginRight: 5, marginLeft: "-1rem" }}
+					>
+						<CloseIcon />
 					</IconButton>
-                        ) : null
-                    }
-					<Typography className={classes.headerName} variant="caption">
-						{handle}
+					<Typography
+						className={classes.headerName}
+						variant="body2"
+						component="span"
+					>
+						{data}
 					</Typography>
 				</Grid>
 			</Grid>
-            </Toolbar>
-          </AppBar>
-          </ElevationScroll>
-        </>
+		</Paper>
 	);
 };
 
-
 export default Header;
-   
-  
-function ElevationScroll({ children }) {
-    
-    const trigger = useScrollTrigger({
-      disableHysteresis: true,
-      threshold: 0,
-      
-    });
-  
-    return React.cloneElement(children, {
-      elevation: trigger ? 4 : 0,
-    });
-  }
- 
-  

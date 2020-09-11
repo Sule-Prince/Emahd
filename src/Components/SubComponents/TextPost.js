@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ useState } from "react";
 
 // MUi components
 import {
@@ -34,12 +34,23 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const Textpost = ({
-	post: { post, postId, likeCount, commentCount, createdAt, userImg, handle },
-}) => {
+const Textpost = ({ post: scream }) => {
+	const {
+		post,
+		postId,
+		likeCount,
+		commentCount,
+		createdAt,
+		imageUrl: userImg,
+		handle,
+	} = scream;
+
+
 	dayjs.extend(relativeTime);
 
 	const classes = useStyles();
+
+	// const [commentNo, setCommentNo] = useState(commentCount);
 
 	return (
 		<div>
@@ -69,9 +80,10 @@ const Textpost = ({
 
 				{/* Card Actions */}
 				<ScreamActions
+					scream={scream}
 					postId={postId}
 					likeCount={likeCount}
-					commentCount={commentCount}
+					commentCount={commentCount} 
 				/>
 
 				<CardContent>
@@ -82,7 +94,7 @@ const Textpost = ({
 			</Card>
 
 			{/* Comment Field  */}
-			<CommentField />
+			<CommentField setCommentNo= {commentCount} postId={postId} />
 		</div>
 	);
 };

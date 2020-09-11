@@ -1,17 +1,22 @@
 import { axios } from "../config/axiosConfig";
-import { unlikePost, likePost } from "../redux/userDataSlice";
+import {
+	unlikePost,
+	likePost,
+	updateLikedPosts,
+	updateUnlikedPosts,
+} from "../redux/userDataSlice";
 
-export const handleLike = (postId, dispatch, setLikes) => {
+export const handleLike = (postId, dispatch, setLikes, scream) => {
 	const likeAudio = document.getElementById("like-audio");
 	likeAudio.play();
 	dispatch(likePost(postId));
 	setLikes(prev => prev + 1);
 	axios
 		.get(`/post/like/${postId}`)
-		.then(() => {})
-		.catch(err => {
-			console.log(err);
-		});
+		.then(() => {
+			dispatch(updateLikedPosts(scream));
+		})
+		.catch(err => {});
 };
 
 export const handleUnlike = (postId, dispatch, setLikes) => {
@@ -21,8 +26,8 @@ export const handleUnlike = (postId, dispatch, setLikes) => {
 	setLikes(prev => prev - 1);
 	axios
 		.get(`/post/unLike/${postId}`)
-		.then(() => {})
-		.catch(err => {
-			console.log(err);
-		});
+		.then(() => {
+			dispatch(updateUnlikedPosts(postId));
+		})
+		.catch(err => {});
 };

@@ -1,49 +1,31 @@
 import React from "react";
-import { Avatar, Typography, makeStyles } from "@material-ui/core";
+import {
+	Avatar,
+	CardActionArea,
+	CardHeader,
+	Typography,
+} from "@material-ui/core";
+import { Link } from "react-router-dom";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    paddingLeft: theme.spacing(2),
-  },
-  avatar: {
-    height: "40px",
-    width: "50px",
-    display: "inline-block",
-  },
-  text: {
-    display: "inline-block",
-    paddingLeft: "5px",
-  },
-  userData: {
-      height: "1rem"
-  }
-}));
+
 const UserInfo = ({ userData }) => {
-  const classes = useStyles();
-  return (
-    <div className={classes.root}>
-      <div className={classes.avatar}>
-        <Avatar
-        style={{width:"35px", height:"35px"}}
-        // src={}
-        />
-      </div>
-      <div className={classes.text}>
-        <div className={classes.userData}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {/* {userData.name} */}
-            Sule Prince
-          </Typography>
-        </div>
-        <div className={classes.userData}>
-          <Typography variant="caption">
-          {/* {userData.extra} */}
-          @_savage.kvng
-          </Typography>
-        </div>
-      </div>
-    </div>
-  );
+
+	return (
+		<CardActionArea style={{ height: 65 }}>
+			<Link to={userData.handle} style={{ height: "inherit", width: "inherit" }}>
+				<CardHeader
+					style={{ height: 60, background: "none" }}
+					title={
+						<Typography color="textPrimary" style={{ fontWeight: "bold" }}>
+							{userData.handle}
+						</Typography>
+					}
+					subheader={userData.fullName}
+					avatar={<Avatar style={{ height: 50, width: 50 }} src={userData.imageUrl} />}
+				/>
+			</Link>
+		</CardActionArea>
+	);
 };
 
 export default UserInfo;

@@ -7,41 +7,39 @@ import Comment from "./Comment";
 import { axios } from "../../../../config/axiosConfig";
 import { useDispatch } from "react-redux";
 import { openSnackBar } from "../../../../redux/userActionsSlice";
+import Header from "../../../SubComponents/Header";
 
 const useStyles = makeStyles(theme => ({
 	root: {
 		overflowY: "auto",
-        height: "100vh",
-        position: "relative",
-        top: 0,
-        transform: `translateY(100vh)`,
-        zIndex: 1000,
-		backgroundColor: "#f4f4f4",
-		paddingLeft: 8,
+		height: "100vh",
+		width: "100%",
+		position: "fixed",
+		top: 0,
+		display: "block",
+		zIndex: 1000,
+		backgroundColor: theme.palette.background.paper,
 	},
 }));
 
-const Comments = ({ postId, commentDialogueBox, setCommentDialogueBox }) => {
+const Comments = ({ postId, setOpenComments }) => {
 	const [comments, setComments] = useState([]);
 	const [status, setStatus] = useState("");
 	const dispatch = useDispatch();
+	const classes = useStyles();
+
 	useEffect(() => {
 		const fetchComments = async postId => {
-            console.log(postId)
 			try {
 				if (postId) {
-                    console.log("postId")
 					setStatus("loading");
-                    // const response = await 
-                    axios.get(`/post/${postId}/getcomments`).then( data => {
-                        setComments(data.data);
-                    console.log(data.data)
-					setStatus("success");
-                    })
-                    
+					// const response = await
+					axios.get(`/post/${postId}/getcomments`).then(data => {
+						setComments(data.data);
+						setStatus("success");
+					});
 				}
 			} catch (error) {
-				console.log(error);
 				setStatus("error");
 				dispatch(
 					openSnackBar({
@@ -53,32 +51,26 @@ const Comments = ({ postId, commentDialogueBox, setCommentDialogueBox }) => {
 			}
 		};
 
-        fetchComments(postId);
-        
-        // eslint-disable-next-line
-    }, [postId]);
-    
-    console.log(comments)
-    console.log(postId)
+		fetchComments(postId);
 
-	const classes = useStyles();
+		// eslint-disable-next-line
+	}, [postId]);
 
 	return (
-		<div className={classes.root} style= {{
-            transform: `translateY(${commentDialogueBox})`
-        }}>
-			<Grid container>
+		<div className={classes.root}>
+			<Grid container style={{ display: "initial" }}>
+				<Header data="Comments" setDisplay={setOpenComments} />
 				{status === "loading" && (
-					<CircularProgress
-						size={30}
+					<span
 						style={{
 							position: "fixed",
 							top: "50%",
 							left: "50%",
 							transform: "translate(-50%, -50%)",
 						}}
-						thickness={8}
-					/>
+					>
+						<CircularProgress size={30} thickness={8} />
+					</span>
 				)}
 				{status === "error" && (
 					<AutorenewIcon
