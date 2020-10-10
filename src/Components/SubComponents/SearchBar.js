@@ -2,7 +2,7 @@ import React from "react";
 import { fade, makeStyles } from "@material-ui/core/styles";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
-import { Paper } from "@material-ui/core";
+import { CircularProgress, InputAdornment, Paper } from "@material-ui/core";
 import { axios } from "../../config/axiosConfig";
 
 const useStyles = makeStyles(theme => ({
@@ -40,7 +40,6 @@ const useStyles = makeStyles(theme => ({
 	},
 	inputInput: {
 		padding: theme.spacing(1, 1, 1, 1),
-
 		paddingLeft: `calc(1em + ${theme.spacing(4)}px)`,
 		transition: theme.transitions.create("width"),
 	},
@@ -48,12 +47,18 @@ const useStyles = makeStyles(theme => ({
 
 let timeoutId;
 
-export default function SearchBar({ setSearchText, searchText, setResult }) {
+export default function SearchBar({
+	setSearchText,
+	searchText,
+	setResult,
+	setLoading,
+	loading,
+}) {
 	const classes = useStyles();
-	
+
 	return (
 		<>
-			<Paper className={classes.root}>
+			<Paper variation= {2} className={classes.root}>
 				<div className={classes.grow}>
 					<div className={classes.search}>
 						<div className={classes.searchIcon}>
@@ -63,28 +68,48 @@ export default function SearchBar({ setSearchText, searchText, setResult }) {
 							placeholder="Search…"
 							value={searchText}
 							onChange={e => {
-								console.log(timeoutId)
+								const text = e.target.value;
 								setSearchText(e.target.value);
 								clearTimeout(timeoutId);
-								
-								timeoutId = setTimeout(() => {
-									axios
-										.post("/search", { text: searchText })
-										.then(response => setResult(response.data))
-										.catch(err => console.log(err));
-								}, 2500);
-								
+								if (text.length > 0) {
+									setLoading(true);
+									timeoutId = setTimeout(() => {
+										axios
+											.post("/search", { text })
+											.then(response => {
+												setResult(response.data);
+												setLoading(false);
+											})
+											.catch(err => {
+												setLoading(false);
+												console.log(err);
+											});
+									}, 1000);
+								}
 							}}
 							classes={{
 								root: classes.inputRoot,
 								input: classes.inputInput,
 							}}
 							inputProps={{ "aria-label": "search" }}
+							endAdornment={
+								<InputAdornment>
+									{loading && (
+										<div>
+											<CircularProgress
+												color="primary"
+												thickness={5}
+												size={20}
+												style={{ marginRight: 10 }}
+											/>
+										</div>
+									)}
+								</InputAdornment>
+							}
 						/>
 					</div>
 				</div>
 			</Paper>
-			
 		</>
 	);
 }

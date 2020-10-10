@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
 	Grid,
 	Paper,
@@ -15,7 +15,7 @@ import PhotoCameraIcon from "@material-ui/icons/PhotoCamera";
 
 import FollowCard from "../../../SubComponents/FollowCard";
 
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import "./Account.css";
 
@@ -25,11 +25,18 @@ import UserPosts from "./UserPosts/UserPosts";
 import useFileUpload from "../../../../utils/useFileUpload";
 import Settings from "./Settings";
 import Chat from "../../../Chat/Chat";
+import { getImageUrl } from "../../../../utils/getImageUrl";
+import { followSuggestThunk } from "../../../../redux/extraDataSlice";
+import { motion } from "framer-motion";
 
 const Account = () => {
 	// Styles to be used by the settings Component to display the Settings
 	const [styles, setStyles] = useState("110vw");
 	const [display, setDisplay] = useState(false);
+
+	const rootRef = useRef(null);
+
+	const dispatch = useDispatch();
 
 	const classes = useStyles();
 
@@ -37,15 +44,24 @@ const Account = () => {
 	// const isLoading = useSelector(state => state.user.isLoading);
 
 	const posts = useSelector(state => state.posts.posts);
-	const myPosts = posts[posts.length - 1];
+	const followSuggest = useSelector(state => state.extra.followSuggest);
+
+	let myPosts = [];
+	if (posts) myPosts = posts[posts.length - 1];
+
+	useEffect(() => {
+		dispatch(followSuggestThunk());
+
+		// eslint-disable-next-line
+	}, []);
 
 	return (
 		<>
-			<div className={classes.root}>
+			<div className={classes.root} ref={rootRef}>
 				<Settings styles={styles} setStyles={setStyles} />
 
 				<Grid direction="column" container>
-					<Grid xs={12} item>
+					<Grid xs={12} item style={{ position: "sticky", top: 0, zIndex: 10 }}>
 						<Header
 							classes={classes}
 							handle={userData.handle}
@@ -90,6 +106,7 @@ const Account = () => {
 					<Grid container className={classes.followTab} item xs={12}>
 						<FollowTab />
 					</Grid>
+
 					<Grid
 						style={{
 							borderBottom: "1px solid #ccc",
@@ -99,10 +116,16 @@ const Account = () => {
 						xs={12}
 						item
 					>
-						<UtilsNavBar classes={classes} />
+						{followSuggest.isLoading ? (
+							<Loader classes={classes} />
+						) : (
+							followSuggest.users.length > 0 && (
+								<UtilsNavBar users={followSuggest.users} classes={classes} />
+							)
+						)}
 					</Grid>
 					<Grid container item xs>
-						<UserPosts posts={myPosts} />
+						<UserPosts posts={myPosts} rootRef={rootRef} />
 					</Grid>
 				</Grid>
 				<div className="positionFix"></div>
@@ -119,7 +142,7 @@ const Header = ({ classes, handle, setStyles }) => {
 	};
 
 	return (
-		<Paper square style={{ borderBottom: "1px solid #aaa" }} elevation={0}>
+		<Paper square elevation={2}>
 			<Grid className={classes.headerRoot} container>
 				<Grid className={classes.headerNameContainer} item>
 					<Typography className={classes.headerName} variant="caption">
@@ -138,6 +161,7 @@ const Header = ({ classes, handle, setStyles }) => {
 
 const CoverPhoto = ({ classes, coverPhoto }) => {
 	const fileUpload = useFileUpload("coverPhoto");
+	const coverPhotoUrl = getImageUrl("coverPhoto", coverPhoto);
 	return (
 		<Grid item>
 			<Card square color="primary">
@@ -148,10 +172,10 @@ const CoverPhoto = ({ classes, coverPhoto }) => {
 							fileInput.click();
 						}}
 					>
-						{coverPhoto ? (
+						{coverPhotoUrl ? (
 							<img
 								className={classes.coverPhoto}
-								src={coverPhoto}
+								src={coverPhotoUrl}
 								alt="cover"
 							/>
 						) : (
@@ -215,18 +239,41 @@ const Bio = ({ data }) => {
 };
 
 const FollowTab = () => {
-	const { friends, followers, noOfPosts } = useSelector(
+	const [displayFollowers, setDisplayFollowers] = useState(false);
+	const [displayFollowing, setDisplayFollowing] = useState(false);
+
+	const { friends: following, followers, noOfPosts } = useSelector(
 		state => state.user.data
 	);
 
-	let noOfFollowers, noOfFriends;
-	if (friends && followers) {
+	let noOfFollowers, noOfFollowing;
+	if (following && followers) {
 		noOfFollowers = followers.length;
-		noOfFriends = friends.length;
+		noOfFollowing = following.length;
 	}
 
+	const displayPage = setDisplay => {
+		setDisplay(true);
+	};
 	return (
 		<>
+			{/* Followers and Following Page */}
+			{/* 
+			{displayFollowers && (
+				<DisplayCardList
+					data="Followers"
+					dataList={followers}
+					setDisplay={setDisplayFollowers}
+				/>
+			)}
+			{displayFollowing && (
+				<DisplayCardList
+					data="Following"
+					dataList={following}
+					setDisplay={setDisplayFollowing}
+				/>
+			)} */}
+
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
 					{noOfPosts >= 0 ? noOfPosts : "_ _"}
@@ -239,15 +286,31 @@ const FollowTab = () => {
 				<Typography variant="body2" component="span">
 					{noOfFollowers >= 0 ? noOfFollowers : "_ _"}
 				</Typography>
-				<Typography variant="caption" color="textSecondary" component="div">
+				<Typography
+					variant="caption"
+					color="textSecondary"
+					style={{ cursor: "pointer" }}
+					component="div"
+					onClick={() => {
+						displayPage(setDisplayFollowers);
+					}}
+				>
 					Followers
 				</Typography>
 			</Grid>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					{noOfFriends >= 0 ? noOfFriends : "_ _"}
+					{noOfFollowing >= 0 ? noOfFollowing : "_ _"}
 				</Typography>
-				<Typography variant="caption" color="textSecondary" component="div">
+				<Typography
+					variant="caption"
+					color="textSecondary"
+					style={{ cursor: "pointer" }}
+					component="div"
+					onClick={() => {
+						displayPage(setDisplayFollowing);
+					}}
+				>
 					Following
 				</Typography>
 			</Grid>
@@ -255,18 +318,64 @@ const FollowTab = () => {
 	);
 };
 
-const UtilsNavBar = ({ classes }) => {
+const UtilsNavBar = ({ classes, users }) => {
 	return (
 		<div className={classes.utilsNavBar}>
-			<span style={{ display: "inline-block" }}>
-				<FollowCard />
-			</span>
-			<span style={{ display: "inline-block" }}>
-				<FollowCard />
-			</span>
-			<span style={{ display: "inline-block" }}>
-				<FollowCard />
-			</span>
+			{users.map(user => (
+				<span key={user.handle} style={{ display: "inline-block" }}>
+					<FollowCard
+						handle={user.handle}
+						fullName={user.fullName}
+						imageUrl={user.imageUrl}
+					/>
+				</span>
+			))}
 		</div>
+	);
+};
+
+const Loader = ({ classes }) => {
+	const loadVariant = {
+		animate: {
+			x: [-80, 80],
+			y: [0, -60],
+			backgroundColor: ["#2196f3", "#ff5722", "#c6ff00", "#ff1744", "#d500f9"],
+			transition: {
+				x: {
+					yoyo: Infinity,
+					duration: 3,
+				},
+				y: {
+					yoyo: Infinity,
+					duration: 0.4,
+					ease: "easeOut",
+				},
+				backgroundColor: {
+					yoyo: Infinity,
+					duration: 4,
+					ease: "easeInOut",
+				},
+			},
+		},
+	};
+
+	return (
+		<>
+			<Divider />
+			<Grid
+				container
+				item
+				justify="center"
+				alignItems="flex-end"
+				className={classes.suggestionTab}
+				style={{ height: 100 }}
+			>
+				<motion.span
+					variants={loadVariant}
+					animate="animate"
+					style={{ backgroundColor: "#2196f3" }}
+				></motion.span>
+			</Grid>
+		</>
 	);
 };

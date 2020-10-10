@@ -8,10 +8,12 @@
     "@material-ui/core": "^4.10.2",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
+    "@material-ui/system": "^4.9.14",
     "@reduxjs/toolkit": "^1.4.0",
     "axios": "^0.19.2",
     "clsx": "^1.1.1",
     "cra-template": "1.0.3",
+    "cropperjs": "^1.5.9",
     "dayjs": "^1.8.31",
     "firebase": "^7.16.1",
     "firebaseui": "^4.6.0",
@@ -21,6 +23,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-emoji": "^0.5.0",
+    "react-lazy-load": "^3.1.13",
     "react-lazyload": "^3.0.0",
     "react-query": "^2.12.1",
     "react-query-devtools": "^2.4.4",
@@ -32,6 +35,7 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-logger": "^3.0.6",
     "retry": "^0.12.0",
+    "simple-peer": "^9.7.2",
     "socket.io-client": "^2.3.0"
   },
   "scripts": {

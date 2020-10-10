@@ -5,10 +5,11 @@ import { useDispatch } from "react-redux";
 import { screamsDataThunk } from "../../redux/screamsSlice";
 
 const usePostData = () => {
+	const [postError, setPostError] = useState("");
 	const dispatch = useDispatch();
 
-	const [postError, setPostError] = useState("");
 	const sendData = (data, route) => {
+		
 		if (!data && !route) return;
 		axios
 			.post(route, data)
@@ -16,7 +17,14 @@ const usePostData = () => {
 				dispatch(screamsDataThunk());
 			})
 			.catch(err => {
-				setPostError(err.response.data.error);
+				console.log({ ...err });
+				if (err.response) {
+					setPostError(err.response.data.error);
+
+					return;
+				}
+
+				setPostError("Ooops!! you're currently offline");
 			});
 	};
 

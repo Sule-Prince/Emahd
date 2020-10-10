@@ -6,16 +6,16 @@ import TextPost from "../../../SubComponents/TextPost";
 
 const useStyles = makeStyles({
 	root: {
-		marginBottom: 8,
+		marginBottom: 10,
 	},
 });
 
-const Post = ({ post }) => {
+const Post = ({ post, rootRef }) => { 
 	const classes = useStyles();
 	return (
 		<Grid item xs={12} className={classes.root}>
 			{post && post.mediaUrl ? (
-				<MediaPost post={post} />
+				<MediaPost post={post} rootRef= {rootRef} />
 			) : (
 				<TextPost post={post} />
 			)}

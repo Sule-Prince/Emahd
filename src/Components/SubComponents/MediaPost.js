@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
 	Card,
 	CardActionArea,
@@ -12,32 +12,30 @@ import {
 
 import MoreVertIcon from "@material-ui/icons/MoreVertRounded";
 
-// import LazyLoad from "react-lazyload";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Link } from "react-router-dom";
 
 import ScreamActions from "./ScreamActions";
 import CommentField from "./CommentField";
+import LazyLoadMedia from "./LazyLoadMedia";
 
 const useStyles = makeStyles(theme => ({
 	avatar: {
 		height: 38,
 		width: 38,
 	},
-	media: {
-		height: "auto",
-		minHeight: "50vw",
-		width: "100%",
-	},
-
 	commentContainer: {
 		padding: "10px 5px",
 		paddingBottom: 12,
 	},
+	media: {
+		height: "auto",
+		width: "100%",
+	},
 }));
 
-const MediaPost = ({ post: scream }) => {
+const MediaPost = ({ post: scream, rootRef }) => {
 	const {
 		mediaUrl,
 		post,
@@ -76,11 +74,12 @@ const MediaPost = ({ post: scream }) => {
 					}
 				/>
 				<CardActionArea>
-					{mediaType === "image" ? (
-						<img className={classes.media} src={mediaUrl} alt="post" />
-					) : (
-						<video controls className={classes.media} src={mediaUrl} />
-					)}
+					<LazyLoadMedia
+						type={mediaType}
+						src={mediaUrl}
+						rootRef={rootRef}
+						settings={{ aspectRatio: 1 }}
+					/>
 				</CardActionArea>
 
 				{/* Card Actions */}

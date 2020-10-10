@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Grid, Typography, Paper, makeStyles } from "@material-ui/core"
 
 const Messages = () => {
-
+const socket = io()
 
     const [message, setMessage] = useState("");
 	const [messages, setMessages] = useState([]);

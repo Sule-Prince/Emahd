@@ -44,7 +44,7 @@ const Screams = ({ posts, error, otherUser }) => {
 						<Typography color= "primary" variant="h4" component="div">
 							Screams
 						</Typography>
-						<Typography color= "primary" variant="body2">
+						<Typography color= "primary" align= "center" variant="body2">
 							When you upload Screams they will appear here!!
 						</Typography>
 					</NoPostUpload>

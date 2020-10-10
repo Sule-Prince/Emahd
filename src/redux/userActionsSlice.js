@@ -18,6 +18,11 @@ const userActions = createSlice({
 			open: false,
 			loading: false,
 		},
+		talkBubble: {
+			message: "",
+			type: "",
+			open: false,
+		},
 	},
 	reducers: {
 		uploadingprofilePic: state => {
@@ -43,14 +48,15 @@ const userActions = createSlice({
 			state.snackBar.loading = false;
 			state.snackBar.type = "success";
 		},
-		/* 	openPostSkeleton: (state, action) => {
-			state.loadingPosts.isLoading = true;
-			state.loadingPosts.which = action.payload;
+		openTalkBubble: (state, action) => {
+			state.talkBubble.message = action.payload.message;
+			state.talkBubble.type = action.payload.type;
+			state.talkBubble.open = true;
 		},
-		closePostSkeleton: state => {
-			state.loadingPosts.isLoading = false;
-			state.loadingPosts.which = "";
-		}, */
+		closeTalkBubble: state => {
+			state.talkBubble.open = false;
+			state.talkBubble.message = "";
+		},
 	},
 });
 
@@ -62,6 +68,8 @@ export const {
 	closePostSkeleton,
 	openSnackBar,
 	closeSnackBar,
+	openTalkBubble,
+	closeTalkBubble,
 } = userActions.actions;
 
 const userActionsReducer = userActions.reducer;

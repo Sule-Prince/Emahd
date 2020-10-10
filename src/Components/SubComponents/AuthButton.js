@@ -17,7 +17,14 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const AuthButton = ({ btnText, route, userDetails, history, setError, inputError }) => {
+const AuthButton = ({
+	btnText,
+	route,
+	userDetails,
+	history,
+	setError,
+	inputError,
+}) => {
 	const classes = useStyles();
 
 	const [response, authenticateUser] = useAuth();
@@ -32,9 +39,10 @@ const AuthButton = ({ btnText, route, userDetails, history, setError, inputError
 				disabled={response.isLoading}
 				size="small"
 				onClick={e => {
+					console.log(userDetails)
 					e.preventDefault();
-					localStorage.removeItem("tabNo")
-					localStorage.removeItem("token")
+					localStorage.removeItem("tabNo");
+					localStorage.removeItem("token");
 					if (setError) {
 						if (isEmpty(userDetails.password) && isEmpty(userDetails.email)) {
 							setError({
@@ -78,18 +86,27 @@ const AuthButton = ({ btnText, route, userDetails, history, setError, inputError
 			<div className="extraInfo">
 				{response.feedback ||
 					(response.error &&
-						response.error.map(
-							(error, i) =>
-								(inputError.email.hasError || inputError.password.hasError) || (
-									<div
-										style={{ paddingBottom: 0, paddingTop: 3 }}
-										key={i}
-										className="error"
-									>
-										{error}
-									</div>
-								)
-						))}
+						response.error.map((error, i) => {
+							if (inputError) {
+								return (
+									inputError.email.hasError ||
+									inputError.password.hasError || (
+										<div
+											style={{ paddingBottom: 0, paddingTop: 3 }}
+											key={i}
+											className="error"
+										>
+											{error}
+										</div>
+									)
+								);
+							}
+							return (
+								<div key={i} className="error">
+									{error}
+								</div>
+							);
+						}))}
 			</div>
 		</>
 	);

@@ -99,7 +99,7 @@ export default () => {
 						onChange={e => setDOB(e.target.value)}
 						style={{ width: "100%" }}
 						endAdornment={
-							<InputAdornment position="end">
+							<InputAdornment style= {{ marginLeft: -50, zIndex: -1 }} position="end"> 
 								<IconButton aria-label="">
 									<EventIcon color="primary" />
 								</IconButton>

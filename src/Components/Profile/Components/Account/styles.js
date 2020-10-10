@@ -5,24 +5,21 @@ export const useStyles = makeStyles(theme => ({
 		overflowY: "auto",
 		overflowX: "hidden",
 		height: "100vh",
-		width: "100vw"
+		width: "100vw",
 	},
 	headerRoot: {
-		position: "-webkit-sticky",
 		height: "45px",
 		alignItems: "center",
-		top: "0",
 	},
 	headerNameContainer: {
 		flexGrow: 1,
-		// fontWeight: theme.typography.fontWeightBold,
 		paddingLeft: "1rem",
 	},
 
 	headerName: {
 		fontWeight: theme.typography.fontWeightBold,
 	},
-	
+
 	coverPhoto: {
 		display: "flex",
 		justifyContent: "center",
@@ -75,7 +72,7 @@ export const useStyles = makeStyles(theme => ({
 		height: 250,
 		paddingRight: "1rem",
 	},
-	
+
 	// Other User Account Styles
 	loadingRoot: {
 		position: "fixed",
@@ -92,4 +89,14 @@ export const useStyles = makeStyles(theme => ({
 		left: "50%",
 		transform: "translate(-50%, -50%)",
 	},
+
+	// Utils NavBar 
+	suggestionTab: {
+		height: 100,
+		"& > span": {
+			height: 20,
+			width: 20,
+			borderRadius: "50%",
+		}
+	}
 }));

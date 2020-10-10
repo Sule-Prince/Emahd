@@ -1,111 +1,166 @@
-import React from 'react';
-import { Avatar, Button, Grid, makeStyles, Typography } from '@material-ui/core';
-import ClearIcon from "@material-ui/icons/Clear"
-// import "./test.css"
+import React, { useState } from "react";
+import {
+	Avatar,
+	Button,
+	Grid,
+	makeStyles,
+	Typography,
+} from "@material-ui/core";
+import ClearIcon from "@material-ui/icons/Clear";
+import { axios } from "../../config/axiosConfig";
+import { useDispatch, useSelector } from "react-redux";
+import { addFriend, removeFriend } from "../../redux/userDataSlice";
+import { screamsDataThunk } from "../../redux/screamsSlice";
+import { Link } from "react-router-dom";
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        border: `1.2px solid ${theme.palette.grey[300]}`,
-        padding: theme.spacing(1),
-        margin: theme.spacing(2.5),
-        borderRadius: "3px",
-        maxWidth: 130,
-        zIndex: -1
-    },
-    header: {
-        color: theme.palette.grey[400],
-        height: "15px",
+const useStyles = makeStyles(theme => ({
+	root: {
+		border: `1.2px solid ${theme.palette.grey[300]}`,
+		padding: theme.spacing(1),
+		margin: theme.spacing(2.5),
+		borderRadius: "3px",
+		maxWidth: 130,
+	},
+	header: {
+		color: theme.palette.grey[400],
+		height: "15px",
+	},
+	photoContainer: {
+		paddingBottom: theme.spacing(1),
+	},
+	channelPhoto: {
+		height: theme.spacing(10),
+		width: theme.spacing(10),
+	},
+	channelUserName: {
+		fontWeight: theme.typography.fontWeightBold,
+	},
+	channelName: {},
+	btnContainer: {
+		paddingTop: "8px",
+		width: "100%",
+	},
+	btn: {
+		letterSpacing: ".5px",
+		fontWeight: theme.typography.fontWeightMedium,
+		textTransform: "none",
+		height: 0,
+		width: "100%",
+		padding: "11px 0px",
+		borderRadius: 2,
+	},
+}));
 
-    },
-    photoContainer: {
-        paddingBottom: theme.spacing(1)
-    },
-    channelPhoto: {
-        height: theme.spacing(10),
-        width: theme.spacing(10)
-    },
-    channelUserName: {
-        fontWeight: theme.typography.fontWeightBold
-    },
-    channelName: {
-        
-    },
-    btnContainer: {
-        paddingTop: "8px",
-        width:"100%",
-       
-    },
-    btn: {
-        letterSpacing: ".5px",
-        fontWeight: theme.typography.fontWeightMedium,
-        textTransform: "none",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "95%",
-        // height: "20px",
-        padding: "4px 0px",
-        backgroundColor: theme.palette.primary["main"],
-        borderRadius: 2,
-        color: "#fff",
-    }
-}))
+const FollowCard = ({ handle, fullName, imageUrl }) => {
+	const classes = useStyles();
 
+	const dispatch = useDispatch();
+	// const friends = useSelector(state => state.user.data.friends);
+	const [value, setValue] = useState("Follow");
 
-const FollowCard = () => {
-    const classes = useStyles()
-    return (
-        <Grid container item className={classes.root} zeroMinWidth alignItems="center" direction="column">
-            <Header classes={classes} />
-            <ChannelPhoto classes={classes} />
-            <ChannelUserName classes= {classes} />
-            <ChannelName classes={classes} />
-            <FollowButton classes={classes} />
-        </Grid>
-    );
-}
+	const handleFollowReq = () => {
+		if (value.toLowerCase() === "follow") {
+			axios.post("/user/followrequest", { friend: handle }).then(() => {
+				setValue("Unfollow");
+				dispatch(addFriend(handle));
+				dispatch(screamsDataThunk("/screams"));
+			});
+		} else {
+			axios.post("/user/unfollowrequest", { friend: handle }).then(() => {
+				setValue("Follow");
+				dispatch(removeFriend(handle));
+			});
+		}
+	};
+
+	return (
+		<>
+			<Grid
+				container
+				item
+				className={classes.root}
+				alignItems="center"
+				justify="center"
+				direction="column"
+			>
+				<Header classes={classes} />
+				<ChannelPhoto imageUrl={imageUrl} classes={classes} />
+				<ChannelUserName
+					fullName={fullName}
+					handle={handle}
+					classes={classes}
+				/>
+				<ChannelName handle={handle} classes={classes} />
+				<FollowButton
+					classes={classes}
+					handleFollow={handleFollowReq}
+					value={value}
+				/>
+			</Grid>
+		</>
+	);
+};
 
 export default FollowCard;
 
 const Header = ({ classes }) => {
+	return (
+		<Grid container justify="flex-end">
+			<Grid container item xs={2}>
+				<ClearIcon className={classes.header} />
+			</Grid>
+		</Grid>
+	);
+};
 
-    return (
-        <Grid container justify="flex-end">
-            <Grid container item xs={2} > <ClearIcon className={classes.header} /></Grid>
-        </Grid>
-    )
-}
+const ChannelPhoto = ({ classes, imageUrl }) => {
+	return (
+		<div className={classes.photoContainer}>
+			<Avatar className={classes.channelPhoto} src={imageUrl} />
+		</div>
+	);
+};
 
-const ChannelPhoto = ({ classes }) => {
+const ChannelUserName = ({ classes, fullName, handle }) => {
+	return (
+		<Link to={handle}>
+			<Typography
+				className={classes.channelUserName}
+				color="textPrimary"
+				variant="body2"
+			>
+				{fullName}
+			</Typography>
+		</Link>
+	);
+};
+const ChannelName = ({ classes, handle }) => {
+	return (
+		<Link to={handle}>
+			<Typography
+				className={classes.channelName}
+				color="textSecondary"
+				variant="caption"
+			>
+				{handle}
+			</Typography>
+		</Link>
+	);
+};
 
-    return (
-        <div className={classes.photoContainer}>
-            <Avatar className={classes.channelPhoto} />
-        </div>
-    )
-}
-
-const ChannelUserName = ({classes}) => {
-
-    return (
-        <Typography className={classes.channelUserName} variant="body2"> Sule Prince </Typography>
-    )
-}
-const ChannelName = ({classes}) => {
-
-    return (
-        <Typography className={classes.channelName} color="textSecondary" variant="caption" >@Savage_Kvng</Typography>    
-        )
-}
-
-const FollowButton = ({ classes }) => {
-
-    return (
-        <div className={classes.btnContainer}>
-            <button size="small" color="primary" className={classes.btn} variant="contained">Follow
-                <span className= "MuiTouchRipple-root"></span>
-            </button>
-
-        </div>
-    )
-}
+const FollowButton = ({ classes, value, handleFollow }) => {
+	return (
+		<div className={classes.btnContainer}>
+			<Button
+				color="primary"
+				className={classes.btn}
+				variant="contained"
+				onClick={() => {
+					handleFollow();
+				}}
+			>
+				{value}
+			</Button>
+		</div>
+	);
+};

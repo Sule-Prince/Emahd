@@ -3,7 +3,7 @@ import { makeStyles, TextField, Grid, Typography } from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import { courses } from "../assets/courses";
-import { universities } from "../assets/schools";
+import { universities } from "../assets/universities";
 import { isEmpty, isAllowedChar } from "../../utils/validators";
 
 const useStyles = makeStyles(theme => ({

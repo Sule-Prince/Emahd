@@ -3,7 +3,13 @@ import { axios } from "../config/axiosConfig";
 
 const initialState = {
 	isLoading: true,
-	userInfo: {},
+	userData: {
+		coverPhoto: "",
+		imageUrl: "",
+		noOfPosts: "__",
+		friends: "",
+		followers: "",
+	},
 	screams: [],
 	error: "",
 };
@@ -30,14 +36,14 @@ const otherUsersData = createSlice({
 		},
 		[otherUsersThunk.fulfilled]: (state, action) => {
 			state.isLoading = false;
-			state.userInfo = { ...action.payload.user };
+			state.userData = { ...action.payload.user };
 			state.screams = [...action.payload.screams];
 			state.error = "";
 		},
 		[otherUsersThunk.rejected]: (state, action) => {
 			state.isLoading = false;
 			state.error = action.payload;
-			state.userInfo = {};
+			state.userData = {};
 			state.screams = {};
 		},
 	},

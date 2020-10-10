@@ -2,6 +2,7 @@ import React from "react";
 
 import {
 	Avatar,
+	Grid,
 	CardActionArea,
 	CardHeader,
 	Typography,
@@ -34,58 +35,71 @@ const Notification = ({ notification }) => {
 	});
 
 	return (
-		<CardActionArea style={{ height: 65 }}>
-			<Link to="" style={{ height: "inherit", width: "inherit" }}>
-				<CardHeader
-					style={{ height: 60, background: "none", paddingLeft: 10 }}
-					title={
-						<Typography
-							color="textPrimary"
-							style={{ fontWeight: "bold" }}
-							component="span"
-							variant="body2"
-							gutterBottom
-						>
-							{notification.sender}
-
-							{notification.type === "comment"
-								? " commented on your post"
-								: " liked your post"}
-						</Typography>
-					}
-					subheader={
-						<>
-							<div style={{ display: "flex" }}>
+		<Grid item xs={12}>
+			<CardActionArea style={{ height: 70 }}>
+				<Link to="" style={{ height: "inherit", width: "inherit" }}>
+					<CardHeader
+						style={{ height: 60, background: "none", paddingLeft: 10 }}
+						title={
+							<div style={{ paddingTop: 8 }}>
 								<Typography
-									color="textSecondary"
-									style={{ flexGrow: 1 }}
+									color="textPrimary"
+									style={{ fontWeight: "bold", flexGrow: 1 }}
 									component="span"
 									variant="body2"
 									gutterBottom
 								>
-									{/* {notification.post.slice(0, 25)}... */}
-									Hello world...
+									{notification.sender}
+
+									{notification.type === "comment"
+										? " commented on your post"
+										: " liked your post"}
 								</Typography>
-								<Typography
-									color="textSecondary"
-									variant="caption"
-									style={{ marginRight: 5 }}
-									component="span"
-								>
-									{dayjs(notification.createdAt).fromNow()}
-								</Typography>
+								{notification.type === "like" ? (
+									<Typography
+										color="textSecondary"
+										variant="caption"
+										style={{ marginRight: 5, marginLeft: 10 }}
+										component="p"
+									>
+										{dayjs(notification.createdAt).fromNow()}
+									</Typography>
+								) : null}
 							</div>
-						</>
-					}
-					avatar={
-						<Avatar
-							style={{ height: 45, width: 45 }}
-							src={notification.senderUrl}
-						/>
-					}
-				/>
-			</Link>
-		</CardActionArea>
+						}
+						subheader={
+							notification.type === "comment" ? (
+								<div style={{ display: "flex" }}>
+									<Typography
+										color="textSecondary"
+										style={{ flexGrow: 1 }}
+										component="span"
+										variant="body2"
+										gutterBottom
+									>
+										{notification.comment + "..."}
+									</Typography>
+									<Typography
+										color="textSecondary"
+										variant="caption"
+										style={{ marginRight: 5 }}
+										component="span"
+									>
+										{dayjs(notification.createdAt).fromNow()}
+									</Typography>
+								</div>
+							) : null
+						}
+						avatar={
+							<Avatar
+								style={{ height: 45, width: 45 }}
+								src={notification.senderUrl ? notification.senderUrl : null}
+							/>
+						}
+					/>
+				</Link>
+			</CardActionArea>
+		</Grid>
 	);
 };
 

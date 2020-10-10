@@ -1,13 +1,19 @@
-import React from 'react';
+import React from "react";
 
-import { Grid, Typography, } from "@material-ui/core"
+import { Grid, Typography } from "@material-ui/core";
 
-const FollowTab = ({  }) => {
+const FollowTab = ({ followers, friends: following, noOfPosts }) => {
+	let noOfFollowers, noOfFollowing;
+	if (following && followers) {
+		noOfFollowers = followers.length;
+		noOfFollowing = following.length;
+	}
+
 	return (
 		<>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					9
+					{noOfPosts >= 0 ? noOfPosts : "_ _"}
 				</Typography>
 				<Typography variant="caption" color="textSecondary" component="div">
 					Posts
@@ -15,7 +21,7 @@ const FollowTab = ({  }) => {
 			</Grid>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					1875
+					{noOfFollowers >= 0 ? noOfFollowers : "_ _"}
 				</Typography>
 				<Typography variant="caption" color="textSecondary" component="div">
 					Followers
@@ -23,7 +29,7 @@ const FollowTab = ({  }) => {
 			</Grid>
 			<Grid item xs={4}>
 				<Typography variant="body2" component="span">
-					135
+					{noOfFollowing >= 0 ? noOfFollowing : "_ _"}
 				</Typography>
 				<Typography variant="caption" color="textSecondary" component="div">
 					Following
@@ -32,6 +38,5 @@ const FollowTab = ({  }) => {
 		</>
 	);
 };
-
 
 export default FollowTab;

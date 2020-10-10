@@ -139,7 +139,7 @@ const GenderForm = ({ gender, setGender }) => {
 							Male
 						</Typography>
 						<FormControlLabel
-							value="male"
+							value="Male"
 							control={<Radio color="primary" size="small" />}
 						/>
 					</Grid>
@@ -157,7 +157,7 @@ const GenderForm = ({ gender, setGender }) => {
 						</Typography>
 
 						<FormControlLabel
-							value="female"
+							value="Female"
 							control={<Radio color="primary" size="small" />}
 						/>
 					</Grid>
@@ -175,7 +175,7 @@ const GenderForm = ({ gender, setGender }) => {
 						</Typography>
 
 						<FormControlLabel
-							value="custom"
+							value="Custom"
 							control={<Radio color="primary" size="small" />}
 						/>
 					</Grid>
@@ -197,7 +197,7 @@ const DateForm = ({ error, setDOB, DOB }) => {
 				onChange= {e => setDOB(e.target.value)}
 				style={{ width: "100%" }}
 				endAdornment={
-					<InputAdornment position="end">
+					<InputAdornment position="end" style= {{ marginLeft: -50, zIndex: -1 }}>
 						<IconButton aria-label="">
 							<EventIcon color="primary" />
 						</IconButton>

@@ -1,24 +1,29 @@
-import React from 'react';
+import React from "react";
 
-import {makeStyles} from "@material-ui/core"
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = makeStyles( theme => ({
-    progressBar: {
-        height: theme.spacing(1),
-        backgroundColor: theme.palette.primary["dark"],
-        borderRadius: 20,
-        margin: 0,
-        marginLeft: -5,
-        marginBottom: theme.spacing(1)
-    }
-}))
+import { motion } from "framer-motion";
+
+const useStyles = makeStyles(theme => ({
+	progressBar: {
+		height: theme.spacing(1),
+		backgroundColor: theme.palette.primary["dark"],
+		borderRadius: 20,
+		margin: 0,
+		marginLeft: -5,
+		marginBottom: theme.spacing(1),
+	},
+}));
 const ProgressBar = ({ progress }) => {
-    const classes = useStyles();
-    return (
-        <div className= {classes.progressBar} style= {{width: `${progress + 5}%`}} >
-            
-        </div>
-    );
-}
+	const classes = useStyles();
+	return (
+		<motion.div
+			className={classes.progressBar}
+			initial={{ width: 0 }}
+			animate={{ width: `${progress + 5}%` }}
+            transition= {{ stiffness: 300, type: "spring" }}
+		></motion.div>
+	);
+};
 
 export default ProgressBar;

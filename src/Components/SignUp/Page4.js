@@ -1,8 +1,22 @@
 import React, { useState } from "react";
-import { makeStyles, TextField, Grid, Typography } from "@material-ui/core";
+import {
+	makeStyles,
+	TextField,
+	Grid,
+	InputAdornment,
+	Typography,
+	InputBase,
+	ButtonBase,
+} from "@material-ui/core";
+
+import LockIcon from "@material-ui/icons/Lock";
+
+import { useDispatch } from "react-redux";
+
 import { isEmpty, isEmail } from "../../utils/validators";
 
-import getData from "../../utils/getData";
+import { axios } from "../../config/axiosConfig";
+import { closeSnackBar, openSnackBar } from "../../redux/userActionsSlice";
 
 const useStyles = makeStyles(theme => ({
 	textField: {
@@ -19,10 +33,104 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-export default ({ setEmail, email, ...props }) => {
+export default ({ setEmail, email, handle, ...props }) => {
 	const classes = useStyles();
 
+	const dispatch = useDispatch();
+
 	const [error, setError] = useState({ message: "", hasError: false });
+	const [displayCodeInput, setDisplayCodeInput] = useState(false);
+	const [code, setCode] = useState("");
+	const [codeError, setCodeError] = useState("");
+
+	const sendVerCode = e => {
+		if (isEmpty(email))
+			setError({ message: "Must not be empty", hasError: true });
+		else if (!isEmail(email)) {
+			setError({
+				message: "Please input a valid email address",
+				hasError: true,
+			});
+		} else {
+			setError({ message: "", hasError: false });
+			e.target.disabled = true;
+			dispatch(
+				openSnackBar({
+					message: "Please wait...",
+					loading: true,
+				})
+			);
+			axios
+				.post("/verifyemail", { handle, email })
+				.then(res => {
+					console.log(res.data);
+					dispatch(closeSnackBar());
+					dispatch(
+						openSnackBar({
+							message: res.data.feedback,
+							duration: 4000,
+						})
+					);
+					setDisplayCodeInput(true);
+					e.target.disabled = false;
+				})
+				.catch(err => {
+					console.log(err.response);
+
+					if (err.response) {
+						dispatch(closeSnackBar());
+						setError({
+							message: err.response.data.error,
+							hasError: true,
+						});
+					} else {
+						dispatch(closeSnackBar());
+						setError({
+							message: "Make sure you have an active connection and try again",
+							hasError: true,
+						});
+					}
+
+					e.target.disabled = false;
+				});
+		}
+	};
+
+	const verifyCode = e => {
+		dispatch(
+			openSnackBar({
+				message: "Please wait...",
+				loading: true,
+			})
+		);
+
+		axios
+			.post("/verifycode", { code, email })
+			.then(res => {
+				dispatch(closeSnackBar());
+				if (res.data.feedback.correct) return props.next(e);
+
+				return setCodeError(res.data.feedback.message);
+			})
+			.catch(error => {
+				dispatch({
+					type: "error",
+					message: error.response.data.error,
+					duration: 3000,
+				});
+			});
+	};
+	const handleEmail = e => {
+		e.persist();
+
+		const textValue = e.target.value;
+		if (textValue === "Send Verification Code") {
+			sendVerCode(e);
+		} else {
+			verifyCode(e);
+		}
+	};
+
 	return (
 		<form>
 			<Grid container>
@@ -53,33 +161,47 @@ export default ({ setEmail, email, ...props }) => {
 									value={email}
 									error={error.hasError}
 									label="Email"
-									onChange= {e => setEmail(e.target.value)}
+									onChange={e => setEmail(e.target.value)}
 								/>
 								<div className="error">{error.message}</div>
 							</Grid>
 						</>
 					</Grid>
-					<Grid item xs={10}>
-						<input
-							className={classes.button}
-							type="button"
-							value="Next"
-							page="4"
-							onClick={e => {
-								
-								if (isEmpty(email))
-									setError({ message: "Must not be empty", hasError: true });
-								else if (!isEmail(email)) {
-									setError({
-										message: "Please input a valid email address",
-										hasError: true,
-									});
-								} else {
-									setError({ message: "", hasError: false });
-									props.next(e);
+					{displayCodeInput ? (
+						<Grid item xs={10}>
+							<InputBase
+								placeholder="Enter Code here"
+								endAdornment={
+									<InputAdornment>
+										<LockIcon color="primary" />
+									</InputAdornment>
 								}
-							}}
-						/>
+								value={code}
+								type="text"
+								style={{
+									fontSize: "2rem",
+									letterSpacing: "3px",
+									padding: 20,
+									width: "100%",
+									margin: "8px 0px",
+									boxShadow:
+										"0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+								}}
+								onChange={e => setCode(e.target.value)}
+							/>
+							{codeError && <div className="error">{codeError}</div>}
+						</Grid>
+					) : null}
+					<Grid item xs={10}>
+						<ButtonBase style={{ height: 30.5, width: "100%" }}>
+							<input
+								className={classes.button}
+								type="button"
+								value={displayCodeInput ? "Verify" : "Send Verification Code"}
+								page="4"
+								onClick={handleEmail}
+							/>
+						</ButtonBase>
 					</Grid>
 				</Grid>
 			</Grid>

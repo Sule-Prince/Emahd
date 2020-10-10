@@ -21,15 +21,15 @@ const initialState = {
 
 /* Get all the user related data */
 
-export const userDataThunk = createAsyncThunk(
+export const userDataThunk = createAsyncThunk( 
 	"user/getData",
-	async (route, { getState, rejectWithValue }) => {
+	async (args, { getState, rejectWithValue }) => {
 		const isLoading = getState().user.isLoading;
 		if (!isLoading) {
 			return;
 		}
 		try {
-			const userData = await axios.get(route);
+			const userData = await axios.get("/user/userinfo");
 
 			return userData.data;
 		} catch (err) {
@@ -124,8 +124,27 @@ const userData = createSlice({
 				course,
 				university,
 				email,
+				friends,
+				followers,
+				DOB,
+				gender,
+				phoneNo,
+				noOfPosts,
 			} = action.payload.data;
-			const userData = { bio, handle, fullName, course, university, email };
+			const userData = {
+				friends,
+				followers,
+				noOfPosts,
+				bio,
+				handle,
+				gender,
+				fullName,
+				course,
+				university,
+				email,
+				DOB,
+				phoneNo,
+			};
 			localStorage.setItem("userData", JSON.stringify(userData));
 			state.data = { ...action.payload.data };
 			state.likes = [...action.payload.likes];

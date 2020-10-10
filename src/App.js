@@ -8,8 +8,7 @@ import { Provider } from "react-redux";
 import store from "./redux/store";
 import AuthRender from "./Components/AuthRender";
 import OtherUserAccount from "./Components/OtherUsersProfile/OtherUserAccount";
-// import MySnackBar from "./Components/SubComponents/MySnackBar";
-
+import MySnackBar from "./Components/SubComponents/MySnackBar";
 
 const theme = createMuiTheme({
 	overrides: {
@@ -37,6 +36,11 @@ const theme = createMuiTheme({
 				fontSize: "0.875rem",
 			},
 		},
+		MuiBottomNavigationAction: {
+			root: {
+				minWidth: 60,
+			},
+		},
 	},
 	palette: {
 		primary: {
@@ -45,8 +49,8 @@ const theme = createMuiTheme({
 			dark: "#1976d2",
 		},
 		secondary: {
-			light: "#b2ff59",
-			main: "#76ff03",
+			light: "#e65100",
+			main: "#aa00ff",
 			dark: "#64dd17",
 		},
 	},
@@ -56,12 +60,14 @@ const App = () => {
 	const [selectedTab, setSelectedTab] = useState(() => {
 		const tabNo = localStorage.getItem("tabNo");
 		if (tabNo && tabNo >= 0) return parseInt(tabNo);
-		else return 3;
+		else return 4;
 	});
+
 	return (
 		<>
 			<Provider store={store}>
 				<ThemeProvider theme={theme}>
+					<MySnackBar />
 					<Router>
 						<Switch>
 							{/* <Route path="/admin" exact component={Dashboard} /> */}
@@ -89,7 +95,6 @@ const App = () => {
 				</ThemeProvider>
 			</Provider>
 
-			{/* <ReactQueryDevtools /> */}
 		</>
 	);
 };

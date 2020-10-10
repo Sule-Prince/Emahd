@@ -53,7 +53,7 @@ const Textpost = ({ post: scream }) => {
 	// const [commentNo, setCommentNo] = useState(commentCount);
 
 	return (
-		<div>
+		<div type= "text">
 			<Card>
 				<CardHeader
 					style={{ paddingLeft: 8, paddingRight: 8 }}

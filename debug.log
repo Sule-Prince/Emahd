@@ -1298,3 +1298,53 @@
 [0903/020541.260:ERROR:process_memory_win.cc(73)] ReadMemory at 0x7ff8dc5f0000 of 64 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
 [0903/020541.260:WARNING:pe_image_reader.cc(340)] could not read dos header from C:\WINDOWS\System32\kernel.appcore.dll
 [0903/020541.260:ERROR:process_memory_win.cc(73)] ReadMemory at 0x7ff8dc5f0000 of 64 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
+[0912/225205.984:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0912/225205.986:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0912/225206.052:ERROR:exception_snapshot_win.cc(100)] thread ID 8976 not found in process
+[0912/225206.052:ERROR:exception_snapshot_win.cc(100)] thread ID 19956 not found in process
+[0925/160721.353:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0925/160721.468:ERROR:exception_snapshot_win.cc(100)] thread ID 7956 not found in process
+[0926/074231.302:ERROR:process_reader_win.cc(155)] SuspendThread: Access is denied. (0x5)
+[0926/074231.302:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0926/074231.521:ERROR:exception_snapshot_win.cc(100)] thread ID 12884 not found in process
+[0926/074231.521:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0926/074231.521:ERROR:exception_snapshot_win.cc(100)] thread ID 8732 not found in process
+[0926/074235.541:ERROR:minidumpwritedump_with_crashpad_info.cc(452)] Failed to call MiniDumpWriteDump: Access is denied. (0x80070005)
+[0926/074235.541:ERROR:minidumpwritedump_with_crashpad_info.cc(661)] Failed to write minidump file
+[0926/074235.541:ERROR:crash_report_exception_handler.cc(132)] TryMiniDumpWriteDumpWithCrashpadInfo failed
+[0926/074235.541:ERROR:minidumpwritedump_with_crashpad_info.cc(452)] Failed to call MiniDumpWriteDump: Access is denied. (0x80070005)
+[0926/074235.541:ERROR:minidumpwritedump_with_crashpad_info.cc(661)] Failed to write minidump file
+[0926/074235.541:ERROR:crash_report_exception_handler.cc(132)] TryMiniDumpWriteDumpWithCrashpadInfo failed
+[0927/205556.681:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.721:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.681:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.737:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.609:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.617:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.769:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.593:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 16260 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 15420 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 21404 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 4068 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 3236 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 7648 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 16536 not found in process
+[0927/205556.945:ERROR:exception_snapshot_win.cc(100)] thread ID 19584 not found in process
+[1005/095957.789:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[1005/095957.852:ERROR:exception_snapshot_win.cc(100)] thread ID 45580 not found in process
+[1005/095957.899:ERROR:process_reader_win.cc(127)] NtOpenThread: {Access Denied} A process has requested access to an object, but has not been granted those access rights. (0xc0000022)
+[1005/095957.899:ERROR:exception_snapshot_win.cc(100)] thread ID 12236 not found in process
+[1005/100001.303:ERROR:minidumpwritedump_with_crashpad_info.cc(452)] Failed to call MiniDumpWriteDump: Access is denied. (0x80070005)
+[1005/100001.303:ERROR:minidumpwritedump_with_crashpad_info.cc(661)] Failed to write minidump file
+[1005/100001.303:ERROR:crash_report_exception_handler.cc(132)] TryMiniDumpWriteDumpWithCrashpadInfo failed
+[1005/100001.303:ERROR:process_memory_win.cc(73)] ReadMemory at 0x22c8b820000 of 64 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
+[1005/100001.303:WARNING:pe_image_reader.cc(340)] could not read dos header from C:\WINDOWS\System32\NSI.dll
+[1005/100001.303:ERROR:process_memory_win.cc(73)] ReadMemory at 0x22c8b8746d0 of 72 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
+[1005/100001.303:WARNING:pe_image_annotations_reader.cc(135)] could not read annotations list object in C:\Program Files (x86)\Microsoft\Edge\Application\85.0.564.63\msedge_elf.dll
+[1005/100001.318:ERROR:process_memory_win.cc(73)] ReadMemory at 0x22c8b8bec00 of 72 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
+[1005/100001.318:WARNING:pe_image_annotations_reader.cc(135)] could not read annotations list object in C:\Program Files (x86)\Microsoft\Edge\Application\85.0.564.63\msedge.dll
+[1005/100001.318:ERROR:process_memory_win.cc(73)] ReadMemory at 0x22c8b820000 of 64 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
+[1005/100001.318:WARNING:pe_image_reader.cc(340)] could not read dos header from C:\WINDOWS\System32\NSI.dll
+[1005/100001.318:ERROR:process_memory_win.cc(73)] ReadMemory at 0x22c8b820000 of 64 bytes failed: Only part of a ReadProcessMemory or WriteProcessMemory request was completed. (0x12B)
+[1005/100001.318:WARNING:pe_image_reader.cc(340)] could not read dos header from C:\WINDOWS\System32\NSI.dll

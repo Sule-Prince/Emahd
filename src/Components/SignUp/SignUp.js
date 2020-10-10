@@ -36,7 +36,7 @@ export default ({ history, ...props }) => {
 		university,
 		course,
 		email,
-		"D.O.B": DOB,
+		DOB,
 	};
 	return (
 		<div>
@@ -80,12 +80,20 @@ export default ({ history, ...props }) => {
 					next={next}
 				/>
 			)}
-			{page === 3 && <Page4 setEmail={setEmail} email={email} next={next} />}
+			{page === 3 && (
+				<Page4 setEmail={setEmail} email={email} handle={handle} next={next} />
+			)}
 			{page === 4 && (
 				<Page5 setPassword={setPassword} password={password} next={next} />
 			)}
 			{page === 5 && (
-				<Page6 setGender={setGender} setDOB={setDOB} DOB={DOB} gender= {gender} next={next} />
+				<Page6
+					setGender={setGender}
+					setDOB={setDOB}
+					DOB={DOB}
+					gender={gender}
+					next={next}
+				/>
 			)}
 			{page === 6 && (
 				<Page7 userDetails={userDetails} history={history} next={next} />

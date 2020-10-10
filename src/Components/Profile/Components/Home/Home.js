@@ -4,16 +4,22 @@ import {
 	Avatar,
 	makeStyles,
 	Fab,
-	IconButton,
+	BottomNavigation,
+	BottomNavigationAction,
+	Grid,
+	Paper,
 	Typography,
 	Toolbar,
 	AppBar,
+	Divider,
 } from "@material-ui/core";
 
 import { useSelector } from "react-redux";
 
 // Icons
-import AddIcon from "@material-ui/icons/Add";
+import AddRoundedIcon from "@material-ui/icons/AddRounded";
+import CenterFocusStrongIcon from "@material-ui/icons/CenterFocusStrong";
+import BubbleChartIcon from "@material-ui/icons/BubbleChart";
 
 // import AvatarSvg from "../../../assets/graphics/profile_pic.svg";
 import AstroX from "../../../assets/Astrox.svg";
@@ -23,7 +29,10 @@ import AstroX from "../../../assets/Astrox.svg";
 import AddScreamPage from "./AddScreamPage";
 import Posts from "./Posts";
 import useStorage from "../../../../utils/customHooks/useStorage";
+import usePostData from "../../../../utils/customHooks/usePostData";
 import ProgressBar from "../../../SubComponents/ProgressBar";
+import Peer2Peer from "../../../../utils/Peer2Peer";
+import Story from "./Story";
 
 // Component Styling
 
@@ -36,6 +45,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	appBarRoot: {
 		flexGrow: 1,
+		marginBottom: 4,
 	},
 	appBar: {
 		backgroundColor: "#fff",
@@ -76,45 +86,14 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Home = ({ AccountTab }) => {
-	const { posts } = useSelector(state => state.posts);
-
-	const [styles, setStyles] = useState("110vh");
-
-	const [file, setFile] = useState(null);
-	const [scream, setScream] = useState("");
-	const { progress, storeData, error } = useStorage(file, setScream);
-
 	const classes = useStyles();
-	const openAddScreamPage = e => {
-		setStyles("0px");
-	};
 
 	return (
 		<>
 			<div className={classes.root}>
 				<HomeAppBar classes={classes} AccountTab={AccountTab} />
-
-				{progress ? <ProgressBar progress={progress} /> : null}
-				<Posts posts={posts} />
-
-				<AddScreamPage
-					styles={styles}
-					setStyles={setStyles}
-					file={file}
-					setFile={setFile}
-					setScream={setScream}
-					storeData={storeData}
-					scream={scream}
-				/>
-
-				<Fab
-					color="primary"
-					size="small"
-					style={{ position: "fixed", bottom: 70, right: 20 }}
-					onClick={openAddScreamPage}
-				>
-					<AddIcon fontSize="small" />
-				</Fab>
+				<Divider />
+				<NewsFeed classes={classes} />
 			</div>
 		</>
 	);
@@ -127,30 +106,145 @@ const HomeAppBar = ({ classes, AccountTab }) => {
 
 	return (
 		<div className={classes.appBarRoot}>
-			<AppBar position="static" className={classes.appBar}>
+			<AppBar position="static" elevation={3} className={classes.appBar}>
 				<Toolbar>
-					<IconButton
-						edge="start"
+					<span
 						className={classes.menuButton}
 						onClick={AccountTab}
-						color="inherit"
 						aria-label="profile "
 					>
 						<Avatar
 							style={{
-								height: "35px",
-								width: "35px",
+								height: 40,
+								width: 40,
 								border: "1px solid #999",
 							}}
 							src={userImg || null}
 						/>
-					</IconButton>
+					</span>
 					<Typography variant="h6" className={classes.title}>
 						<img src={AstroX} alt="" />
 						<span>EMahd</span>
 					</Typography>
 				</Toolbar>
 			</AppBar>
+		</div>
+	);
+};
+
+const NewsFeed = () => {
+	const [selected, setSelected] = useState(0);
+
+	const handleChange = (e, newSelected) => {
+		setSelected(newSelected);
+	};
+
+	return (
+		<>
+			<Grid item xs={12}>
+				<Paper elevation={1}>
+					<BottomNavigation
+						value={selected}
+						onChange={handleChange}
+						variant="fullWidth"
+						aria-label="Posts and Screams"
+					>
+						<BottomNavigationAction
+							icon={<BubbleChartIcon fontSize="large" />}
+							style={{ paddingBottom: 0 }}
+						/>
+
+						<BottomNavigationAction
+							icon={<CenterFocusStrongIcon fontSize="large" />}
+							style={{ paddingBottom: 0 }}
+						/>
+					</BottomNavigation>
+				</Paper>
+			</Grid>
+			{selected === 0 && <Media />}
+
+			{selected === 1 && <Screams />}
+		</>
+	);
+};
+
+const Screams = () => {
+	const { posts } = useSelector(state => state.posts);
+	const postData = usePostData();
+	const [styles, setStyles] = useState("110vh");
+
+	const [file, setFile] = useState(null);
+	const [scream, setScream] = useState("");
+
+	const { progress, storeData } = useStorage(file, setScream, postData);
+
+	const openAddScreamPage = e => {
+		setStyles("0px");
+	};
+
+	return (
+		<>
+			{progress ? <ProgressBar progress={progress} /> : null}
+			<Posts posts={posts} />
+
+			<AddScreamPage
+				styles={styles}
+				setStyles={setStyles}
+				file={file}
+				setFile={setFile}
+				setScream={setScream}
+				storeData={storeData}
+				scream={scream}
+			/>
+
+			<Fab
+				color="primary"
+				size="small"
+				style={{ position: "fixed", bottom: 70, right: 20 }}
+				onClick={openAddScreamPage}
+			>
+				<AddRoundedIcon fontSize="small" />
+			</Fab>
+		</>
+	);
+};
+
+const Media = ({ classes }) => {
+	const [displayStory, setDisplayStory] = useState(false);
+	return (
+		<div>
+			{displayStory && <Story classes={classes} setDisplay={setDisplayStory} />}
+			<div>
+				<div
+					style={{
+						padding: 5,
+						display: "inline-flex",
+						justifyContent: "center",
+						flexDirection: "column",
+					}}
+				>
+					<Fab
+						style={{
+							height: 62,
+							width: 62,
+							marginBottom: 5,
+							background:
+								"linear-gradient(45deg, #6a1b9a, #aa00ff, #2196f3, #42a5f5)",
+						}}
+						onClick={() => {
+							setDisplayStory(true);
+						}}
+					>
+						<AddRoundedIcon style={{ fontSize: 40, color: "#fff" }} />
+					</Fab>
+					<Typography align="center" variant="body2">
+						Your Story
+					</Typography>
+				</div>
+			</div>
+
+			<Divider />
+			{/* <Peer2Peer /> */}
 		</div>
 	);
 };

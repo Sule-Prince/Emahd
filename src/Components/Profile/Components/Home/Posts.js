@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Grid, makeStyles } from "@material-ui/core";
+import React, { useState, useRef } from "react";
+import { Button, Grid, makeStyles } from "@material-ui/core";
 import Post from "./Post";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
 		minHeight: "100vh",
 		position: "absolute",
 		marginTop: 5,
-		backgroundColor: "#f4f4f4",
+		backgroundColor: "#f9f9f9",
 	},
 	positionFIx: {
 		height: 70,
@@ -32,14 +32,14 @@ const Posts = ({ posts }) => {
 	const classes = useStyles();
 	const [deg, setDeg] = useState(0);
 	const [load, setLoad] = useState(false);
+
+	const rootRef = useRef(null);
+
 	let sortedPosts = [];
 
-	
-
 	if (posts) {
-		
 		posts.forEach(postArray => {
-			sortedPosts = [...sortedPosts, ...postArray]; 
+			sortedPosts = [...sortedPosts, ...postArray];
 		});
 
 		sortedPosts.sort((a, b) => {
@@ -52,18 +52,17 @@ const Posts = ({ posts }) => {
 
 	return (
 		<>
-			<div style= {{ height: load && 20, position: "relative"}}>
+			<div style={{ height: load && 20, position: "relative" }}>
 				<AnimatePresence exitBeforeEnter>
 					{!load && deg >= 1 && (
 						<motion.svg
-							
 							style={{ display: "block", margin: "4px auto" }}
 							width="30px"
 							height="30px"
 							viewBox="0 0 100 100"
 						>
 							<motion.path
-							exit={{ pathLength: 0 }}
+								exit={{ pathLength: 0 }}
 								strokeWidth="8"
 								initial={{ pathLength: 0, opacity: 0.4 }}
 								animate={{
@@ -78,14 +77,15 @@ const Posts = ({ posts }) => {
 							/>
 						</motion.svg>
 					)}
-					</AnimatePresence>
+				</AnimatePresence>
 				{load && <LoadingAnimation classes={classes} />}
-				
 			</div>
 
 			{/* <motion.div */}
 			<div
 				className={classes.root}
+				ref={rootRef}
+
 				/* drag="y"
 				dragConstraints={{ left: 0, right: 0, bottom: 0, top: 0 }}
 				dragElastic={0.1}
@@ -100,11 +100,11 @@ const Posts = ({ posts }) => {
 			>
 				<Grid style={{ position: "absolute", marginBottom: 170 }} container>
 					{posts
-						? sortedPosts.map(post => <Post post={post} key={post.postId} />)
+						? sortedPosts.map(post => <Post post={post} rootRef= {rootRef} key={post.postId} />)
 						: null}
 				</Grid>
 				<div className={classes.positionFIx}></div>
-				</div>
+			</div>
 			{/* </motion.div> */}
 		</>
 	);

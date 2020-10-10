@@ -3,11 +3,11 @@ import React, { useEffect } from "react";
 import { makeStyles, Grid } from "@material-ui/core";
 
 import Post from "../Home/Post";
-import PostSkeleton from "../../../SubComponents/PostSkeleton";
 
 import { useSelector, useDispatch } from "react-redux";
 import { openSnackBar } from "../../../../redux/userActionsSlice";
 import Header from "../../../SubComponents/Header";
+import Loading from "../../../SubComponents/Loading";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -52,7 +52,7 @@ const LikedPosts = ({ setDisplayPosts }) => {
 			<Grid container style={{ display: "initial", overflowY: "auto" }}>
 				<Header setDisplay={setDisplayPosts} data="Liked Posts" />
 				{likedPosts.isLoading ? (
-					<PostSkeleton />
+					<Loading />
 				) : (
 					likedPosts.data &&
 					reArrangeArray(likedPosts.data).map(post => {
@@ -60,7 +60,6 @@ const LikedPosts = ({ setDisplayPosts }) => {
 					})
 				)}
 			</Grid>
-			<div className="positionFix"></div>
 		</div>
 	);
 };

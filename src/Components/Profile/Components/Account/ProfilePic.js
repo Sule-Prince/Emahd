@@ -12,6 +12,7 @@ import AddAPhotoIcon from "@material-ui/icons/AddAPhoto";
 import { useSelector } from "react-redux";
 import useFileUpload from "../../../../utils/useFileUpload";
 import EdituserInfo from "./EdituserInfo";
+import { getImageUrl } from "../../../../utils/getImageUrl";
 
 const ProfilePic = ({ classes, imageUrl }) => {
 	const [display, setDisplay] = useState(false);
@@ -25,6 +26,8 @@ const ProfilePic = ({ classes, imageUrl }) => {
 	const openEditProfile = () => {
 		setDisplay(true);
 	};
+
+	
 
 	return (
 		<>
@@ -53,7 +56,7 @@ const ProfilePic = ({ classes, imageUrl }) => {
 							</label>
 						}
 					>
-						<Avatar className={classes.avatar} src={imageUrl ? imageUrl : null}>
+						<Avatar className={classes.avatar} src={getImageUrl("imageUrl", imageUrl)}>
 							{isLoading ? (
 								<CircularProgress color="primary" thickness={5} size={25} />
 							) : null}

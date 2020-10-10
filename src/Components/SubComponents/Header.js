@@ -12,7 +12,9 @@ const Header = ({ setDisplay, data }) => {
 		setDisplay(false);
 	};
 	return (
-		<Paper style={{ borderBottom: "1px solid #aaa" }} square elevation={0}>
+		<>
+		<Paper style={{ zIndex:1, position: "fixed", width: "100%", }} square elevation={1}>
+	
 			<Grid className={classes.headerRoot} container>
 				<Grid className={classes.headerNameContainer} item>
 					<IconButton
@@ -32,6 +34,8 @@ const Header = ({ setDisplay, data }) => {
 				</Grid>
 			</Grid>
 		</Paper>
+		<div style= {{ height: 48 }}></div>
+		</>
 	);
 };
 

@@ -143,7 +143,6 @@ export const courses = [
   "Political Science",
   "Psychology",
   "Public Administration and Local Government",
-  "Religion",
   "Social Work",
   "Sociology/Anthropology",
   "Veterinary Medicine",

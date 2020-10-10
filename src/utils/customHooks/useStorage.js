@@ -1,28 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { projectStorage } from "../../firebase/FBConfig";
 import IDGenerator from "../IDGenerator";
-import usePostData from "./usePostData";
 
-const useStorage = (file, setScream) => {
-	
-	const { sendData, postError } = usePostData();
-
+const useStorage = (file, setScream, postData) => {
+	const { sendData, postError } = postData;
 	const [progress, setProgress] = useState(null);
 
 	const [error, setError] = useState([]);
-	if (postError) setError([...error, postError]);
-	
-	const storeData = (route, scream, mediaType) => {
+
+	useEffect(() => {
+		if (postError) setError(prev => [...prev, postError]);
+		
+		// eslint-disable-next-line
+	}, [postError]);
+
+	const storeData = (route, scream, mediaType, postSettings) => {
 		const post = scream;
 		if (!file) {
-			sendData({post, url: "", mediaType}, route)
-			return ;
+			sendData({ post, url: "", mediaType }, route);
+			return;
 		}
-		
+
 		setScream("");
 		const fileExtension = file.name.split(".")[1];
 		const fileRef = `${IDGenerator()}.${fileExtension}`;
-		console.log(fileRef);
+
 		const storageRef = projectStorage.ref(fileRef);
 		storageRef.put(file).on(
 			"state_changed",
@@ -33,11 +35,11 @@ const useStorage = (file, setScream) => {
 			err => setError(err),
 			async () => {
 				const url = await storageRef.getDownloadURL();
-				const data = { post, url, mediaType };
+				const data = { post, url, mediaType, postSettings };
 				sendData(data, route);
-				setTimeout( () => {
-					setProgress(null)
-				}, 2000)
+				setTimeout(() => {
+					setProgress(null);
+				}, 2000);
 			}
 		);
 	};

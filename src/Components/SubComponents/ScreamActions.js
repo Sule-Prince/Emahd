@@ -80,7 +80,6 @@ const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
 					<audio
 						id="like-audio"
 						style={{ display: "none" }}
-						controls
 						src={likeSound}
 					></audio>
 					{/* End of Audio component */}
@@ -113,11 +112,7 @@ const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
 				</div>
 			</CardActions>
 			{openComments === true ? (
-				<Comments
-					
-					setOpenComments= {setOpenComments}
-					postId={postId}
-				/>
+				<Comments setOpenComments={setOpenComments} postId={postId} />
 			) : null}
 		</>
 	);

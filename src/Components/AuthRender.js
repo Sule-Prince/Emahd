@@ -34,8 +34,7 @@ const AuthRender = ({ setSelectedTab, selectedTab, ...props }) => {
 				axios.defaults.headers["Authorization"] = `Bearer ${token}`;
 
 				const decodedToken = jwtDecode(token);
-				// console.log(decodedToken.email_verified);
-				if (decodedToken.exp * 1000 < Date.now()) {
+				if (decodedToken.exp * (1000 + 1000) < Date.now()) {
 					localStorage.removeItem("token");
 					setIsAuthenticated(false);
 					setIsLoading(false);

@@ -4,6 +4,7 @@ import userDataReducer from './userDataSlice';
 import screamDataReducer from './screamsSlice';
 import userActionsReducer from './userActionsSlice';
 import otherUsersDataReducer from './otherUserSlice';
+import extraDataReducer from "./extraDataSlice"
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     posts: screamDataReducer,
     userActions: userActionsReducer,
     otherUser: otherUsersDataReducer,
+    extra: extraDataReducer
   },
 
 })

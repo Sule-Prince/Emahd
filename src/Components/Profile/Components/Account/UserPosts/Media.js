@@ -7,7 +7,7 @@ import NoPostUpload from "./NoPostUpload";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 import PhotoCameraIcon from "@material-ui/icons/PhotoCamera";
 
-const Media = ({ posts, error, otherUser }) => {
+const Media = ({ posts, error, otherUser, rootRef }) => {
 	posts.sort((a, b) => {
 		let createdAtA = Date.parse(a.createdAt);
 		let createdAtB = Date.parse(b.createdAt);
@@ -48,7 +48,7 @@ const Media = ({ posts, error, otherUser }) => {
 						<Typography color="primary" variant="h4" component="div">
 							Media
 						</Typography>
-						<Typography color="primary" variant="body2">
+						<Typography color="primary" align="center" variant="body2">
 							When you upload Media they will appear here!!
 						</Typography>
 					</NoPostUpload>
@@ -56,7 +56,7 @@ const Media = ({ posts, error, otherUser }) => {
 			) : (
 				posts.map(post => (
 					<Grid key={post.postId} item xs={12} style={{ marginBottom: 8 }}>
-						<MediaPost post={post} />
+						<MediaPost post={post} rootRef={rootRef} />
 					</Grid>
 				))
 			)}

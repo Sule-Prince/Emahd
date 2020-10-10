@@ -24,5 +24,3 @@ export const isAllowedChar = char => {
 
 	return false;
 };
-
-

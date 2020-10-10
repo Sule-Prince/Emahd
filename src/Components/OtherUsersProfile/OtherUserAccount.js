@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
 	Grid,
 	Paper,
@@ -31,15 +31,17 @@ import FollowTab from "../SubComponents/FollowTab";
 
 export default ({ setSelectedTab }) => {
 	const classes = useStyles();
+
+	const rootRef = useRef(null);
+
 	const user = useParams().user;
 	const dispatch = useDispatch();
 
 	const mainUser = useSelector(state => state.user.data.handle);
-	
+
 	const { push } = useHistory();
 	useEffect(() => {
 		if (user === mainUser) {
-			
 			setSelectedTab(0);
 			push("/");
 			return;
@@ -51,15 +53,32 @@ export default ({ setSelectedTab }) => {
 		// eslint-disable-next-line
 	}, [mainUser]);
 
-	const userData = useSelector(state => state.otherUser.userInfo);
-	const screams = useSelector(state => state.otherUser.screams);
+	const { userData, screams, isLoading } = useSelector(
+		state => state.otherUser
+	);
+
 	const error = useSelector(state => state.otherUser.error.trim());
-	const isLoading = useSelector(state => state.otherUser.isLoading);
+
+	const { coverPhoto, imageUrl, noOfPosts, friends, followers } = userData;
+
 	if (isLoading) {
 		return (
-			<Loading classes={classes} handle={user}>
-				<Header classes={classes} handle={user} />
-			</Loading>
+			<Grid
+				container
+				className={classes.root}
+				style={{
+					position: "fixed",
+					top: 0,
+					backgroundColor: "#fff",
+					zIndex: 1000,
+					height: "100vh",
+				}}
+			>
+				<Grid item xs={12}>
+					<Header classes={classes} handle={user} />
+				</Grid>
+				<Loading />
+			</Grid>
 		);
 	}
 	return (
@@ -77,27 +96,32 @@ export default ({ setSelectedTab }) => {
 					<Header classes={classes} handle={user} />
 				</Grid>
 				<Grid xs={12} item>
-					<CoverPhoto classes={classes} coverPhoto={userData.coverPhoto} />
+					<CoverPhoto classes={classes} coverPhoto={coverPhoto} />
 				</Grid>
 				<Grid xs={12} item>
-					<ProfilePic
-						classes={classes}
-						friend={user}
-						imageUrl={userData.imageUrl}
-					/>
+					<ProfilePic classes={classes} friend={user} imageUrl={imageUrl} />
 				</Grid>
 				<Grid container item xs={12}>
 					<Bio data={userData} />
 				</Grid>
 				<Grid container className={classes.followTab} item xs={12}>
-					<FollowTab />
+					<FollowTab
+						friends={friends}
+						noOfPosts={noOfPosts}
+						followers={followers}
+					/>
 				</Grid>
 
 				<Grid container item xs>
-					<UserPosts posts={screams} otherUser={true} error={error} />
+					<UserPosts
+						posts={screams}
+						otherUser={true}
+						error={error}
+						rootRef={rootRef}
+					/>
 				</Grid>
 			</Grid>
-			<div className={classes.positionFIx}></div>
+			<div style={{ height: 70, width: "100%" }} />
 		</div>
 	);
 };
@@ -118,7 +142,11 @@ const Header = ({ classes, handle }) => {
 					>
 						<KeyboardBackspaceIcon />
 					</IconButton>
-					<Typography className={classes.headerName} variant="body2" component= "span" >
+					<Typography
+						className={classes.headerName}
+						variant="body2"
+						component="span"
+					>
 						{handle}
 					</Typography>
 				</Grid>

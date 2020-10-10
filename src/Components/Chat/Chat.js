@@ -12,9 +12,9 @@ const useStyles = makeStyles(theme => ({
 		zIndex: 1000,
 		overflowY: "auto",
 		
-		position: "absolute",
+		position: "fixed",
 		top: 0,
-		right: 0,
+		left: 0,
 	},
 }));
 
