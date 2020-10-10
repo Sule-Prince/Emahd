@@ -45,13 +45,7 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
 	const classes = useStyles();
 
 	useEffect(() => {
-		const mediaConfig = {
-			root: rootRef.current,
-			threshold: [0.01, 1],
-			rootMargin: "50px 0px",
-		};
-
-		const mediaObserver = new IntersectionObserver(observeElement, mediaConfig);
+		const mediaElem = mediaRef.current;
 		if (type === "image") {
 			const thumbConfig = {
 				root: rootRef.current,
@@ -65,24 +59,37 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
 			thumbObserver.observe(thumbRef.current);
 		}
 
-		mediaObserver.observe(mediaRef.current);
+		const mediaConfig = {
+			root: rootRef.current,
+			threshold: [0.01, 1],
+			rootMargin: "50px 0px",
+		};
+
+		const mediaObserver = new IntersectionObserver(observeElement, mediaConfig);
+
+		mediaObserver.observe(mediaElem);
 
 		function observeElement(entry) {
 			entry = entry[0];
-			if (entry.intersectionRatio > 0) {
-				if (!entry.target.getAttribute("preview")) mediaRef.current.src = src;
+			if (entry.intersectionRatio >= 0) {
+				if (!entry.target.getAttribute("preview") && !mediaElem.src) {
+					mediaElem.src = src;
+				}
 				if (type === "image") {
 					this.unobserve(entry.target);
 					return;
 				}
+				if (entry.intersectionRatio < 1) mediaElem.pause();
+
 				if (entry.intersectionRatio === 1) {
-					mediaRef.current.play();
-					this.unobserve(entry.target);
+					mediaElem.play();
 				}
 			}
 		}
 
-		return () => {};
+		return () => {
+			mediaObserver.unobserve(mediaElem);
+		};
 
 		// eslint-disable-next-line
 	}, []);
@@ -123,7 +130,7 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
 					<>
 						<video ref={mediaRef} loop />
 						<span>
-							<IconButton color="secondary" component= "span">
+							<IconButton color="secondary" component="span">
 								<PlayArrowIcon fontSize="large" />
 							</IconButton>
 						</span>
