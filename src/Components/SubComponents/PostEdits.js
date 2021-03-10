@@ -21,7 +21,6 @@ const useStyles = makeStyles(theme => ({
 	container: {
 		display: "flex",
 		"& > *": {
-			// marginLeft: "4%",
 			marginRight: "9%",
 		},
 		"& > :last-child": {
@@ -35,7 +34,8 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const PostEdits = ({ src, clear, setSrc }) => {
+const PostEdits = ({ src, clear, setSrc, textSettings, setTextSettings, style }) => {
+	style= style || {}
 	const classes = useStyles();
 
 	const [openText, setOpenText] = useState(false);
@@ -55,10 +55,10 @@ const PostEdits = ({ src, clear, setSrc }) => {
 				clear(false);
 			}
 		};
-	}, []);
+	}, [clear]);
 
 	return (
-		<div className={classes.root}>
+		<div className={classes.root} style= {style}>
 			<Grid justify="center" container className={classes.container}>
 				<Grid item>
 					<IconButton onClick={() => setOpenCropRotate(true)}>
@@ -80,7 +80,14 @@ const PostEdits = ({ src, clear, setSrc }) => {
 							style={{ color: "#fff", fontSize: 40, marginTop: -3 }}
 						/>
 					</IconButton>
-					{openText && <AddImageText src={src} setOpen={setOpenText} />}
+					{openText && (
+						<AddImageText
+							src={src}
+							setOpen={setOpenText}
+							textSettings={textSettings}
+							setTextSettings={setTextSettings}
+						/>
+					)}
 				</Grid>
 
 				<Grid item>

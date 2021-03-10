@@ -1,34 +1,32 @@
 import { useState } from "react";
 import { axios } from "../../config/axiosConfig";
 
-import { useDispatch } from "react-redux";
-import { screamsDataThunk } from "../../redux/screamsSlice";
-
 const usePostData = () => {
-	const [postError, setPostError] = useState("");
-	const dispatch = useDispatch();
+  const [postError, setPostError] = useState("");
 
-	const sendData = (data, route) => {
-		
-		if (!data && !route) return;
-		axios
-			.post(route, data)
-			.then(() => {
-				dispatch(screamsDataThunk());
-			})
-			.catch(err => {
-				console.log({ ...err });
-				if (err.response) {
-					setPostError(err.response.data.error);
+  const sendData = (data, route) => {
+    if (!data && !route) return;
+    return axios
+      .post(route, data)
+      .then((res) => {
+        return { hasError: false, message: res.data.feedback };
+      })
+      .catch((err) => {
+        if (err.response) {
+          setPostError("Ooops!! Something went wrong, please try again");
 
-					return;
-				}
+          return {
+            hasError: true,
+            message: "Ooops!! Something went wrong, please try again",
+          };
+        }
 
-				setPostError("Ooops!! you're currently offline");
-			});
-	};
+        setPostError("Ooops!! you're currently offline");
+        return { hasError: true, message: "Ooops!! you're currently offline" };
+      });
+  };
 
-	return { sendData, postError };
+  return { sendData, postError };
 };
 
 export default usePostData;

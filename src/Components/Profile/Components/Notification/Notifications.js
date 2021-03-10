@@ -9,111 +9,112 @@ import { useStyles } from "../Account/styles";
 import { projectFirestore } from "../../../../firebase/FBConfig";
 
 export default () => {
-	const readNotifications = useSelector(state => state.user.notifications.read);
-	const unreadNotifications = useSelector(
-		state => state.user.notifications.unread
-	);
-	const user = useSelector(state => state.user.data.handle);
+  const readNotifications = useSelector(
+    (state) => state.user.notifications.read
+  );
+  const unreadNotifications = useSelector(
+    (state) => state.user.notifications.unread
+  );
+  const userId = useSelector((state) => state.user.data.handle);
 
-	useEffect(() => {
-		if (user && unreadNotifications.length > 0) {
-			let readNotifications = [];
-			projectFirestore
-				.doc(`/notifications/${user}`)
-				.get()
+  useEffect(() => {
+    if (userId && unreadNotifications.length > 0) {
+      let readNotifications = [];
+      projectFirestore
+        .doc(`/notifications/${userId}`)
+        .get()
 
-				.then(snapshot => {
-					readNotifications = [
-						...snapshot.data().unread,
-						...snapshot.data().read,
-					];
-					if (readNotifications.length > 30)
-						readNotifications = readNotifications.slice(0, 30);
-					projectFirestore.doc(`/notifications/${user}`).set({
-						read: readNotifications,
-						unread: [],
-					});
-				})
-				.catch(err => {
-					console.error(err);
-				});
-		}
+        .then((snapshot) => {
+          readNotifications = [
+            ...snapshot.data().unread,
+            ...snapshot.data().read,
+          ];
+          if (readNotifications.length > 30)
+            readNotifications = readNotifications.slice(0, 30);
+          projectFirestore.doc(`/notifications/${userId}`).set({
+            read: readNotifications,
+            unread: [],
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
 
-		// eslint-disable-next-line
-	}, [user, unreadNotifications]);
+    // eslint-disable-next-line
+  }, [userId, unreadNotifications]);
 
-	return (
-		<div style={{ backgroundColor: "#f9f9f9", height: "calc(100vh - 60px)" }}>
-			<Grid
-				container
-				style={{ maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}
-				spacing={1}
-			>
-				<Grid item xs={12}>
-					<Header />
-				</Grid>
+  return (
+    <div style={{ backgroundColor: "#f9f9f9", height: "calc(100vh - 60px)" }}>
+      <Grid
+        container
+        style={{ maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}
+        spacing={1}>
+        <Grid item xs={12}>
+          <Header />
+        </Grid>
 
-				{readNotifications.length === 0 && unreadNotifications.length === 0 ? (
-					<Grid
-						container
-						direction="column"
-						justify="center"
-						alignItems="center"
-						style={{ padding: "0px 16px", height: "calc(90vh - 60px)" }}
-					>
-						<NotificationsActiveIcon
-							color="action"
-							style={{ height: 80, width: 80, marginBottom: 10 }}
-						/>
-						<Typography
-							variant="h4"
-							style={{ fontWeight: "bold" }}
-							align="center"
-							color="textSecondary"
-						>
-							Catch up with the activities going on around you, friends and
-							family.
-						</Typography>
-					</Grid>
-				) : null}
+        {readNotifications.length === 0 && unreadNotifications.length === 0 ? (
+          <Grid
+            container
+            direction="column"
+            justify="center"
+            alignItems="center"
+            style={{ padding: "0px 16px", height: "calc(90vh - 60px)" }}>
+            <NotificationsActiveIcon
+              color="action"
+              style={{ height: 80, width: 80, marginBottom: 10 }}
+            />
+            <Typography
+              variant="h4"
+              style={{ fontWeight: "bold" }}
+              align="center"
+              color="textSecondary">
+              Catch up with the activities going on around you, friends and
+              family.
+            </Typography>
+          </Grid>
+        ) : null}
 
-				{unreadNotifications.map(notification => {
-					return (
-						<Notification key={notification.id} notification={notification} />
-					);
-				})}
+        {unreadNotifications.map((notification) => {
+          return (
+            <Notification key={notification.id} notification={notification} />
+          );
+        })}
 
-				{readNotifications.map(notification => (
-					<Notification key={notification.id} notification={notification} />
-				))}
-			</Grid>
-		</div>
-	);
+        {readNotifications.map((notification) => (
+          <Notification key={notification.id} notification={notification} />
+        ))}
+      </Grid>
+    </div>
+  );
 };
 
 const Header = () => {
-	const classes = useStyles();
+  const classes = useStyles();
 
-	return (
-		<>
-			<Paper
-				style={{ zIndex: 1, position: "fixed", width: "100%" }}
-				square
-				elevation={1}
-			>
-				<Grid className={classes.headerRoot} container>
-					<Grid className={classes.headerNameContainer} item>
-						<Typography
-							className={classes.headerName}
-							variant="body2"
-							component="span"
-						>
-							Notifications
-						</Typography>
-					</Grid>
-				</Grid>
-			</Paper>
-			<div style={{ height: 48 }}></div>
-		</>
-	);
+  return (
+    <>
+      <Paper
+        style={{
+          zIndex: 1,
+          position: "fixed",
+          width: "100%",
+        }}
+        square
+        elevation={2}>
+        <Grid alignItems="center" className={classes.headerRoot} container>
+          <Grid className={classes.headerNameContainer} item>
+            <Typography
+              className={classes.headerName}
+              variant="body1"
+              component="span">
+              Activities
+            </Typography>
+          </Grid>
+        </Grid>
+      </Paper>
+      <div style={{ height: "calc(40px + 1.6vmin)" }}></div>
+    </>
+  );
 };

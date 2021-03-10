@@ -25,4 +25,4 @@ export const useGetStatus = userHandle => {
 export const useAddStatus = data => {
     
     useStorage()
-}
+} 

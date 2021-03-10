@@ -1,10 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import signupReducer from './authSlice';
-import userDataReducer from './userDataSlice';
-import screamDataReducer from './screamsSlice';
-import userActionsReducer from './userActionsSlice';
-import otherUsersDataReducer from './otherUserSlice';
-import extraDataReducer from "./extraDataSlice"
+import { configureStore } from "@reduxjs/toolkit";
+
+import signupReducer from "./authSlice";
+import userDataReducer from "./userDataSlice";
+import screamDataReducer from "./postsSlice";
+import userActionsReducer from "./userActionsSlice";
+import otherUsersDataReducer from "./otherUserSlice";
+import extraDataReducer from "./extraDataSlice";
+import userChatsReducer from "./userChatsSlice";
+import searchReducer from "./searchResultSlice";
+import userPostReducer from "./userPostSlice";
 
 const store = configureStore({
   reducer: {
@@ -13,9 +17,11 @@ const store = configureStore({
     posts: screamDataReducer,
     userActions: userActionsReducer,
     otherUser: otherUsersDataReducer,
-    extra: extraDataReducer
+    extra: extraDataReducer,
+    chats: userChatsReducer,
+    search: searchReducer,
+    uploadPost: userPostReducer,
   },
+});
 
-})
-
-export default store
+export default store;

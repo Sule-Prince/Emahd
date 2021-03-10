@@ -1,101 +1,130 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import SignUp from "./Components/SignUp/SignUp";
-import ForgotPsw from "./Components/Login/ForgotPsw";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import "./index.css";
+import { Helmet } from "react-helmet";
+
+// import SignUp from "./Components/SignUp/SignUp";
+// import ForgotPsw from "./Components/Login/ForgotPsw";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import AuthRender from "./Components/AuthRender";
-import OtherUserAccount from "./Components/OtherUsersProfile/OtherUserAccount";
+// import OtherUserAccount from "./Components/OtherUsersProfile/OtherUserAccount";
 import MySnackBar from "./Components/SubComponents/MySnackBar";
 
+import "./index.css";
+import Loading from "./Components/SubComponents/Loading";
+
 const theme = createMuiTheme({
-	overrides: {
-		MuiMenuItem: {
-			root: {
-				fontSize: ".875rem",
-			},
-		},
-		MuiInputBase: {
-			root: {
-				fontSize: "0.875rem",
-			},
-			input: "0.875rem",
-		},
-		MuiInputLabel: {
-			root: {
-				fontSize: "0.875rem",
-			},
-		},
-		MuiFormControlLabel: {
-			root: {
-				marginRight: 0,
-			},
-			label: {
-				fontSize: "0.875rem",
-			},
-		},
-		MuiBottomNavigationAction: {
-			root: {
-				minWidth: 60,
-			},
-		},
-	},
-	palette: {
-		primary: {
-			light: "#42a5f5",
-			main: "#2196f3",
-			dark: "#1976d2",
-		},
-		secondary: {
-			light: "#e65100",
-			main: "#aa00ff",
-			dark: "#64dd17",
-		},
-	},
+  overrides: {
+    MuiMenuItem: {
+      root: {
+        fontSize: ".875rem",
+      },
+    },
+    MuiButton: {
+      containedSizeSmall: {
+        padding: "1vmin 10px",
+      },
+    },
+    MuiInputBase: {
+      root: {
+        fontSize: "0.875rem",
+      },
+      input: "0.875rem",
+    },
+    MuiInputLabel: {
+      root: {
+        fontSize: "0.875rem",
+      },
+    },
+    MuiFormControlLabel: {
+      root: {
+        marginRight: 0,
+      },
+      label: {
+        fontSize: "0.875rem",
+      },
+    },
+    MuiBottomNavigationAction: {
+      root: {
+        minWidth: 60,
+      },
+    },
+  },
+  palette: {
+    primary: {
+      light: "#42a5f5",
+      main: "#2196f3",
+      dark: "#1976d2",
+    },
+    secondary: {
+      light: "#e65100",
+      main: "#aa00ff",
+      dark: "#6a1b9a",
+    },
+  },
 });
 
 const App = () => {
-	const [selectedTab, setSelectedTab] = useState(() => {
-		const tabNo = localStorage.getItem("tabNo");
-		if (tabNo && tabNo >= 0) return parseInt(tabNo);
-		else return 4;
-	});
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const tabNo = localStorage.getItem("tabNo");
+    if (tabNo && tabNo >= 0) return parseInt(tabNo);
+    else return 4;
+  });
 
-	return (
-		<>
-			<Provider store={store}>
-				<ThemeProvider theme={theme}>
-					<MySnackBar />
-					<Router>
-						<Switch>
-							{/* <Route path="/admin" exact component={Dashboard} /> */}
-							{/* <Route path="/chat" component={Chat} /> */}
-							<Route path="/signup" component={SignUp} />
-							<Route path="/forgot" component={ForgotPsw} />
+  const SignUp = lazy(() => import("./Components/SignUp/SignUp"));
 
-							<Route
-								path="/:user"
-								render={() => (
-									<OtherUserAccount setSelectedTab={setSelectedTab} />
-								)}
-							/>
-						</Switch>
-						<Route
-							path="/"
-							render={() => (
-								<AuthRender
-									selectedTab={selectedTab}
-									setSelectedTab={setSelectedTab}
-								/>
-							)}
-						/>
-					</Router>
-				</ThemeProvider>
-			</Provider>
+  const ForgotPsw = lazy(() => import("./Components/Login/ForgotPsw"));
 
-		</>
-	);
+  const OtherUserAccount = lazy(() =>
+    import("./Components/OtherUsersProfile/OtherUserAccount")
+  );
+
+  return (
+    <>
+      <Provider store={store}>
+        <ThemeProvider theme={theme}>
+          <MySnackBar />
+          <Helmet>
+            <meta
+              name="description"
+              content="Create an account or log into Emahd. Connect with friends, loved ones, and other people you know. Share photos, videos and screams, send messages and get updates."
+            />
+          </Helmet>
+          <Router>
+            <Suspense
+              fallback={
+                <Loading
+                  styles={{
+                    height: "100vh",
+                  }}
+                />
+              }>
+              <Switch>
+                <Route path="/signup" component={SignUp} />
+                <Route path="/forgot" component={ForgotPsw} />
+
+                <Route
+                  path="/:user"
+                  render={() => (
+                    <OtherUserAccount setSelectedTab={setSelectedTab} />
+                  )}
+                />
+              </Switch>
+              <Route
+                path="/"
+                render={() => (
+                  <AuthRender
+                    selectedTab={selectedTab}
+                    setSelectedTab={setSelectedTab}
+                  />
+                )}
+              />
+            </Suspense>
+          </Router>
+        </ThemeProvider>
+      </Provider>
+    </>
+  );
 };
 export default App;

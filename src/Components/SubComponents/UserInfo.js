@@ -1,30 +1,48 @@
 import React from "react";
-import {
-	Avatar,
-	CardActionArea,
-	CardHeader,
-	Typography,
-} from "@material-ui/core";
-import { Link } from "react-router-dom";
+import { Avatar, CardHeader, Typography, makeStyles } from "@material-ui/core";
 
+const useStyles = makeStyles({
+	root: {
+		"& > :nth-child(2)": {
+			overflow: "hidden",
+			"& > span": {
+				overflow: "hidden",
+				textOverflow: "ellipsis",
+				whiteSpace: "nowrap",
+			},
+		},
+	},
+});
 
-const UserInfo = ({ userData }) => {
-
+const UserInfo = ({ imageUrl, header, subheader }) => {
+	const classes = useStyles();
 	return (
-		<CardActionArea style={{ height: 65 }}>
-			<Link to={userData.handle} style={{ height: "inherit", width: "inherit" }}>
-				<CardHeader
-					style={{ height: 60, background: "none" }}
-					title={
-						<Typography color="textPrimary" style={{ fontWeight: "bold" }}>
-							{userData.handle}
-						</Typography>
-					}
-					subheader={userData.fullName}
-					avatar={<Avatar style={{ height: 50, width: 50 }} src={userData.imageUrl} />}
-				/>
-			</Link>
-		</CardActionArea>
+		<CardHeader
+			className={classes.root}
+			style={{ height: 65, background: "none", paddingRight: 10 }}
+			title={
+				<Typography
+					color="textPrimary"
+					style={{ fontWeight: "bold", fontSize: ".95rem" }}
+				>
+					{header}
+				</Typography>
+			}
+			subheader={
+				<Typography
+					style={{
+						fontWeight: "inherit",
+						fontSize: ".875rem",
+						color: "inherit",
+						display: "block",
+					}}
+					component="span"
+				>
+					{subheader}
+				</Typography>
+			}
+			avatar={<Avatar style={{ height: 45, width: 45 }} src={imageUrl} />}
+		/>
 	);
 };
 

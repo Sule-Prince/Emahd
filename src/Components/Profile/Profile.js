@@ -1,10 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
+
+import io from "socket.io-client";
+
 import {
-	BottomNavigation,
-	BottomNavigationAction,
-	Avatar,
-	Badge,
+  BottomNavigation,
+  BottomNavigationAction,
+  Avatar,
+  Badge,
 } from "@material-ui/core";
+
+import { Helmet } from "react-helmet";
 
 import HomeRoundedIcon from "@material-ui/icons/HomeRounded";
 import HomeOutlinedIcon from "@material-ui/icons/HomeOutlined";
@@ -24,147 +29,191 @@ import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import "./Profile.css";
-import { userDataThunk, notifications } from "../../redux/userDataSlice";
-import { screamsDataThunk } from "../../redux/screamsSlice";
-import { openTalkBubble, closeTalkBubble } from "../../redux/userActionsSlice";
+import { notifications, userDataThunk } from "../../redux/userDataSlice";
+import { screamsDataThunk } from "../../redux/postsSlice";
+// import { openTalkBubble, closeTalkBubble } from "../../redux/userActionsSlice";
 
 import { projectFirestore, projectAuth } from "../../firebase/FBConfig";
 import TalkBubble from "../SubComponents/TalkBubble";
 import AddMedia from "./Components/AddMedia/AddMedia";
+import useStorage from "../../utils/customHooks/useStorage";
+
+export const StorageContext = React.createContext();
+
+const ENDPOINT = "http://localhost:5000/";
 
 const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
-	const user = useSelector(state => state.user.data.handle);
-	const userImg = useSelector(state => state.user.data.imageUrl);
-	const noOfUnread = useSelector(state => state.user.notifications.noOfUnread);
-	const dispatch = useDispatch();
-	const { push, location } = useHistory();
+  const { handle: user, ...data } = useSelector((state) => state.user.data);
 
-	const handleTabChange = (ev, newValue) => {
-		if (location.pathname !== "/") push("/");
+  const userImg = useSelector((state) => state.user.data.imageUrl);
+  const noOfUnread = useSelector(
+    (state) => state.user.notifications.noOfUnread
+  );
+  const dispatch = useDispatch();
 
-		setSelectedTab(newValue);
-		localStorage.setItem("tabNo", newValue);
-	};
+  const { push, location } = useHistory();
 
-	const AccountTab = () => {
-		setSelectedTab(0);
-	};
+  const [media, setMedia] = useState(null);
+  const [fileCodec, setFileCodec] = useState(null);
+  const [mediaUrl, setMediaUrl] = useState("");
 
-	useEffect(() => {
-		const fetchData = async () => {
-			const data = await dispatch(userDataThunk());
-			if (!data.payload) return;
-			const handle = data.payload.handle;
-			if (handle) {
-				const title = document.getElementsByTagName("title")[0];
-				title.innerHTML = handle;
-			}
-		};
+  const { progress, storeData } = useStorage(
+    "scream",
+    fileCodec === "image" ? mediaUrl : media
+  );
 
-		fetchData();
+  const handleTabChange = (ev, newValue) => {
+    if (location.pathname !== "/") push("/");
 
-		// eslint-disable-next-line
-	}, []);
+    setSelectedTab(newValue);
+    localStorage.setItem("tabNo", newValue);
+  };
 
-	useEffect(() => {
-		let unsubscribe = () => {};
-		if (user) {
-			unsubscribe = projectFirestore
-				.collection("notifications")
-				.doc(user)
-				.onSnapshot(snapshot => {
-					const data = snapshot.data();
-					if (data) {
-						let { latest } = data;
-						dispatch(notifications(data));
+  const AccountTab = () => {
+    setSelectedTab(0);
+  };
 
-						if (latest > 0) {
-							dispatch(closeTalkBubble());
-							dispatch(
-								openTalkBubble({
-									message: latest,
-									type: "comment",
-								})
-							);
-							setTimeout(() => {
-								dispatch(closeTalkBubble());
-							}, 5000);
-						}
-					}
-				});
-		}
+  useEffect(() => {
+    window.socket = io(ENDPOINT);
 
-		return () => {
-			unsubscribe();
-		};
+    dispatch(userDataThunk());
+    dispatch(screamsDataThunk());
 
-		// eslint-disable-next-line
-	}, [user]);
-	useEffect(() => {
-		dispatch(screamsDataThunk());
+    // eslint-disable-next-line
+  }, []);
 
-		// eslint-disable-next-line
-	}, []);
-	return (
-		<div className="profile-page" onDrag={e => e.preventDefault()}>
-			<TalkBubble />
-			<div className="bottom-tab">
-				<BottomNavigation
-					value={selectedTab}
-					onChange={handleTabChange}
-					style= {{ justifyContent: "space-between" }}
-					variant="fullWidth"
-				>
-					<BottomNavigationAction
-						icon={
-							<Avatar
-								style={{
-									height: "30px",
-									width: "30px",
-									border: "1px solid #999",
-								}}
-								src={userImg || null}
-							/>
-						}
-					/>
-					<BottomNavigationAction icon={<SearchOutlinedIcon />} />
-					<BottomNavigationAction
-						icon={
-							selectedTab === 2 ? (
-								<AddBoxRoundedIcon style={{ fontSize: "1.7rem" }} />
-							) : (
-								<AddBoxOutlinedIcon style={{ fontSize: "1.7rem" }} />
-							)
-						}
-					/>
-					<BottomNavigationAction
-						icon={
-							selectedTab === 3 ? (
-								<Badge badgeContent={noOfUnread} color="primary">
-									<NotificationsRoundedIcon />
-								</Badge>
-							) : (
-								<Badge badgeContent={noOfUnread} color="primary">
-									<NotificationsOutlinedIcon />
-								</Badge>
-							)
-						}
-					/>
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = projectFirestore
+      .collection("notifications")
+      .doc(user)
+      .onSnapshot((snapshot) => {
+        const data = snapshot.data();
+        if (data) {
+          dispatch(notifications(data));
+        }
+      });
 
-					<BottomNavigationAction
-						icon={
-							selectedTab === 4 ? <HomeRoundedIcon /> : <HomeOutlinedIcon />
-						}
-					/>
-				</BottomNavigation>
-			</div>
-			{selectedTab === 0 && <Account />}
-			{selectedTab === 1 && <Search />}
-			{selectedTab === 2 && <AddMedia />}
-			{selectedTab === 3 && <Notification />}
-			{selectedTab === 4 && <Home AccountTab={AccountTab} />}
-		</div>
-	);
+    return () => {
+      unsubscribe();
+    };
+
+    // eslint-disable-next-line
+  }, [user]);
+
+  return (
+    <div className="profile-page" onDrag={(e) => e.preventDefault()}>
+      <Helmet>
+        <title>{user}</title>
+        {data.followers && (
+          <meta
+            name="description"
+            content={`${data.followers.length} followers, ${data.friends.length} following, ${data.noOfPosts} posts, login to see media and scream posts from ${data.fullName} (@${user})`}
+          />
+        )}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@900&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Lobster&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Fugaz+One&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Nosifer&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Ewert&display=swap"
+        />
+      </Helmet>
+      <TalkBubble />
+      <div className="bottom-tab">
+        <BottomNavigation
+          value={selectedTab}
+          onChange={handleTabChange}
+          style={{ justifyContent: "space-between" }}
+          variant="fullWidth">
+          <BottomNavigationAction
+            icon={
+              <Avatar
+                style={{
+                  height: "30px",
+                  width: "30px",
+                  border: "1px solid #999",
+                }}
+                src={userImg || null}
+              />
+            }
+          />
+          <BottomNavigationAction icon={<SearchOutlinedIcon />} />
+          <BottomNavigationAction
+            icon={
+              selectedTab === 2 ? (
+                <AddBoxRoundedIcon style={{ fontSize: "1.7rem" }} />
+              ) : (
+                <AddBoxOutlinedIcon style={{ fontSize: "1.7rem" }} />
+              )
+            }
+          />
+          <BottomNavigationAction
+            icon={
+              selectedTab === 3 ? (
+                <Badge badgeContent={noOfUnread} color="primary">
+                  <NotificationsRoundedIcon />
+                </Badge>
+              ) : (
+                <Badge badgeContent={noOfUnread} color="primary">
+                  <NotificationsOutlinedIcon />
+                </Badge>
+              )
+            }
+          />
+
+          <BottomNavigationAction
+            icon={
+              selectedTab === 4 ? <HomeRoundedIcon /> : <HomeOutlinedIcon />
+            }
+          />
+        </BottomNavigation>
+      </div>
+      {selectedTab === 0 && <Account />}
+      {selectedTab === 1 && <Search />}
+      {selectedTab === 2 && <AddMedia />}
+      {selectedTab === 3 && <Notification />}
+      {selectedTab === 4 && (
+        <StorageContext.Provider
+          value={{
+            fileCodec,
+            mediaUrl,
+            progress,
+            storeData,
+            setMedia,
+            setMediaUrl,
+            setFileCodec,
+          }}>
+          <Home AccountTab={AccountTab} />
+        </StorageContext.Provider>
+      )}
+    </div>
+  );
 };
 
 export default React.memo(Profile);

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { makeStyles, Grid } from "@material-ui/core";
 
@@ -24,6 +24,8 @@ const useStyles = makeStyles(theme => ({
 const LikedPosts = ({ setDisplayPosts }) => {
 	const classes = useStyles();
 
+	const rootRef = useRef(null);
+
 	const likedPosts = useSelector(state => state.user.likedPosts);
 	const dispatch = useDispatch();
 
@@ -48,7 +50,7 @@ const LikedPosts = ({ setDisplayPosts }) => {
 	};
 
 	return (
-		<div className={classes.root}>
+		<div className={classes.root} ref={rootRef}>
 			<Grid container style={{ display: "initial", overflowY: "auto" }}>
 				<Header setDisplay={setDisplayPosts} data="Liked Posts" />
 				{likedPosts.isLoading ? (
@@ -56,7 +58,7 @@ const LikedPosts = ({ setDisplayPosts }) => {
 				) : (
 					likedPosts.data &&
 					reArrangeArray(likedPosts.data).map(post => {
-						return <Post post={post} key={post.postId} />;
+						return <Post post={post} rootRef={rootRef} key={post.postId} />;
 					})
 				)}
 			</Grid>

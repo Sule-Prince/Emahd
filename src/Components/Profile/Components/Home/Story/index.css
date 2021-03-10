@@ -1,0 +1,11 @@
+@keyframes animateBar {
+from {
+    width: 0px;
+}
+to {
+    width: 30px;
+}
+then {
+
+}
+}

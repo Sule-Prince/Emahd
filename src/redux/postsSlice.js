@@ -1,0 +1,101 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { axios } from "../config/axiosConfig";
+
+const initialState = {
+  isLoading: false,
+  posts: [],
+  error: "",
+  retries: 0,
+  uploadProfilePic: {
+    isLoading: false,
+    error: "",
+  },
+};
+
+export const screamsDataThunk = createAsyncThunk(
+  "post/getData",
+  async (args, { getState, dispatch, rejectWithValue }) => {
+    let sections = getState().posts.posts;
+
+    try {
+      const response = await axios.get("/screams");
+      if (!response.data.feedback) {
+        sections = response.data;
+      }
+      return sections;
+    } catch (error) {
+      if (!navigator.onLine)
+        return rejectWithValue(
+          "Cannot get posts, please connect to the internet!!"
+        );
+      if (sections.retries <= 5 && navigator.onLine) {
+        setTimeout(() => {
+          dispatch(screamsDataThunk());
+        }, 10000);
+      }
+      return rejectWithValue("Cannot get posts, please try again later");
+    }
+  }
+);
+
+const screamsData = createSlice({
+  name: "postsData",
+  initialState,
+  reducers: {
+    // profile photo related reducers
+    uploadingProfilePic: (state) => {
+      state.uploadProfilePic.isLoading = true;
+    },
+    uploadedProfilePic: (state, action) => {
+      const payload = action.payload,
+        length = state.posts.length,
+        userPostLength = state.posts[length - 1].length;
+      state.uploadProfilePic.isLoading = false;
+
+      if (length === 0) return;
+      if (userPostLength === 0) return;
+      if (state.posts[length - 1][0].handle === payload.user) {
+        state.posts[length - 1].map((post) => {
+          post.imageUrl = payload.url;
+
+          return post;
+        });
+      }
+    },
+    uploadProfilePicError: (state) => {
+      state.uploadProfilePic.isLoading = false;
+      state.uploadProfilePic.error = "Failed to update profile picture";
+    },
+  },
+  extraReducers: {
+    [screamsDataThunk.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [screamsDataThunk.fulfilled]: (state, action) => {
+      state.isLoading = false;
+      state.posts = action.payload;
+      state.error = "";
+    },
+    [screamsDataThunk.rejected]: (state, action) => {
+      state.isLoading = false;
+      state.retries += 1;
+      if (!navigator.onLine) {
+        state.error = action.payload;
+        return;
+      }
+      if (state.retries === 5) {
+        state.error = action.payload;
+      }
+      state.posts = [];
+    },
+  },
+});
+
+export const {
+  uploadedProfilePic,
+  uploadingProfilePic,
+  uploadProfilePicError,
+} = screamsData.actions;
+
+const screamDataReducer = screamsData.reducer;
+export default screamDataReducer;

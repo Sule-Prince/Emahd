@@ -13,7 +13,7 @@ const FontsSelectOptions = ({ setFontFamily, fontFamily }) => {
 		"'Ewert', cursive",
 	];
 	return (
-		<div>
+		
 			<IconButton style={{ position: "relative", right: 10, top: 0 }}>
 				<TextFieldsIcon color="primary" fontSize="large" />
 
@@ -42,7 +42,6 @@ const FontsSelectOptions = ({ setFontFamily, fontFamily }) => {
 					))}
 				</Select>
 			</IconButton>
-		</div>
 	);
 };
 

@@ -12,6 +12,7 @@ import {
 	setStopRecord,
 	useStyles,
 } from "./CameraDevicesFuncs";
+import RecordTimer from "./RecordTimer";
 
 const CameraDevice = () => {
 	const [timer, setTimer] = useState({ sec: 0, min: 0, size: 0 });
@@ -28,14 +29,14 @@ const CameraDevice = () => {
 				record={record}
 				media={media}
 				setRecord={setRecord}
+				setTimer={setTimer}
 			/>
 			<VideoStream
 				classes={classes}
-				setTimer={setTimer}
-				timer={timer}
 				record={record}
 				media={media}
 				setRecord={setRecord}
+				setTimer={setTimer}
 			/>
 		</div>
 	);
@@ -43,7 +44,7 @@ const CameraDevice = () => {
 
 export default CameraDevice;
 
-const Header = ({ timer, classes, record, media, setRecord }) => {
+const Header = ({ timer, classes, record, media, setRecord, setTimer }) => {
 	return (
 		<>
 			<Grid
@@ -53,11 +54,7 @@ const Header = ({ timer, classes, record, media, setRecord }) => {
 				className={classes.headerRoot}
 			>
 				{record.isRecording && (
-					<Typography align="center" variant="body1" component="span">
-						{`${timer.min
-							.toString()
-							.padStart(2, 0)} : ${timer.sec.toString().padStart(2, 0)}`}
-					</Typography>
+					<RecordTimer timer={timer} setTimer={setTimer} />
 				)}
 			</Grid>
 
@@ -135,19 +132,13 @@ const Header = ({ timer, classes, record, media, setRecord }) => {
 	);
 };
 
-const VideoStream = ({
-	classes,
-	setTimer,
-	timer,
-	record,
-	media,
-	setRecord,
-}) => {
+const VideoStream = ({ classes, setTimer, record, media, setRecord }) => {
 	// States
 	const [videoConstraint, setVideoConstraint] = useState({
-		video: { facingMode: "user" },
+		video: { facingMode: "user", width: 4096, height: 4096 },
 		audio: true,
 	});
+	// navigator.mediaDevices.getUserMedia({ video: { widt: {ideal: 4096}}})
 	const [vidScale, setVidScale] = useState("scaleX(-1)");
 	const [hasRecorded, setHasRecorded] = useState({
 		rec: false,
@@ -178,16 +169,6 @@ const VideoStream = ({
 
 		// eslint-disable-next-line
 	}, [videoConstraint]);
-
-	useEffect(() => {
-		if (timer.sec === 60) {
-			setTimer(prev => ({
-				...prev,
-				sec: 0,
-				min: (prev.min += 1),
-			}));
-		}
-	}, [timer, setTimer]);
 
 	useEffect(() => {
 		if (!record.isRecording && !record.recorded) {
@@ -329,6 +310,8 @@ const Footer = ({
 
 	const stopRecord = e => {
 		e.preventDefault();
+		if (recorderRef.current.state !== "recording") return;
+
 		setBgColor("#fff");
 		setClassName(`${classes.recordButton}`);
 		setScale({ scale: [1, 1], yoyo: 1 });
@@ -346,7 +329,7 @@ const Footer = ({
 	}, [hasRecorded]);
 
 	return (
-		<div style={{ position: "fixed", bottom: 50, width: "100%", zIndex: 1000 }}>
+		<div style={{ position: "absolute", bottom: 50, width: "100%", zIndex: 10 }}>
 			<AnimatePresence exitBeforeEnter>
 				{!record.recorded && (
 					<motion.div
@@ -372,7 +355,9 @@ const Footer = ({
 									animate={{ backgroundColor: bgColor }}
 									transition={{ duration: 0.5 }}
 									onTouchStart={startRecord}
+									onMouseDown={startRecord}
 									onTouchEnd={stopRecord}
+									onMouseUp={stopRecord}
 								></motion.div>
 							</motion.span>
 							<IconButton

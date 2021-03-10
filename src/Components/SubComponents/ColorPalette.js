@@ -1,17 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
 import { makeStyles } from "@material-ui/core";
 
 import { motion } from "framer-motion";
 
-import wobbleAudio from "../assets/audio/jelly-wobble.mp3";
-
 const useStyles = makeStyles(theme => ({
-	root: {
-		position: "fixed",
-		zIndex: 10,
-		width: "100vw",
-	},
 	palette: {
 		overflowX: "auto",
 		overflowY: "hidden",
@@ -29,6 +22,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const ColorPalette = ({ setTextColor, textColor, bottom }) => {
+	bottom =
+		bottom === undefined ? true : bottom || bottom === null ? true : bottom;
+
 	const colorArray = [
 		"#000",
 		"#fff",
@@ -70,18 +66,24 @@ const ColorPalette = ({ setTextColor, textColor, bottom }) => {
 	const classes = useStyles();
 
 	return (
-		<div className={classes.root} style= {{ bottom }}>
-			<div style={{ height: 65, overflowY: "hidden" }}>
-				<div className={classes.palette}>
-					{colorArray.map(color => (
-						<Paint
-							color={color}
-							key={color}
-							textColor={textColor}
-							setTextColor={setTextColor}
-						/>
-					))}
-				</div>
+		<div
+			style={{
+				height: 65,
+				overflowY: "hidden",
+				position:
+					bottom === true ? "absolute" : bottom === false ? "static" : bottom,
+				bottom: bottom === true ? 50 : bottom === false ? null : bottom,
+			}}
+		>
+			<div className={classes.palette}>
+				{colorArray.map(color => (
+					<Paint
+						color={color}
+						key={color}
+						textColor={textColor}
+						setTextColor={setTextColor}
+					/>
+				))}
 			</div>
 		</div>
 	);
@@ -92,13 +94,9 @@ export default ColorPalette;
 const Paint = ({ color, setTextColor, textColor }) => {
 	const [style, setStyle] = useState(40);
 
-	const soundRef = useRef(null);
-
 	useEffect(() => {
 		if (textColor === color) {
 			setStyle(50);
-			soundRef.current.play();
-			soundRef.current.volume = 0.5;
 
 			return;
 		}
@@ -121,11 +119,6 @@ const Paint = ({ color, setTextColor, textColor }) => {
 					cursor: "pointer",
 				}}
 			></motion.div>
-			<audio
-				src={wobbleAudio}
-				ref={soundRef}
-				style={{ display: "none" }}
-			></audio>
 		</>
 	);
 };

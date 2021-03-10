@@ -5,69 +5,89 @@ import { useSelector, useDispatch } from "react-redux";
 import { closeSnackBar } from "../../redux/userActionsSlice";
 
 const useStyles = makeStyles({
-	alert: {
-		backgroundColor: "#aaa",
-	},
+  alert: {
+    backgroundColor: "#aaa",
+  },
+  font: {
+    fontSize: 12.5,
+    paddingTop: 4,
+    paddingBottom: 4,
+  },
 });
 
 function SuccessAlert(props) {
-	return (
-		<MuiAlert elevation={6} variant="filled" severity="success" {...props} />
-	);
+  return (
+    <MuiAlert elevation={6} variant="filled" severity="success" {...props} />
+  );
+}
+function InfoAlert(props) {
+  return <MuiAlert elevation={6} variant="filled" severity="info" {...props} />;
 }
 
 function ErrorAlert(props) {
-	return (
-		<MuiAlert elevation={6} variant="filled" severity="error" {...props} />
-	);
+  return (
+    <MuiAlert elevation={6} variant="filled" severity="error" {...props} />
+  );
 }
 
-const LoadingAlert = props => {
-	return (
-		<MuiAlert
-			elevation={6}
-			icon={<CircularProgress size={20} thickness={6} />}
-			variant="filled"
-			{...props}
-		/>
-	);
+const LoadingAlert = (props) => {
+  return (
+    <MuiAlert
+      elevation={6}
+      icon={<CircularProgress size={15} thickness={4} />}
+      variant="filled"
+      {...props}
+    />
+  );
 };
 
 const MySnackBar = () => {
-	const open = useSelector(state => state.userActions.snackBar.open);
-	const duration = useSelector(state => state.userActions.snackBar.duration);
-	const snackBarInfo = useSelector(state => state.userActions.snackBar.message);
-	const snackBarType = useSelector(state => state.userActions.snackBar.type);
-	const loading = useSelector(state => state.userActions.snackBar.loading);
+  const open = useSelector((state) => state.userActions.snackBar.open);
+  const duration = useSelector((state) => state.userActions.snackBar.duration);
+  const snackBarInfo = useSelector(
+    (state) => state.userActions.snackBar.message
+  );
+  const snackBarType = useSelector((state) => state.userActions.snackBar.type);
+  const loading = useSelector((state) => state.userActions.snackBar.loading);
 
-	const classes = useStyles();
-	const dispatch = useDispatch();
-	const handleClose = (event, reason) => {
-		dispatch(closeSnackBar());
-	};
+  const classes = useStyles();
+  const dispatch = useDispatch();
+  const handleClose = (event, reason) => {
+    dispatch(closeSnackBar());
+  };
 
-	return (
-		<Snackbar
-			style={{ zIndex: 10000 }}
-			open={open}
-			autoHideDuration={duration}
-			onClose={handleClose}
-		>
-			{loading ? (
-				<LoadingAlert
-					onClose={handleClose}
-					className={classes.alert}
-					severity={snackBarType}
-				>
-					{snackBarInfo}
-				</LoadingAlert>
-			) : snackBarType === "error" ? (
-				<ErrorAlert onClose={handleClose}>{snackBarInfo}</ErrorAlert>
-			) : (
-				<SuccessAlert onClose={handleClose}>{snackBarInfo}</SuccessAlert>
-			)}
-		</Snackbar>
-	);
+  return (
+    <Snackbar
+      style={{ zIndex: 10000 }}
+      open={open}
+      autoHideDuration={duration}
+      onClose={handleClose}>
+      {loading ? (
+        <LoadingAlert
+          onClose={handleClose}
+          className={classes.alert + " " + classes.font}
+          severity={snackBarType}>
+          {snackBarInfo}
+        </LoadingAlert>
+      ) : (
+        (snackBarType === "success" && (
+          <SuccessAlert onClose={handleClose} className={classes.font}>
+            {snackBarInfo}
+          </SuccessAlert>
+        )) ||
+        (snackBarType === "error" && (
+          <ErrorAlert onClose={handleClose} className={classes.font}>
+            {snackBarInfo}
+          </ErrorAlert>
+        )) ||
+        (snackBarType === "info" && (
+          <InfoAlert onClose={handleClose} className={classes.font}>
+            {snackBarInfo}
+          </InfoAlert>
+        ))
+      )}
+    </Snackbar>
+  );
 };
 
 export default MySnackBar;

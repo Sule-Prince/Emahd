@@ -16,6 +16,8 @@ body {
 		Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 	height: 100vh;
 	scroll-behavior: smooth;
+	overflow: hidden;
+	font-size: calc(14px + 1vmin);
 }
 
 a {
@@ -32,6 +34,7 @@ button {
 	display: block;
 	margin: 10px auto;
 	font-size: 0.7rem;
+	padding: calc(2px + 1.2vmin) 10px;
 }
 
 .appName {
@@ -40,14 +43,14 @@ button {
 
 .error {
 	color: #f00;
-	font-size: 0.875rem;
+	font-size: 0.8rem;
 	padding: 10px;
 	text-align: center;
 	width: 100%;
 }
 
 .extraInfo {
-	font-size: 0.85rem;
+	font-size: 0.8rem;
 	text-align: center;
 	margin-top: 2px;
 }
@@ -112,14 +115,45 @@ input[type="date"]::-webkit-clear-button {
 		rgb(33, 150, 243)
 	);
 	background-size: 200%;
-	animation: position 1s ease-in-out infinite;
+	animation: bg-position 1s ease-in-out infinite;
 }
 
-@keyframes position {
+.modal-animate {
+	transform: scale(0) translate(-50%, -50%);
+	animation: modal-scale 1.5s cubic-bezier(0, 0.4, 0.6, 1);
+}
+
+.animate-scale {
+	animation: el-scale 1.8s ease-in-out infinite;
+	transform: scale(1);
+}
+
+@keyframes bg-position {
 	from {
 		background-position: 0%;
 	}
 	to {
 		background-position: 200%;
+	}
+}
+
+@keyframes modal-scale {
+	from {
+		transform: scale(0) translate(-50%, -50%);
+	}
+	to {
+		transform: scale(1) translate(-50%, -50%);
+	}
+}
+
+@keyframes el-scale {
+	0% {
+		transform: scale(1);
+	}
+	65% {
+		transform: scale(1.2);
+	}
+	100% {
+		transform: scale(1);
 	}
 }

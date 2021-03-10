@@ -9,7 +9,7 @@ export const followSuggestThunk = createAsyncThunk(
 
 			return users.users;
 		} catch (error) {
-			return rejectWithValue("Something seems to have gone wrong please try again");
+			return rejectWithValue("Something went wrong, please try again later");
 		}
 	}
 );

@@ -15,12 +15,13 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 const ProgressBar = ({ progress }) => {
+	console.log(progress)
 	const classes = useStyles();
 	return (
 		<motion.div
 			className={classes.progressBar}
 			initial={{ width: 0 }}
-			animate={{ width: `${progress + 5}%` }}
+			animate={{ width: `${progress +5}%` }}
             transition= {{ stiffness: 300, type: "spring" }}
 		></motion.div>
 	);

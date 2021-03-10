@@ -1,0 +1,63 @@
+import { makeStyles } from "@material-ui/core";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    backgroundColor: "#fff",
+    minHeight: "100vh",
+    color: "#000",
+    // overflowY: "auto",
+  },
+  appBarRoot: {
+    flexGrow: 1,
+    marginBottom: 4,
+  },
+  appBar: {
+    backgroundColor: "#fff",
+  },
+  addFab: {
+    boxShadow: theme.shadows[8],
+    position: "fixed",
+    bottom: 70,
+    right: 20,
+    height: "calc(45px + 2vmin)",
+    width: "calc(45px + 2vmin)",
+    color: "#fff",
+    zIndex: 10,
+    backgroundColor: "#2196f3",
+  },
+  RefreshIcon: {
+    marginTop: -28,
+    position: "absolute",
+    zIndex: 1000,
+    left: "calc(50% - 24px)",
+    color: "rgb(0, 96, 139)",
+  },
+  menuButton: {
+    color: "#aaa",
+  },
+  title: {
+    flexGrow: 1,
+    textAlign: "center",
+    color: "rgb(0, 96, 139)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "bold",
+    paddingRight: 59,
+    "& > img": {
+      height: "2rem",
+      width: "2rem",
+    },
+    "& > span": {
+      marginLeft: -6,
+      fontFamily: "Lobster Two, cursive",
+    },
+  },
+
+  posts: {
+    marginBottom: "1rem",
+    padding: "1rem .7rem",
+  },
+}));
+
+export default useStyles;

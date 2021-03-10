@@ -1,15 +1,21 @@
 import React from "react";
+
+import {
+	CircularProgress,
+	InputAdornment,
+	Paper,
+	InputBase,
+} from "@material-ui/core";
 import { fade, makeStyles } from "@material-ui/core/styles";
-import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
-import { CircularProgress, InputAdornment, Paper } from "@material-ui/core";
-import { axios } from "../../config/axiosConfig";
+import { searchThunk } from "../../redux/searchResultSlice";
+import { useDispatch } from "react-redux";
 
 const useStyles = makeStyles(theme => ({
 	root: {
 		padding: theme.spacing(1, 0, 1, 0),
 		"&:hover": {
-			backgroundColor: fade(theme.palette.common.white, 0.9),
+			backgroundColor: fade("#eee", 0.9),
 		},
 	},
 	grow: {
@@ -20,7 +26,7 @@ const useStyles = makeStyles(theme => ({
 		borderRadius: theme.shape.borderRadius,
 		backgroundColor: fade(theme.palette.common.white, 1),
 		"&:hover": {
-			backgroundColor: fade(theme.palette.common.white, 0.9),
+			backgroundColor: fade("#eee", 0.9),
 		},
 	},
 	searchIcon: {
@@ -50,15 +56,15 @@ let timeoutId;
 export default function SearchBar({
 	setSearchText,
 	searchText,
-	setResult,
-	setLoading,
 	loading,
 }) {
 	const classes = useStyles();
 
+	const dispatch = useDispatch();
+
 	return (
 		<>
-			<Paper variation= {2} className={classes.root}>
+			<Paper variation={2} className={classes.root}>
 				<div className={classes.grow}>
 					<div className={classes.search}>
 						<div className={classes.searchIcon}>
@@ -68,22 +74,13 @@ export default function SearchBar({
 							placeholder="Search…"
 							value={searchText}
 							onChange={e => {
-								const text = e.target.value;
+								const text = e.target.value.trim();
+
 								setSearchText(e.target.value);
 								clearTimeout(timeoutId);
 								if (text.length > 0) {
-									setLoading(true);
 									timeoutId = setTimeout(() => {
-										axios
-											.post("/search", { text })
-											.then(response => {
-												setResult(response.data);
-												setLoading(false);
-											})
-											.catch(err => {
-												setLoading(false);
-												console.log(err);
-											});
+										dispatch(searchThunk(text.trim()));
 									}, 1000);
 								}
 							}}

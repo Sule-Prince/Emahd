@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
-	makeStyles,
-	TextField,
-	Grid,
-	InputAdornment,
-	Typography,
-	InputBase,
-	ButtonBase,
+  makeStyles,
+  TextField,
+  Grid,
+  InputAdornment,
+  Typography,
+  InputBase,
+  ButtonBase,
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
@@ -18,193 +18,202 @@ import { isEmpty, isEmail } from "../../utils/validators";
 import { axios } from "../../config/axiosConfig";
 import { closeSnackBar, openSnackBar } from "../../redux/userActionsSlice";
 
-const useStyles = makeStyles(theme => ({
-	textField: {
-		margin: theme.spacing(1.3),
-		"& > * ": {
-			width: "100%",
-		},
-	},
-	button: {
-		backgroundColor: theme.palette.primary["main"],
-		width: " 100% ",
-		fontFamily: "Roboto, Helvetica, Arial, sans-serif",
-		color: "#fff",
-	},
+const useStyles = makeStyles((theme) => ({
+  textField: {
+    margin: theme.spacing(1.3),
+    "& > * ": {
+      width: "100%",
+    },
+  },
+  button: {
+    backgroundColor: theme.palette.primary["main"],
+    width: " 100% ",
+    fontFamily: "Roboto, Helvetica, Arial, sans-serif",
+    color: "#fff",
+  },
 }));
 
 export default ({ setEmail, email, handle, ...props }) => {
-	const classes = useStyles();
+  const classes = useStyles();
 
-	const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-	const [error, setError] = useState({ message: "", hasError: false });
-	const [displayCodeInput, setDisplayCodeInput] = useState(false);
-	const [code, setCode] = useState("");
-	const [codeError, setCodeError] = useState("");
+  const [error, setError] = useState({ message: "", hasError: false });
+  const [displayCodeInput, setDisplayCodeInput] = useState(false);
+  const [code, setCode] = useState("");
+  const [codeError, setCodeError] = useState("");
 
-	const sendVerCode = e => {
-		if (isEmpty(email))
-			setError({ message: "Must not be empty", hasError: true });
-		else if (!isEmail(email)) {
-			setError({
-				message: "Please input a valid email address",
-				hasError: true,
-			});
-		} else {
-			setError({ message: "", hasError: false });
-			e.target.disabled = true;
-			dispatch(
-				openSnackBar({
-					message: "Please wait...",
-					loading: true,
-				})
-			);
-			axios
-				.post("/verifyemail", { handle, email })
-				.then(res => {
-					console.log(res.data);
-					dispatch(closeSnackBar());
-					dispatch(
-						openSnackBar({
-							message: res.data.feedback,
-							duration: 4000,
-						})
-					);
-					setDisplayCodeInput(true);
-					e.target.disabled = false;
-				})
-				.catch(err => {
-					console.log(err.response);
+  const sendVerCode = (e) => {
+    if (isEmpty(email))
+      setError({ message: "Must not be empty", hasError: true });
+    else if (!isEmail(email)) {
+      setError({
+        message: "Please input a valid email address",
+        hasError: true,
+      });
+    } else {
+      setError({ message: "", hasError: false });
+      e.target.disabled = true;
+      dispatch(
+        openSnackBar({
+          message: "Please wait...",
+          loading: true,
+        })
+      );
+      axios
+        .post("/verifyemail", { handle, email })
+        .then((res) => {
+          dispatch(closeSnackBar());
+          dispatch(
+            openSnackBar({
+              message: res.data.feedback,
+              duration: 4000,
+            })
+          );
+          setDisplayCodeInput(true);
+          e.target.disabled = false;
+        })
+        .catch((err) => {
+          if (err.response) {
+            dispatch(closeSnackBar());
+            setError({
+              message: err.response.data.error,
+              hasError: true,
+            });
+          } else {
+            dispatch(closeSnackBar());
+            setError({
+              message: "Make sure you have a healthy internet connection",
+              hasError: true,
+            });
+          }
 
-					if (err.response) {
-						dispatch(closeSnackBar());
-						setError({
-							message: err.response.data.error,
-							hasError: true,
-						});
-					} else {
-						dispatch(closeSnackBar());
-						setError({
-							message: "Make sure you have an active connection and try again",
-							hasError: true,
-						});
-					}
+          e.target.disabled = false;
+        });
+    }
+  };
 
-					e.target.disabled = false;
-				});
-		}
-	};
+  const verifyCode = (e) => {
+    dispatch(
+      openSnackBar({
+        message: "Please wait...",
+        loading: true,
+      })
+    );
 
-	const verifyCode = e => {
-		dispatch(
-			openSnackBar({
-				message: "Please wait...",
-				loading: true,
-			})
-		);
+    axios
+      .post("/verifycode", { code, email })
+      .then((res) => {
+        dispatch(closeSnackBar());
+        if (res.data.feedback.correct) return props.next(e);
 
-		axios
-			.post("/verifycode", { code, email })
-			.then(res => {
-				dispatch(closeSnackBar());
-				if (res.data.feedback.correct) return props.next(e);
+        return setCodeError(res.data.feedback.message);
+      })
+      .catch((error) => {
+        dispatch(closeSnackBar());
 
-				return setCodeError(res.data.feedback.message);
-			})
-			.catch(error => {
-				dispatch({
-					type: "error",
-					message: error.response.data.error,
-					duration: 3000,
-				});
-			});
-	};
-	const handleEmail = e => {
-		e.persist();
+        if (!error.response) {
+          dispatch(
+            openSnackBar({
+              type: "error",
+              message: "You do not have a healthy network",
+              duration: 3000,
+            })
+          );
+          return;
+        }
 
-		const textValue = e.target.value;
-		if (textValue === "Send Verification Code") {
-			sendVerCode(e);
-		} else {
-			verifyCode(e);
-		}
-	};
+        dispatch(
+          openSnackBar({
+            type: "error",
+            message: error.response.data.error,
+            duration: 3000,
+          })
+        );
+      });
+  };
+  const handleEmail = (e) => {
+    e.persist();
+    e.preventDefault();
 
-	return (
-		<form>
-			<Grid container>
-				<Grid container justify="center" item xs={12}>
-					<Grid
-						style={{ marginTop: 35, marginBottom: 10, height: 120 }}
-						justify="center"
-						container
-						item
-						xs={12}
-					>
-						<>
-							<Grid item style={{ textAlign: "center" }} xs={12}>
-								<Typography
-									style={{
-										fontWeight: "bold",
-										marginBottom: 10,
-									}}
-									variant="body2"
-								>
-									Enter your email address
-								</Typography>
-							</Grid>
+    const textValue = e.target.value;
+    if (textValue === "Send Verification Code") {
+      sendVerCode(e);
+    } else {
+      verifyCode(e);
+    }
+  };
 
-							<Grid className={classes.textField} item xs={10}>
-								<TextField
-									name="email"
-									value={email}
-									error={error.hasError}
-									label="Email"
-									onChange={e => setEmail(e.target.value)}
-								/>
-								<div className="error">{error.message}</div>
-							</Grid>
-						</>
-					</Grid>
-					{displayCodeInput ? (
-						<Grid item xs={10}>
-							<InputBase
-								placeholder="Enter Code here"
-								endAdornment={
-									<InputAdornment>
-										<LockIcon color="primary" />
-									</InputAdornment>
-								}
-								value={code}
-								type="text"
-								style={{
-									fontSize: "2rem",
-									letterSpacing: "3px",
-									padding: 20,
-									width: "100%",
-									margin: "8px 0px",
-									boxShadow:
-										"0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
-								}}
-								onChange={e => setCode(e.target.value)}
-							/>
-							{codeError && <div className="error">{codeError}</div>}
-						</Grid>
-					) : null}
-					<Grid item xs={10}>
-						<ButtonBase style={{ height: 30.5, width: "100%" }}>
-							<input
-								className={classes.button}
-								type="button"
-								value={displayCodeInput ? "Verify" : "Send Verification Code"}
-								page="4"
-								onClick={handleEmail}
-							/>
-						</ButtonBase>
-					</Grid>
-				</Grid>
-			</Grid>
-		</form>
-	);
+  return (
+    <form>
+      <Grid container>
+        <Grid container justify="center" item xs={12}>
+          <Grid
+            style={{ marginTop: 35, marginBottom: 10, height: 120 }}
+            justify="center"
+            container
+            item
+            xs={12}>
+            <>
+              <Grid item style={{ textAlign: "center" }} xs={12}>
+                <Typography
+                  style={{
+                    fontWeight: "bold",
+                    marginBottom: 10,
+                  }}
+                  variant="body2">
+                  Enter your email address
+                </Typography>
+              </Grid>
+
+              <Grid className={classes.textField} item xs={10}>
+                <TextField
+                  name="email"
+                  value={email}
+                  error={error.hasError}
+                  label="Email"
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <div className="error">{error.message}</div>
+              </Grid>
+            </>
+          </Grid>
+          {displayCodeInput ? (
+            <Grid item xs={10}>
+              <InputBase
+                placeholder="Enter Code here"
+                endAdornment={
+                  <InputAdornment>
+                    <LockIcon color="primary" />
+                  </InputAdornment>
+                }
+                value={code}
+                type="text"
+                style={{
+                  fontSize: "2rem",
+                  letterSpacing: "3px",
+                  padding: 20,
+                  width: "100%",
+                  margin: "8px 0px",
+                  boxShadow:
+                    "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+                }}
+                onChange={(e) => setCode(e.target.value)}
+              />
+              {codeError && <div className="error">{codeError}</div>}
+            </Grid>
+          ) : null}
+          <Grid item xs={10}>
+            <ButtonBase
+              style={{ height: 30.5, width: "100%" }}
+              component="span">
+              <button className={classes.button} page="4" onClick={handleEmail}>
+                {displayCodeInput ? "Verify" : "Send Verification Code"}
+              </button>
+            </ButtonBase>
+          </Grid>
+        </Grid>
+      </Grid>
+    </form>
+  );
 };
