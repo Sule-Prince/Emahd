@@ -7,6 +7,7 @@ import {
   Button,
   makeStyles,
   IconButton,
+  Portal,
 } from "@material-ui/core";
 
 import KeyboardBackspaceIcon from "@material-ui/icons/KeyboardBackspace";
@@ -16,6 +17,12 @@ import LikedPosts from "./LikedPosts";
 import { useDispatch, useSelector } from "react-redux";
 import { userLikedPostsThunk } from "../../../../redux/userDataSlice";
 import PersonalInfo from "./PersonalInfo";
+import MessagePage from "../../../SubComponents/MessagePage";
+import { axios } from "../../../../config/axiosConfig";
+import {
+  closeSnackBar,
+  openSnackBar,
+} from "../../../../redux/userActionsSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -36,8 +43,33 @@ const Settings = ({ styles, setStyles }) => {
 
   const likesArray = useSelector((state) => state.user.likes);
 
+  const [openFeedback, setOpenFeedback] = useState(false);
+  const [openReport, setOpenReport] = useState(false);
   const [displayPosts, setDisplayPosts] = useState(false);
   const [displayPersonalInfo, setDisplayPersonalInfo] = useState(false);
+
+  const sendData = (type, response) => {
+    return (message) => {
+      dispatch(
+        openSnackBar({
+          message: "Sending...",
+          shouldClose: false,
+          loading: true,
+        })
+      );
+      return axios.post("/user/feedback", { type, message }).then(() => {
+        dispatch(closeSnackBar());
+        dispatch(
+          openSnackBar({
+            message: response,
+            duration: 3000,
+          })
+        );
+      });
+    };
+  };
+  const sendReport = sendData("report", "Report sent successfully.");
+  const sendFeedback = sendData("feedback", "Feedback sent successfully.");
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -54,52 +86,53 @@ const Settings = ({ styles, setStyles }) => {
   };
 
   return (
-    <div
-      className={classes.root}
-      style={{
-        transform: `translateX(${styles})`,
-      }}>
-      <Grid container>
-        <Header setStyles={setStyles} />
-        <Grid item xs={12}>
-          <Button
-            style={{
-              padding: 8,
-              textTransform: "capitalize",
-              justifyContent: "flex-start",
-            }}
-            fullWidth
-            onClick={showLikedPosts}>
-            Posts you've Liked
-          </Button>
-          {displayPosts ? (
-            <LikedPosts setDisplayPosts={setDisplayPosts} />
-          ) : null}
-        </Grid>
-        <Grid item xs={12}>
-          <Divider style={{ width: "100%" }} />
-        </Grid>
+    <>
+      <div
+        className={classes.root}
+        style={{
+          transform: `translateX(${styles})`,
+        }}>
+        <Grid container>
+          <Header setStyles={setStyles} />
+          <Grid item xs={12}>
+            <Button
+              style={{
+                padding: 8,
+                textTransform: "capitalize",
+                justifyContent: "flex-start",
+              }}
+              fullWidth
+              onClick={showLikedPosts}>
+              Posts you've Liked
+            </Button>
+            {displayPosts ? (
+              <LikedPosts setDisplayPosts={setDisplayPosts} />
+            ) : null}
+          </Grid>
+          <Grid item xs={12}>
+            <Divider style={{ width: "100%" }} />
+          </Grid>
 
-        <Grid item xs={12}>
-          <Button
-            style={{
-              padding: 8,
-              textTransform: "capitalize",
-              justifyContent: "flex-start",
-            }}
-            fullWidth
-            onClick={openPersonalInfo}>
-            Personal Information
-          </Button>
-          {displayPersonalInfo ? (
-            <PersonalInfo setOpenInfo={setDisplayPersonalInfo} />
-          ) : null}
-        </Grid>
-        <Grid item xs={12}>
-          <Divider style={{ width: "100%" }} />
-        </Grid>
+          <Grid item xs={12}>
+            <Button
+              style={{
+                padding: 8,
+                textTransform: "capitalize",
+                justifyContent: "flex-start",
+              }}
+              fullWidth
+              onClick={openPersonalInfo}>
+              Personal Information
+            </Button>
+            {displayPersonalInfo ? (
+              <PersonalInfo setOpenInfo={setDisplayPersonalInfo} />
+            ) : null}
+          </Grid>
+          <Grid item xs={12}>
+            <Divider style={{ width: "100%" }} />
+          </Grid>
 
-        <Grid item xs={12}>
+          {/*  <Grid item xs={12}>
           <Button
             style={{
               padding: 8,
@@ -111,12 +144,9 @@ const Settings = ({ styles, setStyles }) => {
           >
             Images Quality
           </Button>
-          {/* {displayPersonalInfo ? (
-            <PersonalInfo setOpenInfo={setDisplayPersonalInfo} />
-          ) : null} */}
-        </Grid>
-
-        <Grid item xs={12}>
+        </Grid> 
+        
+         <Grid item xs={12}>
           <Button
             style={{
               padding: 8,
@@ -128,29 +158,90 @@ const Settings = ({ styles, setStyles }) => {
           >
             Change Password
           </Button>
-          {/* {
-						displayPersonalInfo ? <PersonalInfo setOpenInfo= {setDisplayPersonalInfo} /> : null
-					} */}
+         
         </Grid>
-        <Grid item xs={12}>
-          <Divider style={{ width: "100%" }} />
-        </Grid>
+        */}
 
-        <Grid item xs={12}>
-          <Button
-            style={{ padding: 8, justifyContent: "flex-start" }}
-            fullWidth
-            onClick={logout}
-            color="primary">
-            Log Out
-          </Button>
-        </Grid>
+          <Grid item xs={12}>
+            <Button
+              style={{
+                padding: 8,
+                textTransform: "capitalize",
+                justifyContent: "flex-start",
+              }}
+              fullWidth
+              onClick={() => {
+                setOpenFeedback(true);
+              }}>
+              Send Us Feedback
+            </Button>
+          </Grid>
 
-        <Grid item xs={12}>
-          <Divider style={{ width: "100%" }} />
+          <Grid item xs={12}>
+            <Divider style={{ width: "100%" }} />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Button
+              style={{
+                padding: 8,
+                textTransform: "capitalize",
+                justifyContent: "flex-start",
+              }}
+              fullWidth
+              onClick={() => {
+                setOpenReport(true);
+              }}>
+              Report a problem
+            </Button>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider style={{ width: "100%" }} />
+          </Grid>
+
+          <Grid item xs={12}>
+            <Button
+              style={{ padding: 8, justifyContent: "flex-start" }}
+              fullWidth
+              onClick={logout}
+              color="primary">
+              Log Out
+            </Button>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Divider style={{ width: "100%" }} />
+          </Grid>
         </Grid>
-      </Grid>
-    </div>
+      </div>
+
+      {openFeedback && (
+        <Portal container={document.body}>
+          <MessagePage
+            button="Send Feeback"
+            header="Send us feedback"
+            mainText="Are you happy about the user experience of the app, or see where we can improve the app? Send us a feedback and we'll review your thoughts."
+            commentSection="Type your feedback here."
+            setDisplay={setOpenFeedback}
+            sendData={sendFeedback}
+          />
+        </Portal>
+      )}
+
+      {openReport && (
+        <Portal container={document.body}>
+          <MessagePage
+            button="Send Report"
+            header="Report a problem"
+            mainText="Is there a problem? Feel free to report it here"
+            commentSection="Type your issue here."
+            setDisplay={setOpenReport}
+            sendData={sendReport}
+          />
+        </Portal>
+      )}
+    </>
   );
 };
 

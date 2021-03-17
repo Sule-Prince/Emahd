@@ -13,7 +13,7 @@ import {
   Divider,
 } from "@material-ui/core";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 // Icons
 import AddRoundedIcon from "@material-ui/icons/AddRounded";
@@ -25,38 +25,30 @@ import AstroX from "../../../assets/Astrox.svg";
 // Custom Components
 
 import AddScreamPage from "./AddScreamPage";
+import RefreshWrapper from "../../../SubComponents/RefreshWrapper";
 import Posts from "./Posts";
-// import useStorage from "../../../../utils/customHooks/useStorage";
 import ProgressBar from "../../../SubComponents/ProgressBar";
-// import Peer2Peer from "../../../../utils/Peer2Peer";
-import Story from "./Story/Story";
+// import Story from "./Story/Story";
 
 // Component Styling
 
 import useStyles from "./styles";
 import { StorageContext } from "../../Profile";
 import { screamsDataThunk } from "../../../../redux/postsSlice";
+import { followSuggestThunk } from "../../../../redux/extraDataSlice";
 import MultiPosts from "../../../SubComponents/MultiPosts";
+import useRefresh from "../../../../utils/customHooks/useRefresh";
+import FollowCardTwo from "../../../SubComponents/FollowCardTwo";
 
 const Home = ({ AccountTab }) => {
   const classes = useStyles();
 
-  const dispatch = useDispatch();
-
-  const refreshFunc = (refresh) => {
-    return () => {
-      return dispatch(refresh());
-    };
-  };
-
   return (
-    <>
-      <div className={classes.root}>
-        <HomeAppBar classes={classes} AccountTab={AccountTab} />
-        <Divider />
-        <NewsFeed classes={classes} refreshFunc={refreshFunc} />
-      </div>
-    </>
+    <div className={classes.root}>
+      <HomeAppBar classes={classes} AccountTab={AccountTab} />
+      <Divider />
+      <NewsFeed classes={classes} />
+    </div>
   );
 };
 
@@ -92,7 +84,7 @@ const HomeAppBar = ({ classes, AccountTab }) => {
   );
 };
 
-const NewsFeed = ({ classes, refreshFunc }) => {
+const NewsFeed = ({ classes }) => {
   const [selected, setSelected] = useState(0);
 
   const handleChange = (e, newSelected) => {
@@ -100,7 +92,11 @@ const NewsFeed = ({ classes, refreshFunc }) => {
   };
 
   return (
-    <>
+    <div
+      style={{
+        height: "calc(100% - 60px)",
+        backgroundColor: "#f9f9f9",
+      }}>
       <Grid item xs={12}>
         <Paper elevation={1}>
           <BottomNavigation
@@ -120,49 +116,65 @@ const NewsFeed = ({ classes, refreshFunc }) => {
           </BottomNavigation>
         </Paper>
       </Grid>
-      {selected === 0 && <Media refreshFunc={refreshFunc} />}
+      {selected === 0 && <Media classes={classes} />}
 
-      {selected === 1 && (
-        <Screams classes={classes} refreshFunc={refreshFunc} />
-      )}
-    </>
+      {selected === 1 && <Screams classes={classes} />}
+    </div>
   );
 };
 
-const Screams = ({ classes, refreshFunc }) => {
+const Screams = ({ classes }) => {
   const { posts } = useSelector((state) => state.posts);
   const [styles, setStyles] = useState("110vh");
 
   const { progress } = useContext(StorageContext);
+
+  const onRefresh = useRefresh(screamsDataThunk);
 
   const openAddScreamPage = (e) => {
     setStyles("0px");
   };
 
   return (
-    <>
+    <div
+      style={{
+        height: "calc(100% - (130px + 1vw))",
+        overflowY: "auto",
+        paddingBottom: 16,
+      }}>
       {progress ? <ProgressBar progress={progress} /> : null}
-      <Posts posts={posts.scream} onRefresh={refreshFunc(screamsDataThunk)} />
+      <Posts posts={posts.scream} onRefresh={onRefresh} />
 
       <AddScreamPage styles={styles} setStyles={setStyles} />
 
       <Fab className={classes.addFab} onClick={openAddScreamPage}>
         <AddRoundedIcon />
       </Fab>
-    </>
+    </div>
   );
 };
 
-const Media = ({ classes, refreshFunc }) => {
-  const [displayStory, setDisplayStory] = useState(false);
+const Media = ({ classes }) => {
+  // const [displayStory, setDisplayStory] = useState(false);
 
-  const { posts } = useSelector((state) => state.posts);
+  const { posts, isLoading } = useSelector((state) => state.posts);
+
+  const users = useSelector((state) => state.extra.followSuggest.users);
+
+  const onRefresh = useRefresh(screamsDataThunk);
+  const followRefresh = useRefresh(followSuggestThunk);
 
   const rootRef = useRef();
 
   return (
-    <div ref={rootRef}>
-      {displayStory && <Story classes={classes} setDisplay={setDisplayStory} />}
+    <div
+      ref={rootRef}
+      style={{
+        height: "calc(100% - (110px + 1vw))",
+        paddingBottom: 16,
+        overflowY: "hidden",
+      }}>
+      {/* {displayStory && <Story classes={classes} setDisplay={setDisplayStory} />}
 
       <div>
         <div
@@ -189,14 +201,59 @@ const Media = ({ classes, refreshFunc }) => {
             Your Story
           </Typography>
         </div>
-      </div>
+      </div> */}
 
       <Divider />
-
-      <MultiPosts
-        posts={posts.media}
-        onRefresh={refreshFunc(screamsDataThunk)}
-      />
+      {!isLoading || posts.media.length > 0 ? (
+        <MultiPosts posts={posts.media} onRefresh={onRefresh} />
+      ) : (
+        <RefreshWrapper onRefresh={followRefresh}>
+          <UtilsNavBar users={users} classes={classes} />
+        </RefreshWrapper>
+      )}
     </div>
+  );
+};
+
+const UtilsNavBar = ({ classes, users }) => {
+  return (
+    <Grid
+      container
+      alignItems="center"
+      justify="center"
+      style={{
+        height: "100%",
+        marginTop: "5vh",
+      }}>
+      {users.length > 0 && (
+        <Grid
+          item
+          style={{
+            padding: 4,
+          }}>
+          <Typography variant="body2" style={{ fontWeight: "bold" }}>
+            People you may know
+          </Typography>
+        </Grid>
+      )}
+      <Grid item xs={12}>
+        <div className={classes.utilsNavBar}>
+          {users.map((user, i) => (
+            <span key={user.handle} style={{ display: "inline-block" }}>
+              <FollowCardTwo
+                handle={user.handle}
+                fullName={user.fullName}
+                imageUrl={user.imageUrl}
+                coverPhoto={user.coverPhoto}
+                index={i}
+                noBorder
+                variant={10}
+                size="small"
+              />
+            </span>
+          ))}
+        </div>
+      </Grid>
+    </Grid>
   );
 };

@@ -5,11 +5,11 @@ import { motion } from "framer-motion";
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    height: "100%",
+    maxHeight: "100%",
     overflowY: "auto",
-    minHeight: "100vh",
     position: "relative",
     zIndex: 1,
-    marginTop: 5,
     width: "100%",
     backgroundColor: "#f9f9f9",
   },
@@ -19,67 +19,61 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function RefreshWrapper({ rootRef, children, onRefresh }) {
+function RefreshWrapper({ children, onRefresh, style = {} }) {
   const classes = useStyles();
   const [dragLen, setDragLen] = useState(0);
   const [load, setLoad] = useState(false);
   const [dragEnd, setDragEnd] = useState(false);
   const [shouldRefresh, setShouldRefresh] = useState(true);
-  const [drag, setDrag] = useState(false);
+  const [drag, setDrag] = useState(true);
 
-  const dragRef = useRef(null);
+  const motionRef = useRef(null);
 
   useEffect(() => {
-    const dragEl = dragRef.current;
-    const observeConfig = {
-      root: rootRef ? rootRef.current : null,
-    };
-
-    const mediaObserver = new IntersectionObserver(
-      observeElement,
-      observeConfig
-    );
-
-    mediaObserver.observe(dragEl);
-
-    function observeElement(entry) {
-      entry = entry[0];
-
-      if (entry.intersectionRatio !== 1) {
-        setDrag(false);
-
-        return;
-      }
-      setDrag(true);
-    }
-
-    return () => {
-      mediaObserver.unobserve(dragEl);
-    };
-
-    // eslint-disable-next-line
+    motionRef.current.scrollTop = 5;
   }, []);
 
   useEffect(() => {
     if (!load || !shouldRefresh) return;
     setShouldRefresh(false);
 
+    const motionEl = motionRef.current;
+
     onRefresh()
       .then(() => {
         setDragEnd(false);
         setLoad(false);
+
+        setTimeout(() => {
+          setShouldRefresh(true);
+        }, 2000);
+
+        if (motionEl.scrollTop === 0) {
+          setTimeout(() => {
+            setDrag(false);
+            motionEl.scrollTop = 5;
+          }, 3000);
+        }
       })
       .catch(() => {
         setDragEnd(false);
         setLoad(false);
+
+        setTimeout(() => {
+          setShouldRefresh(true);
+        }, 2000);
+
+        if (motionEl.scrollTop === 0) {
+          setTimeout(() => {
+            setDrag(false);
+            motionEl.scrollTop = 5;
+          }, 3000);
+        }
       });
-    setTimeout(() => {
-      setShouldRefresh(true);
-    }, 2000);
   }, [load, shouldRefresh, onRefresh]);
 
   return (
-    <>
+    <div style={{ position: "relative", height: "100%" }}>
       <div
         style={{
           height: 50,
@@ -91,8 +85,22 @@ function RefreshWrapper({ rootRef, children, onRefresh }) {
       </div>
 
       <motion.div
+        ref={motionRef}
         className={classes.root}
-        ref={rootRef}
+        onScroll={(e) => {
+          if (motionRef.current.scrollTop === 0) {
+            const motionEl = motionRef.current;
+
+            setDrag(true);
+
+            setTimeout(() => {
+              if (load) return;
+
+              setDrag(false);
+              motionEl.scrollTop = 5;
+            }, 2000);
+          } else setDrag(false);
+        }}
         animate={{
           y: dragEnd && load && 50,
         }}
@@ -104,20 +112,24 @@ function RefreshWrapper({ rootRef, children, onRefresh }) {
         dragConstraints={{ left: 0, right: 0, bottom: 0, top: 0 }}
         dragElastic={0.3}
         onDragStart={(event, info) => {
+          event.preventDefault();
           setDragLen(info.point.y);
         }}
         onDrag={(event, info) => {
+          event.preventDefault();
+
           if (info.point.y - dragLen > 115 && !load) {
             setLoad(true);
           }
         }}
         onDragEnd={(event, info) => {
+          if (!load) return;
           setDragEnd(true);
+          // setShouldRefresh(true);
         }}>
-        <div ref={dragRef}></div>
         {children}
       </motion.div>
-    </>
+    </div>
   );
 }
 

@@ -74,14 +74,13 @@ export default ({ setEmail, email, handle, ...props }) => {
           e.target.disabled = false;
         })
         .catch((err) => {
+          dispatch(closeSnackBar());
           if (err.response) {
-            dispatch(closeSnackBar());
             setError({
               message: err.response.data.error,
               hasError: true,
             });
           } else {
-            dispatch(closeSnackBar());
             setError({
               message: "Make sure you have a healthy internet connection",
               hasError: true,
@@ -207,7 +206,11 @@ export default ({ setEmail, email, handle, ...props }) => {
             <ButtonBase
               style={{ height: 30.5, width: "100%" }}
               component="span">
-              <button className={classes.button} page="4" onClick={handleEmail}>
+              <button
+                className={classes.button}
+                page="4"
+                value={displayCodeInput ? "Verify" : "Send Verification Code"}
+                onClick={handleEmail}>
                 {displayCodeInput ? "Verify" : "Send Verification Code"}
               </button>
             </ButtonBase>

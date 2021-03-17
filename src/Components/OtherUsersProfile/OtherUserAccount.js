@@ -47,12 +47,10 @@ export default ({ setSelectedTab }) => {
     }
     dispatch(otherUsersThunk(user));
 
-    // document.getElementsByTagName("title")[0].innerHTML = user;
-
     // eslint-disable-next-line
   }, [mainUser]);
 
-  const { userData, screams, isLoading } = useSelector(
+  const { userData, userPost, isLoading } = useSelector(
     (state) => state.otherUser
   );
 
@@ -111,7 +109,7 @@ export default ({ setSelectedTab }) => {
 
         <Grid container item xs>
           <UserPosts
-            posts={screams}
+            posts={userPost}
             otherUser={true}
             error={error}
             rootRef={rootRef}

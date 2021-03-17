@@ -3,12 +3,17 @@ import { Grid } from "@material-ui/core";
 import MultiPost from "./MultiPost";
 import RefreshWrapper from "./RefreshWrapper";
 
-function MultiPosts({ posts, onRefresh }) {
+function MultiPosts({ posts, onRefresh, style = {} }) {
   const rootRef = useRef(null);
   return (
-    <div ref={rootRef}>
-      <RefreshWrapper onRefresh={onRefresh} rootRef={rootRef}>
-        <Grid style={{ position: "absolute", paddingBottom: 230 }} container>
+    <div
+      ref={rootRef}
+      style={{
+        height: "100%",
+        ...style,
+      }}>
+      <RefreshWrapper onRefresh={onRefresh}>
+        <Grid container>
           {posts
             ? posts.map((post) => (
                 <MultiPost

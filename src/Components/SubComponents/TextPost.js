@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 // MUi components
 import {
@@ -6,13 +6,11 @@ import {
   CardHeader,
   CardContent,
   Avatar,
-  IconButton,
   makeStyles,
   Typography,
 } from "@material-ui/core";
 
-// Mui Icons
-import MoreVertIcon from "@material-ui/icons/MoreVertRounded";
+import { useSelector } from "react-redux";
 
 import { Link } from "react-router-dom";
 
@@ -21,6 +19,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import ScreamActions from "./ScreamActions";
 
 import CommentField from "./CommentField";
+import PostOptions from "./PostOptions";
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -49,7 +48,9 @@ const Textpost = ({ post: scream }) => {
 
   const classes = useStyles();
 
-  // const [commentNo, setCommentNo] = useState(commentCount);
+  const user = useSelector((state) => state.user.data.handle);
+
+  const [commentNo, setCommentNo] = useState(commentCount);
 
   return (
     <div type="text">
@@ -60,9 +61,11 @@ const Textpost = ({ post: scream }) => {
             <Avatar src={userImg ? userImg : null} className={classes.avatar} />
           }
           action={
-            <IconButton>
-              <MoreVertIcon />
-            </IconButton>
+            <PostOptions
+              postId={postId}
+              handle={handle}
+              user={user === handle ? true : false}
+            />
           }
           title={
             <div>
@@ -87,12 +90,12 @@ const Textpost = ({ post: scream }) => {
           scream={scream}
           postId={postId}
           likeCount={likeCount}
-          commentCount={commentCount}
+          commentCount={commentNo}
         />
       </Card>
 
       {/* Comment Field  */}
-      <CommentField setCommentNo={commentCount} postId={postId} />
+      <CommentField postId={postId} setCommentNo={setCommentNo} />
     </div>
   );
 };

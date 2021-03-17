@@ -105,21 +105,21 @@ const App = () => {
                 <Route path="/forgot" component={ForgotPsw} />
 
                 <Route
-                  path="/:user"
+                  path="/user/:user"
                   render={() => (
                     <OtherUserAccount setSelectedTab={setSelectedTab} />
                   )}
                 />
+                <Route
+                  path="/"
+                  render={() => (
+                    <AuthRender
+                      selectedTab={selectedTab}
+                      setSelectedTab={setSelectedTab}
+                    />
+                  )}
+                />
               </Switch>
-              <Route
-                path="/"
-                render={() => (
-                  <AuthRender
-                    selectedTab={selectedTab}
-                    setSelectedTab={setSelectedTab}
-                  />
-                )}
-              />
             </Suspense>
           </Router>
         </ThemeProvider>

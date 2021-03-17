@@ -38,9 +38,11 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
 
   const [showThumb, setShowThumb] = useState(true);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+  const [playOpacity, setPlayOpacity] = useState(1);
 
   const mediaRef = useRef(null);
   const thumbRef = useRef(null);
+  const timeoutId = useRef(null);
   const classes = useStyles();
 
   useEffect(() => {
@@ -82,14 +84,19 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
         this.unobserve(entry.target);
         return;
       }
-      if (entry.intersectionRatio < 1 && type !== "image") mediaElem.pause();
+      if (entry.intersectionRatio < 1 && type !== "image") {
+        mediaElem.pause();
+        setPlayOpacity(1);
+      }
 
       if (entry.intersectionRatio === 1 && type !== "image") {
+        setPlayOpacity(0);
         mediaElem.play();
       }
     }
 
     return () => {
+      if (type !== "image" && !mediaElem.paused) mediaElem.pause();
       mediaObserver.unobserve(mediaElem);
     };
 
@@ -130,13 +137,26 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
         ) : (
           <>
             <video ref={mediaRef} loop />
-            <span>
+            <span
+              style={{
+                opacity: playOpacity,
+                transition: "all .5s ease-out",
+              }}>
               <IconButton
-                color="secondary"
+                color="primary"
                 component="span"
                 onClick={() => {
-                  if (mediaRef.current.paused) mediaRef.current.play();
-                  else mediaRef.current.pause();
+                  if (mediaRef.current.paused) {
+                    mediaRef.current.play();
+                    timeoutId.current = setTimeout(() => {
+                      setPlayOpacity(0);
+                    }, 3000);
+                  } else {
+                    clearTimeout(timeoutId.current);
+                    mediaRef.current.pause();
+
+                    setPlayOpacity(1);
+                  }
                 }}>
                 <PlayArrowIcon fontSize="large" />
               </IconButton>

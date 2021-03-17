@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 
-import io from "socket.io-client";
+// import io from "socket.io-client";
+import jwtDecode from "jwt-decode";
+
+import { useHistory } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   BottomNavigation,
@@ -24,26 +29,30 @@ import Search from "./Components/Search/Search";
 import Notification from "./Components/Notification/Notifications";
 import Account from "./Components/Account/Account";
 
-import { useHistory } from "react-router-dom";
-
-import { useDispatch, useSelector } from "react-redux";
-
 import "./Profile.css";
 import { notifications, userDataThunk } from "../../redux/userDataSlice";
 import { screamsDataThunk } from "../../redux/postsSlice";
-// import { openTalkBubble, closeTalkBubble } from "../../redux/userActionsSlice";
 
 import { projectFirestore, projectAuth } from "../../firebase/FBConfig";
 import TalkBubble from "../SubComponents/TalkBubble";
 import AddMedia from "./Components/AddMedia/AddMedia";
 import useStorage from "../../utils/customHooks/useStorage";
+import encryptor from "../../utils/encryptor";
+import {
+  bannerPostsThunk,
+  followSuggestThunk,
+} from "../../redux/extraDataSlice";
 
 export const StorageContext = React.createContext();
 
-const ENDPOINT = "http://localhost:5000/";
+// const ENDPOINT = "http://localhost:5000/";
+
+window.jwt = jwtDecode;
 
 const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
-  const { handle: user, ...data } = useSelector((state) => state.user.data);
+  const { handle: user, userId, ...data } = useSelector(
+    (state) => state.user.data
+  );
 
   const userImg = useSelector((state) => state.user.data.imageUrl);
   const noOfUnread = useSelector(
@@ -74,19 +83,40 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
   };
 
   useEffect(() => {
-    window.socket = io(ENDPOINT);
+    // window.socket = io(ENDPOINT);
 
-    dispatch(userDataThunk());
-    dispatch(screamsDataThunk());
+    projectAuth.onAuthStateChanged((user) => {
+      if (user) return;
+      else {
+        let token = localStorage.getItem("token");
+
+        const decodedToken = jwtDecode(token);
+
+        let email = decodedToken.email;
+        let psw = localStorage.getItem("p-s-w");
+        psw = encryptor.decrypt(psw);
+
+        projectAuth.signInWithEmailAndPassword(email, psw);
+      }
+    });
 
     // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    dispatch(userDataThunk());
+    dispatch(screamsDataThunk());
+    dispatch(bannerPostsThunk());
+    dispatch(followSuggestThunk());
+
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
     const unsubscribe = projectFirestore
       .collection("notifications")
-      .doc(user)
+      .doc(userId)
       .onSnapshot((snapshot) => {
         const data = snapshot.data();
         if (data) {
@@ -99,7 +129,7 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
     };
 
     // eslint-disable-next-line
-  }, [user]);
+  }, [userId]);
 
   return (
     <div className="profile-page" onDrag={(e) => e.preventDefault()}>
@@ -176,11 +206,17 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
           <BottomNavigationAction
             icon={
               selectedTab === 3 ? (
-                <Badge badgeContent={noOfUnread} color="primary">
+                <Badge
+                  invisible={noOfUnread > 0 ? false : true}
+                  variant="dot"
+                  color="error">
                   <NotificationsRoundedIcon />
                 </Badge>
               ) : (
-                <Badge badgeContent={noOfUnread} color="primary">
+                <Badge
+                  invisible={noOfUnread > 0 ? false : true}
+                  variant="dot"
+                  color="error">
                   <NotificationsOutlinedIcon />
                 </Badge>
               )
@@ -194,6 +230,7 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
           />
         </BottomNavigation>
       </div>
+
       {selectedTab === 0 && <Account />}
       {selectedTab === 1 && <Search />}
       {selectedTab === 2 && <AddMedia />}

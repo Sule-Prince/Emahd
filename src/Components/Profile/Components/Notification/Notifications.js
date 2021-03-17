@@ -15,30 +15,32 @@ export default () => {
   const unreadNotifications = useSelector(
     (state) => state.user.notifications.unread
   );
-  const userId = useSelector((state) => state.user.data.handle);
+  const userId = useSelector((state) => state.user.data.userId);
 
   useEffect(() => {
     if (userId && unreadNotifications.length > 0) {
-      let readNotifications = [];
-      projectFirestore
-        .doc(`/notifications/${userId}`)
-        .get()
+      setTimeout(() => {
+        let readNotifications = [];
+        projectFirestore
+          .doc(`/notifications/${userId}`)
+          .get()
 
-        .then((snapshot) => {
-          readNotifications = [
-            ...snapshot.data().unread,
-            ...snapshot.data().read,
-          ];
-          if (readNotifications.length > 30)
-            readNotifications = readNotifications.slice(0, 30);
-          projectFirestore.doc(`/notifications/${userId}`).set({
-            read: readNotifications,
-            unread: [],
+          .then((snapshot) => {
+            readNotifications = [
+              ...snapshot.data().unread,
+              ...snapshot.data().read,
+            ];
+            if (readNotifications.length > 30)
+              readNotifications = readNotifications.slice(0, 30);
+            projectFirestore.doc(`/notifications/${userId}`).set({
+              read: readNotifications,
+              unread: [],
+            });
+          })
+          .catch((err) => {
+            console.error(err);
           });
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      }, 3000);
     }
 
     // eslint-disable-next-line
@@ -53,7 +55,6 @@ export default () => {
         <Grid item xs={12}>
           <Header />
         </Grid>
-
         {readNotifications.length === 0 && unreadNotifications.length === 0 ? (
           <Grid
             container
@@ -78,7 +79,11 @@ export default () => {
 
         {unreadNotifications.map((notification) => {
           return (
-            <Notification key={notification.id} notification={notification} />
+            <Notification
+              key={notification.id}
+              color="#e0e0e0"
+              notification={notification}
+            />
           );
         })}
 

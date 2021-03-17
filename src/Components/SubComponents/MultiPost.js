@@ -6,13 +6,14 @@ import {
   CardHeader,
   CardContent,
   Avatar,
-  IconButton,
   makeStyles,
   Typography,
+  MobileStepper,
 } from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVertRounded";
 
-import { Carousel } from "react-responsive-carousel";
+import { useSelector } from "react-redux";
+
+import SwipeableViews from "react-swipeable-views";
 
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -20,6 +21,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import CommentField from "./CommentField";
 import LazyLoad from "./LazyLoad";
 import ScreamActions from "./ScreamActions";
+import PostOptions from "./PostOptions";
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -52,9 +54,11 @@ function MultiPost({ mediaPost, rootRef }) {
   } = mediaPost;
   dayjs.extend(relativeTime);
 
+  const [commentNo, setCommentNo] = useState(commentCount);
+
   const classes = useStyles();
 
-  console.log(slides);
+  const user = useSelector((state) => state.user.data.handle);
 
   return (
     <LazyLoad rootRef={rootRef}>
@@ -68,9 +72,11 @@ function MultiPost({ mediaPost, rootRef }) {
             />
           }
           action={
-            <IconButton>
-              <MoreVertIcon />
-            </IconButton>
+            <PostOptions
+              postId={postId}
+              handle={handle}
+              user={user === handle ? true : false}
+            />
           }
           title={
             <Link style={{ color: "#000", fontWeight: "bold" }} to={handle}>
@@ -91,7 +97,7 @@ function MultiPost({ mediaPost, rootRef }) {
           scream={scream}
           postId={postId}
           likeCount={likeCount}
-          commentCount={commentCount}
+          commentCount={commentNo}
         />
 
         <CardContent>
@@ -105,7 +111,7 @@ function MultiPost({ mediaPost, rootRef }) {
       </Card>
 
       {/* Comment Field  */}
-      <CommentField setCommentNo={commentCount} postId={postId} />
+      <CommentField setCommentNo={setCommentNo} postId={postId} />
     </LazyLoad>
   );
 }
@@ -159,16 +165,32 @@ const Single = ({ src, aspectRatio }) => {
 };
 
 const Multiple = ({ slides, settings }) => {
+  const [index, setIndex] = useState(0);
   return (
-    <Carousel showArrows={false} emulateTouch dynamicHeight showThumbs={false}>
-      {slides.map((slide, i) => (
-        <CarouselContent
-          key={i}
-          src={slide}
-          aspectRatio={settings[i].aspectRatio}
-        />
-      ))}
-    </Carousel>
+    <>
+      <SwipeableViews
+        enableMouseEvents
+        index={index}
+        onChangeIndex={(step) => setIndex(step)}>
+        {slides.map((slide, i) => (
+          <CarouselContent
+            key={i}
+            src={slide}
+            aspectRatio={settings[i].aspectRatio}
+          />
+        ))}
+      </SwipeableViews>
+      <MobileStepper
+        position="static"
+        variant="dots"
+        activeStep={index}
+        steps={slides.length}
+        style={{
+          justifyContent: "center",
+          backgroundColor: "#fff",
+          paddingTop: 10,
+        }}></MobileStepper>
+    </>
   );
 };
 
@@ -183,7 +205,7 @@ const CarouselContent = ({ src, aspectRatio }) => {
     <div
       style={{
         position: "relative",
-        paddingBottom: mediaPad,
+        paddingBottom: `${mediaPad}%`,
         backgroundColor: "#fff",
       }}>
       {!load && (
@@ -207,11 +229,7 @@ const CarouselContent = ({ src, aspectRatio }) => {
         }}
         style={{
           width: "100%",
-          height: "auto",
           position: "absolute",
-          zIndex: 1,
-          top: 0,
-          left: 0,
         }}
       />
     </div>

@@ -11,14 +11,16 @@ import { axios } from "../../config/axiosConfig";
 import { useDispatch } from "react-redux";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
 import { Link } from "react-router-dom";
+import { popUserSuggest } from "../../redux/extraDataSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "calc(220px + 2vw)",
-    border: `1.2px solid ${theme.palette.grey[300]}`,
-    paddingTop: 4,
-    padding: theme.spacing(1),
+    width: ({ size }) =>
+      size === "large" ? "calc(220px + 2vw)" : "calc(180px + 1vw)",
+    overflow: "hidden",
+    position: "relative",
     margin: theme.spacing(2.5),
+    boxShadow: ({ variant }) => (variant > 0 ? theme.shadows[variant] : ""),
     borderRadius: "3px",
   },
   header: {
@@ -26,15 +28,14 @@ const useStyles = makeStyles((theme) => ({
     height: "15px",
   },
   cover_root: {
-    marginTop: 4,
     width: "100%",
-    height: 120,
+    height: ({ size }) => (size === "large" ? 140 : 100),
     background:
       "linear-gradient(360deg, #3f51b5 0%, #2196f3 75%, #64b5f6 100%)",
   },
   cover_img: {
     width: "100%",
-    height: 120,
+    height: ({ size }) => (size === "large" ? 140 : 100),
     objectFit: "cover",
   },
   profile_root: {
@@ -43,8 +44,10 @@ const useStyles = makeStyles((theme) => ({
     marginTop: -35,
   },
   profile_avatar: {
-    height: theme.spacing(11),
-    width: theme.spacing(11),
+    height: ({ size }) =>
+      size === "large" ? theme.spacing(11) : theme.spacing(8),
+    width: ({ size }) =>
+      size === "large" ? theme.spacing(11) : theme.spacing(8),
   },
   userInfo_root: {
     marginTop: 4,
@@ -72,49 +75,87 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function FollowCardTwo({ handle, fullName, imageUrl, coverPhoto }) {
-  const classes = useStyles();
+function FollowCardTwo({
+  handle,
+  fullName,
+  imageUrl,
+  coverPhoto,
+  index,
+  style = {},
+  noBorder,
+  variant,
+  size,
+}) {
+  const classes = useStyles({ size, variant });
 
   const dispatch = useDispatch();
   // const friends = useSelector(state => state.user.data.friends);
   const [value, setValue] = useState("Follow");
 
   const handleFollowReq = () => {
-    if (value.toLowerCase() === "follow") {
-      axios.post("/user/followrequest", { friend: handle }).then(() => {
+    return new Promise((res, rej) => {
+      if (value.toLowerCase() === "follow") {
         setValue("Unfollow");
-        dispatch(addFriend(handle));
-      });
-    } else {
-      axios.post("/user/unfollowrequest", { friend: handle }).then(() => {
+        axios
+          .post("/user/followrequest", { friend: handle })
+          .then(() => {
+            return dispatch(addFriend(handle));
+          })
+          .then(() => res());
+      } else {
         setValue("Follow");
-        dispatch(removeFriend(handle));
-      });
-    }
+        axios
+          .post("/user/unfollowrequest", { friend: handle })
+          .then(() => {
+            return dispatch(removeFriend(handle));
+          })
+          .then(() => res());
+      }
+    });
   };
   return (
-    <Grid container className={classes.root}>
-      <Header classes={classes} />
+    <Grid container className={classes.root} style={style}>
+      <Header classes={classes} i={index} />
       <CoverPhoto coverPhoto={coverPhoto} classes={classes} />
-      <ProfilePic imageUrl={imageUrl} classes={classes} />
-      <UserInfo handle={handle} fullName={fullName} classes={classes} />
 
-      <FollowButton
-        value={value}
-        handleFollow={handleFollowReq}
-        classes={classes}
-      />
+      <Grid
+        container
+        style={{
+          padding: 8,
+          border: noBorder ? "none" : `1.2px solid #e0e0e0`,
+          borderRadius: "3px",
+        }}>
+        <ProfilePic imageUrl={imageUrl} classes={classes} />
+        <UserInfo handle={handle} fullName={fullName} classes={classes} />
+
+        <FollowButton
+          value={value}
+          handleFollow={handleFollowReq}
+          classes={classes}
+          i={index}
+        />
+      </Grid>
     </Grid>
   );
 }
 
 export default FollowCardTwo;
 
-const Header = ({ classes }) => {
+const Header = ({ classes, i }) => {
+  const dispatch = useDispatch();
   return (
-    <Grid container justify="flex-end">
+    <Grid container style={{ position: "absolute", zIndex: 1 }}>
+      <div style={{ flexGrow: 1 }}></div>
       <Grid item>
-        <ClearIcon className={classes.header} />
+        <IconButton
+          style={{
+            padding: "6px 4px",
+          }}
+          onClick={() => {
+            dispatch(popUserSuggest(i));
+          }}>
+          <ClearIcon className={classes.header} />
+        </IconButton>
       </Grid>
     </Grid>
   );
@@ -129,11 +170,21 @@ const CoverPhoto = ({ coverPhoto, classes }) => {
       alignItems="center"
       className={classes.cover_root}>
       {coverPhoto ? (
-        <img
-          src={coverPhoto}
-          alt="A coverPhoto"
-          className={classes.cover_img}
-        />
+        <>
+          <div
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: 20,
+              top: 0,
+              background: "linear-gradient(180deg, #000, transparent)",
+            }}></div>
+          <img
+            src={coverPhoto}
+            alt="A coverPhoto"
+            className={classes.cover_img}
+          />
+        </>
       ) : (
         <Typography variant="body1" component="span" style={{ color: "#fff" }}>
           A Cover Photo
@@ -175,14 +226,16 @@ const UserInfo = ({ handle, fullName, classes }) => {
   );
 };
 
-const FollowButton = ({ classes, value, handleFollow }) => {
+const FollowButton = ({ classes, value, handleFollow, i }) => {
+  const dispatch = useDispatch();
+
   return (
     <div className={classes.btnContainer}>
       <IconButton
         component="span"
         style={{ padding: 0, width: "100%" }}
         onClick={() => {
-          handleFollow();
+          handleFollow().then(() => dispatch(popUserSuggest(i)));
         }}>
         <button className={classes.btn}>{value}</button>
       </IconButton>

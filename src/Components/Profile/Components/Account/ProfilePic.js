@@ -6,6 +6,7 @@ import {
   Button,
   Badge,
   CircularProgress,
+  Portal,
 } from "@material-ui/core";
 import AddAPhotoIcon from "@material-ui/icons/AddAPhoto";
 
@@ -38,7 +39,11 @@ const ProfilePic = ({ classes, imageUrl }) => {
 
   return (
     <>
-      {display && <EdituserInfo setDisplay={setDisplay} />}
+      {display && (
+        <Portal container={document.body}>
+          <EdituserInfo setDisplay={setDisplay} />
+        </Portal>
+      )}
       <Grid container>
         <Grid
           xs={5}

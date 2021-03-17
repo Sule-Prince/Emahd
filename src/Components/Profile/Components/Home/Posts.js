@@ -5,13 +5,18 @@ import Post from "./Post";
 import "./home.css";
 import RefreshWrapper from "../../../SubComponents/RefreshWrapper";
 
-const Posts = ({ posts, onRefresh }) => {
+const Posts = ({ posts, onRefresh, style = {} }) => {
   const rootRef = useRef(null);
 
   return (
-    <div ref={rootRef}>
-      <RefreshWrapper rootRef={rootRef} onRefresh={onRefresh}>
-        <Grid style={{ position: "absolute", paddingBottom: 230 }} container>
+    <div
+      style={{
+        height: "100%",
+        style,
+      }}
+      ref={rootRef}>
+      <RefreshWrapper onRefresh={onRefresh}>
+        <Grid container>
           {posts
             ? posts.map((post) => (
                 <Post post={post} rootRef={rootRef} key={post.postId} />

@@ -3,6 +3,7 @@ import { axios } from "../config/axiosConfig";
 import { projectStorage } from "../firebase/FBConfig";
 import IDGenerator from "../utils/IDGenerator";
 import ImageEdits from "../utils/ImageEditor";
+import toFile from "../utils/toFIle";
 import { screamsDataThunk } from "./postsSlice";
 
 export const userPostThunk = createAsyncThunk(
@@ -65,7 +66,6 @@ export const dataStoreThunk = createAsyncThunk(
         postSettings,
       };
 
-      console.log(data);
       const res = await dispatch(userPostThunk({ data, route }));
 
       dispatch(screamsDataThunk());
@@ -118,14 +118,6 @@ const userPost = createSlice({
 
 const userPostReducer = userPost.reducer;
 export default userPostReducer;
-
-// Function converts blob data to a file
-function toFile(blob, type) {
-  return new File([blob], `${IDGenerator()}.${type.split("/")[1]}`, {
-    type,
-    lastModified: Date.now(),
-  });
-}
 
 // Function uploads data to firebase storage bucket
 function uploadData({

@@ -12,30 +12,15 @@ import { projectAuth } from "../firebase/FBConfig";
 const AuthRender = ({ setSelectedTab, selectedTab, ...props }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [shouldRender, setShouldRender] = useState(false);
+
   const { pathname } = useLocation();
   const classes = useStyles();
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (
-      pathname !== "/signup" &&
-      pathname !== "/forgot" &&
-      pathname !== "/chat"
-    ) {
-      setShouldRender(true);
-    } else {
-      setShouldRender(false);
-    }
-  }, [pathname]);
 
   useEffect(() => {
     let token = localStorage.getItem("token");
 
     setTimeout(() => {
       if (token) {
-        axios.defaults.headers["Authorization"] = `Bearer ${token}`;
-
         setIsAuthenticated(true);
       }
       setIsLoading(false);
@@ -43,42 +28,50 @@ const AuthRender = ({ setSelectedTab, selectedTab, ...props }) => {
   }, [isAuthenticated, pathname]);
 
   useEffect(() => {
-    let token = localStorage.getItem("token");
-
     axios.interceptors.request.use(
       async (request) => {
+        let token = localStorage.getItem("token");
         if (!token) return request;
 
-        const decodedToken = jwtDecode(token);
+        let newToken = await new Promise(async (res, rej) => {
+          try {
+            const decodedToken = jwtDecode(token);
 
-        if (decodedToken.exp * 1000 > Date.now()) return request;
-        let email = decodedToken.email;
-        let psw = localStorage.getItem("p-s-w");
-        if (!psw) return request;
-        psw = encryptor.decrypt(psw);
+            if (decodedToken.exp * 1000 < Date.now()) {
+              let email = decodedToken.email;
+              let psw = localStorage.getItem("p-s-w");
+              if (!psw) return request;
+              psw = encryptor.decrypt(psw);
 
-        const data = await projectAuth.signInWithEmailAndPassword(email, psw);
+              const data = await projectAuth.signInWithEmailAndPassword(
+                email,
+                psw
+              );
 
-        const newToken = await data.user.getIdToken();
+              const newToken = await data.user.getIdToken();
 
-        localStorage.setItem("token", newToken);
+              localStorage.setItem("token", newToken);
 
+              res(newToken);
+            } else res(token);
+          } catch (error) {
+            rej(error);
+          }
+        });
+        request.headers["Authorization"] = `Bearer ${newToken}`;
         return request;
       },
       (err) => Promise.reject(err)
     );
   }, [isAuthenticated]);
 
-  if (shouldRender) {
-    return isLoading ? (
-      <Loading classes={classes} />
-    ) : isAuthenticated ? (
-      <Profile selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
-    ) : (
-      <Login />
-    );
-  }
-  return <> </>;
+  return isLoading ? (
+    <Loading classes={classes} />
+  ) : isAuthenticated ? (
+    <Profile selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+  ) : (
+    <Login />
+  );
 };
 
 export default React.memo(AuthRender);

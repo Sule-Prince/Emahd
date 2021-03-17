@@ -75,6 +75,7 @@ export const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     WebkitOverflowScrolling: "touch",
     height: 250,
+    maxWidth: "100vw",
     padding: "8px 0px",
     paddingRight: "1rem",
   },

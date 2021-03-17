@@ -49,16 +49,20 @@ const MySnackBar = () => {
   );
   const snackBarType = useSelector((state) => state.userActions.snackBar.type);
   const loading = useSelector((state) => state.userActions.snackBar.loading);
+  const shouldClose = useSelector(
+    (state) => state.userActions.snackBar.shouldClose
+  );
 
   const classes = useStyles();
   const dispatch = useDispatch();
   const handleClose = (event, reason) => {
+    if (!shouldClose) return;
     dispatch(closeSnackBar());
   };
 
   return (
     <Snackbar
-      style={{ zIndex: 10000 }}
+      style={{ zIndex: 1300 }}
       open={open}
       autoHideDuration={duration}
       onClose={handleClose}>

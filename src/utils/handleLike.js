@@ -10,8 +10,8 @@ export const handleLike = (postId, dispatch, setLikes, scream) => {
   const likeAudio = document.getElementById("like-audio");
   likeAudio.volume = 0.6;
   likeAudio.play();
-  dispatch(likePost(postId));
   setLikes((prev) => prev + 1);
+  dispatch(likePost(postId));
   axios
     .get(`/post/like/${postId}`)
     .then(() => {

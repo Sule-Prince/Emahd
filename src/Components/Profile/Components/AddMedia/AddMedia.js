@@ -6,13 +6,12 @@ import { Fab, Grid } from "@material-ui/core";
 import Slideshow from "../../../SubComponents/Slideshow";
 import FollowCardTwo from "../../../SubComponents/FollowCardTwo";
 
-import { followSuggestThunk } from "../../../../redux/extraDataSlice";
+import {
+  bannerPostsThunk,
+  followSuggestThunk,
+} from "../../../../redux/extraDataSlice";
 import Loader from "../../../SubComponents/Loader";
 
-import img1 from "../../../assets/graphics/slideshow/(1).jpg";
-import img2 from "../../../assets/graphics/slideshow/(2).jpg";
-import img3 from "../../../assets/graphics/slideshow/(3).jpg";
-import img4 from "../../../assets/graphics/slideshow/(4).jpg";
 import { AddRounded } from "@material-ui/icons";
 import MediaUpload from "./MediaUpload";
 
@@ -27,6 +26,7 @@ const AddMedia = () => {
   const dispatch = useDispatch();
 
   const followSuggest = useSelector((state) => state.extra.followSuggest);
+  const bannerPosts = useSelector((state) => state.extra.bannerPosts);
 
   const classes = useStyles();
 
@@ -37,36 +37,51 @@ const AddMedia = () => {
     // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    if (bannerPosts.data.length > 0) return;
+
+    dispatch(bannerPostsThunk());
+
+    // eslint-disable-next-line
+  }, []);
+
   return (
     <div className={classes.root}>
       <Grid
         container
         className={classes.mediaContainer}
+        alignItems="center"
+        justify="center"
         style={{
           transform: `translateY(${styles.upperTranslate[0]})`,
           transitionDelay: `${styles.upperTranslate[1]}s`,
         }}>
-        <Slideshow
-          slides={[
-            {
-              media: img1,
-              info: "This is the first slide",
-            },
-            {
-              media: img2,
-              info: "This is the second slide",
-            },
-            {
-              media: img3,
-              info: "This is the third slide",
-            },
-            {
-              media: img4,
-              info: "This is the fourth slide",
-            },
-          ]}
-        />
+        <div
+          style={{
+            paddingBottom: "56.25%",
+            position: "relative",
+            width: "100%",
+            marginBottom: 16,
+          }}>
+          <Slideshow
+            slides={bannerPosts.data}
+            style={{ position: "absolute" }}
+          />
 
+          {bannerPosts.isLoading && (
+            <div
+              style={{
+                width: 70,
+                height: 70,
+                borderRadius: "50%",
+                border: "1px solid #ddd",
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+              }}></div>
+          )}
+        </div>
         <Grid
           style={{
             borderBottom: "1px solid #ccc",
@@ -115,13 +130,14 @@ export default AddMedia;
 const UtilsNavBar = ({ classes, users }) => {
   return (
     <div className={classes.utilsNavBar}>
-      {users.map((user) => (
+      {users.map((user, i) => (
         <span key={user.handle} style={{ display: "inline-block" }}>
           <FollowCardTwo
             handle={user.handle}
             fullName={user.fullName}
             imageUrl={user.imageUrl}
             coverPhoto={user.coverPhoto}
+            index={i}
           />
         </span>
       ))}

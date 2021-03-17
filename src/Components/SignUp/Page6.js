@@ -89,7 +89,7 @@ export default ({ setGender, setDOB, gender, DOB, ...props }) => {
 
           {/* Button */}
           <Grid item xs={10}>
-            <input
+            <button
               className={classes.button}
               page="6"
               onClick={(e) => {
@@ -103,7 +103,7 @@ export default ({ setGender, setDOB, gender, DOB, ...props }) => {
                 props.next(e);
               }}>
               Next
-            </input>
+            </button>
           </Grid>
         </Grid>
       </Grid>

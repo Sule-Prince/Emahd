@@ -96,8 +96,8 @@ const userData = createSlice({
     },
     notifications: (state, action) => {
       if (action.payload) {
-        state.notifications.unread = [...action.payload.unread.reverse()];
-        state.notifications.read = [...action.payload.read.reverse()];
+        state.notifications.unread = [...action.payload.unread];
+        state.notifications.read = [...action.payload.read];
         state.notifications.noOfUnread = action.payload.unread.length;
       }
     },

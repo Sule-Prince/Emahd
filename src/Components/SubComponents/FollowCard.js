@@ -11,6 +11,7 @@ import { axios } from "../../config/axiosConfig";
 import { useDispatch } from "react-redux";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
 import { Link } from "react-router-dom";
+import { popUserSuggest } from "../../redux/extraDataSlice";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -32,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
   },
   channelUserName: {
     fontWeight: theme.typography.fontWeightBold,
-    maxWidth: 126,
+    maxWidth: "calc(120px - .3vw)",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -57,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const FollowCard = ({ handle, fullName, imageUrl }) => {
+const FollowCard = ({ handle, fullName, imageUrl, index }) => {
   const classes = useStyles();
 
   const dispatch = useDispatch();
@@ -65,17 +66,25 @@ const FollowCard = ({ handle, fullName, imageUrl }) => {
   const [value, setValue] = useState("Follow");
 
   const handleFollowReq = () => {
-    if (value.toLowerCase() === "follow") {
-      axios.post("/user/followrequest", { friend: handle }).then(() => {
+    return new Promise((res, rej) => {
+      if (value.toLowerCase() === "follow") {
         setValue("Unfollow");
-        dispatch(addFriend(handle));
-      });
-    } else {
-      axios.post("/user/unfollowrequest", { friend: handle }).then(() => {
+        axios
+          .post("/user/followrequest", { friend: handle })
+          .then(() => {
+            return dispatch(addFriend(handle));
+          })
+          .then(() => res());
+      } else {
         setValue("Follow");
-        dispatch(removeFriend(handle));
-      });
-    }
+        axios
+          .post("/user/unfollowrequest", { friend: handle })
+          .then(() => {
+            return dispatch(removeFriend(handle));
+          })
+          .then(() => res());
+      }
+    });
   };
 
   return (
@@ -87,7 +96,7 @@ const FollowCard = ({ handle, fullName, imageUrl }) => {
         alignItems="center"
         justify="center"
         direction="column">
-        <Header classes={classes} />
+        <Header classes={classes} i={index} />
         <ChannelPhoto imageUrl={imageUrl} classes={classes} />
         <ChannelUserName
           fullName={fullName}
@@ -99,6 +108,7 @@ const FollowCard = ({ handle, fullName, imageUrl }) => {
           classes={classes}
           handleFollow={handleFollowReq}
           value={value}
+          i={index}
         />
       </Grid>
     </>
@@ -107,11 +117,21 @@ const FollowCard = ({ handle, fullName, imageUrl }) => {
 
 export default FollowCard;
 
-const Header = ({ classes }) => {
+const Header = ({ classes, i }) => {
+  const dispatch = useDispatch();
   return (
-    <Grid container justify="flex-end">
-      <Grid container item xs={2}>
-        <ClearIcon className={classes.header} />
+    <Grid container>
+      <div style={{ flexGrow: 1 }}></div>
+      <Grid item>
+        <span
+          style={{
+            marginRight: -6,
+          }}
+          onClick={() => {
+            dispatch(popUserSuggest(i));
+          }}>
+          <ClearIcon className={classes.header} />
+        </span>
       </Grid>
     </Grid>
   );
@@ -151,14 +171,15 @@ const ChannelName = ({ classes, handle }) => {
   );
 };
 
-const FollowButton = ({ classes, value, handleFollow }) => {
+const FollowButton = ({ classes, value, handleFollow, i }) => {
+  const dispatch = useDispatch();
   return (
     <div className={classes.btnContainer}>
       <IconButton
         component="span"
         style={{ padding: 0, width: "100%" }}
         onClick={() => {
-          handleFollow();
+          handleFollow().then(() => dispatch(popUserSuggest(i)));
         }}>
         <button className={classes.btn}>{value}</button>
       </IconButton>

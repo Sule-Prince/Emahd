@@ -83,7 +83,9 @@ const Search = () => {
                   item
                   xs={12}
                   style={{ height: 68 }}>
-                  <Link to={data.result.handle} style={{ color: "#555" }}>
+                  <Link
+                    to={`/user/${data.result.handle}`}
+                    style={{ color: "#555" }}>
                     <UserInfoButton
                       imageUrl={data.result.imageUrl}
                       header={data.result.handle}

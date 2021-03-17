@@ -6,7 +6,7 @@ import {
   Card,
   CardActionArea,
   Divider,
-  Button,
+  // Button,
   CircularProgress,
 } from "@material-ui/core";
 
@@ -24,7 +24,7 @@ import ProfilePic from "./ProfilePic";
 import UserPosts from "./UserPosts/UserPosts";
 import useFileUpload from "../../../../utils/customHooks/useFileUpload";
 import Settings from "./Settings";
-import Chat from "../../../Chat/Chat";
+// import Chat from "../../../Chat/Chat";
 import { followSuggestThunk } from "../../../../redux/extraDataSlice";
 import HeaderBase from "../../../SubComponents/HeaderBase";
 import Loader from "../../../SubComponents/Loader";
@@ -34,11 +34,14 @@ import {
   uploadingCoverPhoto,
 } from "../../../../redux/userActionsSlice";
 import BackDrop from "../../../SubComponents/BackDrop";
+import RefreshWrapper from "../../../SubComponents/RefreshWrapper";
+import useRefresh from "../../../../utils/customHooks/useRefresh";
+import { userDataThunk } from "../../../../redux/userDataSlice";
 
 const Account = () => {
   // Styles to be used by the settings Component to display the Settings
   const [styles, setStyles] = useState("110vw");
-  const [display, setDisplay] = useState(false);
+  // const [display, setDisplay] = useState(false);
 
   const rootRef = useRef(null);
 
@@ -52,8 +55,7 @@ const Account = () => {
   const posts = useSelector((state) => state.posts.posts);
   const followSuggest = useSelector((state) => state.extra.followSuggest);
 
-  let myPosts = [];
-  if (posts) myPosts = posts[posts.length - 1];
+  const onRefresh = useRefresh(userDataThunk);
 
   useEffect(() => {
     if (followSuggest.users.length > 0) return;
@@ -68,15 +70,17 @@ const Account = () => {
       <div className={classes.root} ref={rootRef}>
         <Settings styles={styles} setStyles={setStyles} />
 
-        <Grid direction="column" container>
-          <Grid xs={12} item style={{ position: "sticky", top: 0, zIndex: 10 }}>
+        <Grid container style={{ height: "100%" }}>
+          <Grid item style={{ width: "100%", top: 0, zIndex: 10 }}>
             <Header
               classes={classes}
               handle={userData.handle}
               setStyles={setStyles}
             />
           </Grid>
-          <Grid xs={12} item>
+
+          {/* <RefreshWrapper onRefresh={onRefresh}> */}
+          <Grid style={{ width: "100%" }} item>
             <CoverPhoto classes={classes} coverPhoto={userData.coverPhoto} />
           </Grid>
           <Grid xs={12} item test="test">
@@ -86,20 +90,20 @@ const Account = () => {
             <Bio data={userData} />
           </Grid>
           <Grid justify="center" container item xs={12}>
-            {display && <Chat setDisplay={setDisplay} />}
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => setDisplay(true)}
-              style={{
-                width: "92%",
-                fontSize: ".72rem",
-                color: "#2196f3",
-                marginTop: "1rem",
-              }}
-              fullWidth>
-              Messages
-            </Button>
+            {/* {display && <Chat setDisplay={setDisplay} />}
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => setDisplay(true)}
+                style={{
+                  width: "92%",
+                  fontSize: ".72rem",
+                  color: "#2196f3",
+                  marginTop: "1rem",
+                }}
+                fullWidth>
+                Messages
+              </Button> */}
             <Grid
               container
               alignItems="flex-end"
@@ -130,8 +134,9 @@ const Account = () => {
             )}
           </Grid>
           <Grid container item xs>
-            <UserPosts posts={myPosts} rootRef={rootRef} />
+            <UserPosts posts={posts.userPost} rootRef={rootRef} />
           </Grid>
+          {/* </RefreshWrapper> */}
         </Grid>
         <div className="positionFix"></div>
       </div>
@@ -183,10 +188,6 @@ const CoverPhoto = ({ classes, coverPhoto }) => {
             component="div"
             style={{
               position: "relative",
-            }}
-            onClick={() => {
-              const fileInput = document.getElementById("upload-cover-photo");
-              fileInput.click();
             }}>
             {coverPhoto ? (
               <img
@@ -348,7 +349,7 @@ const FollowTab = () => {
 const UtilsNavBar = ({ classes, users }) => {
   return (
     <div className={classes.utilsNavBar}>
-      {users.map((user) => (
+      {users.map((user, i) => (
         <span
           key={user.handle}
           style={{ display: "inline-block", margin: "8px 16px" }}>
@@ -356,6 +357,7 @@ const UtilsNavBar = ({ classes, users }) => {
             handle={user.handle}
             fullName={user.fullName}
             imageUrl={user.imageUrl}
+            index={i}
           />
         </span>
       ))}

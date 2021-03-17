@@ -7,7 +7,7 @@ import {
   Fab,
   Typography,
   Button,
-  ButtonBase
+  ButtonBase,
 } from "@material-ui/core";
 import PaletteIcon from "@material-ui/icons/Palette";
 import ChevronRightRoundedIcon from "@material-ui/icons/ChevronRightRounded";
@@ -28,13 +28,13 @@ import usePostData from "../../../../../utils/customHooks/usePostData";
 const useStyles = makeStyles({
   root: {
     height: "100%",
-    width: "100%"
+    width: "100%",
   },
   text: {
     position: "relative",
     height: "100%",
-    width: "100%"
-  }
+    width: "100%",
+  },
 });
 
 const TypeSelect = ({ setStyle, setDisplay }) => {
@@ -61,14 +61,14 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
     "linear-gradient(45deg, #4caf50, #76ff03, #00c853)",
     "linear-gradient(45deg, #d50000, #f50057, #dd2c00, #ff5722)",
     "linear-gradient(45deg, #757575, #212121)",
-    "linear-gradient(45deg, #aaa, #ddd)"
+    "linear-gradient(45deg, #aaa, #ddd)",
   ];
 
   useEffect(() => {
     if (text.length > 49)
-      setOtherStyles(prev => ({
+      setOtherStyles((prev) => ({
         ...prev,
-        fontWeight: "normal"
+        fontWeight: "normal",
       }));
   }, [text]);
 
@@ -83,7 +83,7 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
     <div
       className={classes.root}
       style={{
-        background: bgColor
+        background: bgColor,
       }}
       onClick={() => {
         textAreaRef.current.focus();
@@ -103,7 +103,7 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
           <IconButton
             color="primary"
             onClick={() => {
-              setNum(prev => (prev += 1));
+              setNum((prev) => (prev += 1));
             }}>
             <PaletteIcon style={{ fontSize: "1.8rem" }} />
           </IconButton>
@@ -111,7 +111,7 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
             style={{
               position: "absolute",
               left: "50%",
-              transform: "translateX(-50%)"
+              transform: "translateX(-50%)",
             }}>
             <FontsSelectOptions
               fontFamily={fontFamily}
@@ -130,7 +130,7 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
             color,
             fontSize: `${fontSize}vmin`,
             fontFamily,
-            maxHeight: "85%"
+            maxHeight: "85%",
           }}
         />
       </Grid>
@@ -148,7 +148,7 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
                 style={{
                   color: "#fff",
                   fontWeight: "bold",
-                  backgroundColor: "rgba(80, 80, 80, .7)"
+                  backgroundColor: "rgba(80, 80, 80, .7)",
                 }}
                 onClick={() => setDisplayPalatte(false)}>
                 Done
@@ -175,12 +175,12 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
                   marginLeft: 8,
                   padding: "8px 4px",
                   borderBottom:
-                    otherStyles.fontWeight === "bold" && "2px solid #aa00ff"
+                    otherStyles.fontWeight === "bold" && "2px solid #aa00ff",
                 }}>
                 <ButtonBase
                   style={{
                     padding: 5,
-                    borderRadius: "50%"
+                    borderRadius: "50%",
                   }}
                   onClick={() => {
                     if (text.length > 49) {
@@ -188,14 +188,15 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
                         openSnackBar({
                           message: "Text is too long to bolden",
                           type: "info",
-                          duration: 3000
+                          duration: 3000,
                         })
                       );
                       return;
                     }
-                    setOtherStyles(prev => ({
+                    setOtherStyles((prev) => ({
                       ...prev,
-                      fontWeight: prev.fontWeight === "bold" ? "normal" : "bold"
+                      fontWeight:
+                        prev.fontWeight === "bold" ? "normal" : "bold",
                     }));
                   }}>
                   <FormatBoldRoundedIcon />
@@ -208,7 +209,7 @@ const TypeSelect = ({ setStyle, setDisplay }) => {
                 bgColor,
                 color: color,
                 fontFamily,
-                ...otherStyles
+                ...otherStyles,
               }}
               text={text}
               dispatch={dispatch}
@@ -228,21 +229,27 @@ const Footer = ({ settings, text, dispatch, setStyle, setDisplay }) => {
   const { sendData } = usePostData();
 
   const sendTextStory = () => {
-    sendData({ settings, text: [text], type: "text" }, "/stories").then(res => {
-      if (res.hasError) {
-        dispatch(
-          openSnackBar({ message: res.message, type: "error", duration: 4000 })
-        );
-        return;
-      }
+    sendData({ settings, text: [text], type: "text" }, "/stories").then(
+      (res) => {
+        if (res.hasError) {
+          dispatch(
+            openSnackBar({
+              message: res.message,
+              type: "error",
+              duration: 4000,
+            })
+          );
+          return;
+        }
 
-      dispatch(
-        openSnackBar({
-          message: res.message,
-          duration: 4000
-        })
-      );
-    });
+        dispatch(
+          openSnackBar({
+            message: res.message,
+            duration: 4000,
+          })
+        );
+      }
+    );
 
     setStyle("-110vw");
     setTimeout(() => {
@@ -261,7 +268,7 @@ const Footer = ({ settings, text, dispatch, setStyle, setDisplay }) => {
             color: "#ddd",
             display: "flex",
             alignItems: "center",
-            padding: " 0px 5px"
+            padding: " 0px 5px",
           }}
           variant="caption">
           <ChevronRightRoundedIcon />
@@ -276,7 +283,7 @@ const Footer = ({ settings, text, dispatch, setStyle, setDisplay }) => {
           right: "5%",
           top: -35,
           backgroundColor: "#2196f3",
-          color: "#fff"
+          color: "#fff",
         }}
         onClick={sendTextStory}>
         <SendRounded fontSize="small" />

@@ -2,6 +2,8 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { axios } from "../../config/axiosConfig";
 import { updateData } from "../../redux/userDataSlice";
+import ImageEdits from "../ImageEditor";
+import toFile from "../toFIle";
 
 const useFileUpload = (
   type,
@@ -19,11 +21,27 @@ const useFileUpload = (
 
     if (uploadingMedia) dispatch(uploadingMedia());
 
-    formData.append("image", image, image.name);
+    let editor = new ImageEdits();
+
+    const url = URL.createObjectURL(image);
+
+    let blob;
+
+    if (type === "imageUrl")
+      blob = await editor.reduceImage({ src: url, size: 500, format: "blob" });
+    else
+      blob = await editor.reduceImage({
+        src: url,
+        quality: 0.8,
+        format: "blob",
+      });
+
+    let newFile = toFile(blob, "image/jpeg");
+
+    formData.append("image", newFile, newFile.name);
     axios
       .post(`/user/upload/${type}`, formData)
       .then((res) => {
-        console.log(res.data.url);
         dispatch(updateData({ which: type, data: res.data.url }));
 
         if (uploadedMedia) dispatch(uploadedMedia({ user, url: res.data.url }));

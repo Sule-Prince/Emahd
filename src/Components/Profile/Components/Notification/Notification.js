@@ -13,7 +13,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 
-const Notification = ({ notification }) => {
+const Notification = ({ notification, color }) => {
   dayjs.extend(updateLocale);
   dayjs.extend(relativeTime);
   dayjs.updateLocale("en", {
@@ -36,7 +36,7 @@ const Notification = ({ notification }) => {
 
   return (
     <Grid item xs={12}>
-      <CardActionArea style={{ height: 70 }}>
+      <CardActionArea style={{ height: 70, backgroundColor: color }}>
         <Link to="" style={{ height: "inherit", width: "inherit" }}>
           <CardHeader
             style={{ height: 60, background: "none", paddingLeft: 10 }}
@@ -68,14 +68,20 @@ const Notification = ({ notification }) => {
             }
             subheader={
               notification.type === "comment" ? (
-                <div style={{ display: "flex" }}>
+                <div style={{ display: "flex", overflow: "hidden" }}>
                   <Typography
                     color="textSecondary"
-                    style={{ flexGrow: 1 }}
+                    style={{
+                      flexGrow: 1,
+                      textOverflow: "ellipsis",
+                      maxWidth: "calc(100vw - 160px)",
+                      paddingRight: 6,
+                    }}
                     component="span"
                     variant="body2"
-                    gutterBottom>
-                    {notification.comment + "..."}
+                    gutterBottom
+                    noWrap>
+                    {notification.comment}
                   </Typography>
                   <Typography
                     color="textSecondary"

@@ -19,6 +19,8 @@ const useAuth = () => {
       axios
         .post(route, data)
         .then((res) => {
+          const encrypted = encryptor.encrypt(data.password);
+          localStorage.setItem("p-s-w", encrypted);
           return localStorage.setItem("token", res.data.token);
         })
         .then(() => {

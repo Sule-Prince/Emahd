@@ -4,8 +4,10 @@ const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: "#fff",
     minHeight: "100vh",
+    height: "100%",
+    maxHeight: "100vh",
     color: "#000",
-    // overflowY: "auto",
+    overflow: "hidden",
   },
   appBarRoot: {
     flexGrow: 1,
@@ -23,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
     width: "calc(45px + 2vmin)",
     color: "#fff",
     zIndex: 10,
-    backgroundColor: "#2196f3",
+    background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
   },
   RefreshIcon: {
     marginTop: -28,
@@ -57,6 +59,16 @@ const useStyles = makeStyles((theme) => ({
   posts: {
     marginBottom: "1rem",
     padding: "1rem .7rem",
+  },
+
+  utilsNavBar: {
+    overflowX: "auto",
+    overflowY: "hidden",
+    whiteSpace: "nowrap",
+    textAlign: "center",
+    WebkitOverflowScrolling: "touch",
+    paddingRight: "1rem",
+    paddingBottom: 26,
   },
 }));
 

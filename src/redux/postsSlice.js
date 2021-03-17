@@ -3,7 +3,14 @@ import { axios } from "../config/axiosConfig";
 
 const initialState = {
   isLoading: false,
-  posts: [],
+  posts: {
+    media: [],
+    scream: [],
+    userPost: {
+      media: [],
+      scream: [],
+    },
+  },
   error: "",
   retries: 0,
   uploadProfilePic: {
@@ -15,20 +22,20 @@ const initialState = {
 export const screamsDataThunk = createAsyncThunk(
   "post/getData",
   async (args, { getState, dispatch, rejectWithValue }) => {
-    let sections = getState().posts.posts;
+    let posts = getState().posts.posts;
 
     try {
       const response = await axios.get("/screams");
       if (!response.data.feedback) {
-        sections = response.data;
+        posts = response.data;
       }
-      return sections;
+      return posts;
     } catch (error) {
       if (!navigator.onLine)
         return rejectWithValue(
           "Cannot get posts, please connect to the internet!!"
         );
-      if (sections.retries <= 5 && navigator.onLine) {
+      if (posts.retries <= 5 && navigator.onLine) {
         setTimeout(() => {
           dispatch(screamsDataThunk());
         }, 10000);
@@ -86,7 +93,6 @@ const screamsData = createSlice({
       if (state.retries === 5) {
         state.error = action.payload;
       }
-      state.posts = [];
     },
   },
 });

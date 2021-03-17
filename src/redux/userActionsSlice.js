@@ -17,6 +17,7 @@ const userActions = createSlice({
       duration: null,
       open: false,
       loading: false,
+      shouldClose: true,
     },
     talkBubble: {
       message: "",
@@ -44,12 +45,15 @@ const userActions = createSlice({
         state.snackBar.duration = action.payload.duration;
       if (action.payload.loading)
         state.snackBar.loading = action.payload.loading;
+      if (action.payload.shouldClose)
+        state.snackBar.shouldClose = action.payload.shouldClose;
       state.snackBar.message = action.payload.message;
       state.snackBar.open = true;
     },
     closeSnackBar: (state) => {
       state.snackBar.open = false;
       state.snackBar.loading = false;
+      state.snackBar.shouldClose = true;
       state.snackBar.type = "success";
     },
 

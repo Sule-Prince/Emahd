@@ -1,3 +1,18 @@
+const bannerPoster = [
+  {
+    media: "img1.jpg",
+    info: "This is the first slide",
+  },
+  {
+    media: "img2.jpg",
+    info: "This is the second slide",
+  },
+  {
+    media: "img3.jpg",
+    info: "This is the third slide",
+  },
+];
+
 const displayStories = [
   {
     type: "text",

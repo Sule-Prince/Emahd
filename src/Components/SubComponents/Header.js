@@ -12,37 +12,44 @@ const Header = ({ setDisplay, data, avatar, imageUrl }) => {
     setDisplay(false);
   };
   return (
-    <HeaderBase style={{ zIndex: 1, position: "fixed" }}>
-      <Grid className={classes.headerRoot} container>
-        <Grid
-          style={{ display: "flex", alignItems: "center" }}
-          item
-          className={classes.headerNameContainer}>
-          <Grid item>
-            <IconButton
-              color="primary"
-              onClick={handleCancelButton}
-              style={{ marginRight: 5, marginLeft: "-1rem" }}>
-              <CloseIcon />
-            </IconButton>
-          </Grid>
+    <>
+      <HeaderBase style={{ zIndex: 1, position: "absolute" }}>
+        <Grid className={classes.headerRoot} container>
+          <Grid
+            style={{ display: "flex", alignItems: "center" }}
+            item
+            className={classes.headerNameContainer}>
+            <Grid item>
+              <IconButton
+                color="primary"
+                onClick={handleCancelButton}
+                style={{ marginRight: 5, marginLeft: "-1rem" }}>
+                <CloseIcon />
+              </IconButton>
+            </Grid>
 
-          <Grid item>
-            <Typography
-              className={classes.headerName}
-              variant="body1"
-              component="span">
-              {data}
-            </Typography>
+            <Grid item>
+              <Typography
+                className={classes.headerName}
+                variant="body1"
+                component="span">
+                {data}
+              </Typography>
+            </Grid>
           </Grid>
+          {avatar && (
+            <Grid item style={{ marginRight: 10 }}>
+              <Avatar src={imageUrl} style={{ height: 35, width: 35 }} />
+            </Grid>
+          )}
         </Grid>
-        {avatar && (
-          <Grid item style={{ marginRight: 10 }}>
-            <Avatar src={imageUrl} style={{ height: 35, width: 35 }} />
-          </Grid>
-        )}
-      </Grid>
-    </HeaderBase>
+      </HeaderBase>
+      <div
+        style={{
+          height: "calc(40px + 1.6vmin)",
+          width: "100%",
+        }}></div>
+    </>
   );
 };
 
