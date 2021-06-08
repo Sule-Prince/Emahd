@@ -22,14 +22,33 @@
       "type": "image/png",
       "sizes": "144x144"
     },
-     {
-      "src": "Emahd-ico512.png",
+    {
+      "src": "maskable_icon_x512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
+  "screenshots": [
+    {
+      "src": "screenshot/Screenshot1.jpg",
+      "sizes": "800x1280",
+      "type": "image/jpg"
+    },
+    {
+      "src": "screenshot/Screenshot2.jpg",
+      "sizes": "800x1280",
+      "type": "image/jpg"
+    },
+    {
+      "src": "screenshot/Screenshot3.jpg",
+      "sizes": "800x1280",
+      "type": "image/jpg"
+    }
+  ],
+  "categories": ["social", "productivity", "personalization"],
   "start_url": ".",
   "display": "standalone",
-  "theme_color":"#ffffff",
+  "orientation": "portrait-primary",
+  "theme_color": "#ffffff",
   "background_color": "#ffffff"
 }

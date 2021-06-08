@@ -54,7 +54,9 @@ const extraData = createSlice({
     },
     [followSuggestThunk.fulfilled]: (state, action) => {
       state.followSuggest.isLoading = false;
-      state.followSuggest.users = [...action.payload];
+      state.followSuggest.users = [
+        ...action.payload.filter((user) => user !== null),
+      ];
       state.followSuggest.error = "";
     },
     [followSuggestThunk.rejected]: (state, action) => {
@@ -68,7 +70,6 @@ const extraData = createSlice({
     },
     [bannerPostsThunk.fulfilled]: (state, action) => {
       state.bannerPosts.isLoading = false;
-      console.log(action.payload);
       state.bannerPosts.data = action.payload;
       state.bannerPosts.error = "";
     },

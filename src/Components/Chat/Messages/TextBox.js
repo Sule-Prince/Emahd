@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux";
 import {
   updateChatMessages,
   updateLastMessage,
+  setUserMsgsThunk,
 } from "../../../redux/userChatsSlice";
 import { audioRecorder } from "../../../utils/audioRecorder";
 import CameraDevice from "../../SubComponents/CameraDevice";
@@ -38,7 +39,7 @@ const useStyles = makeStyles({
   },
 });
 
-const TextBox = ({ handle, roomId, i, audioStream, setAudio }) => {
+const TextBox = ({ userId, roomId, audioStream, setAudio }) => {
   const [message, setMessage] = useState("");
   const [showCamera, setShowCamera] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -46,22 +47,29 @@ const TextBox = ({ handle, roomId, i, audioStream, setAudio }) => {
 
   const recorder = useRef(null);
 
-  const socket = window.socket;
-
   const dispatch = useDispatch();
 
   const classes = useStyles();
 
   const sendMessage = () => {
     if (!message.trim()) return;
-    socket.emit("message", { message, roomId });
+
+    const createdAt = Date.now(),
+      data = { sender: userId, message, createdAt };
+
+    /* 
+    TODO:: Update UI to give pending and done status 
+           of messages to be delivered to other user
+    */
+    dispatch(setUserMsgsThunk({ roomId, data }));
+
     dispatch(
       updateChatMessages({
-        handle,
-        data: { sender: "user", message },
+        roomId,
+        data,
       })
     );
-    dispatch(updateLastMessage([i, message]));
+    dispatch(updateLastMessage({ message, createdAt, roomId }));
     setMessage("");
   };
 

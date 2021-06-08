@@ -1,0 +1,5 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target" : { "namespace": "android_app", "package_name": "com.xemahd.twa",
+                   "sha256_cert_fingerprints": ["D8:11:39:37:3F:EF:86:E7:D4:0D:B8:C9:0F:CE:62:F2:FE:D2:EE:AE:80:FE:58:27:52:8E:FD:17:32:FC:F0:00"] }
+    }]

@@ -23,6 +23,7 @@ import {
   closeSnackBar,
   openSnackBar,
 } from "../../../../redux/userActionsSlice";
+import { projectAuth } from "../../../../firebase/FBConfig";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -71,7 +72,9 @@ const Settings = ({ styles, setStyles }) => {
   const sendReport = sendData("report", "Report sent successfully.");
   const sendFeedback = sendData("feedback", "Feedback sent successfully.");
 
-  const logout = () => {
+  const logout = async () => {
+    await projectAuth.signOut();
+
     localStorage.removeItem("token");
     window.location.reload();
   };

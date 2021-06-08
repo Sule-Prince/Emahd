@@ -1,3 +1,4 @@
+import { createStore, set } from "idb-keyval";
 import { useDispatch, useSelector } from "react-redux";
 
 import { axios } from "../../config/axiosConfig";
@@ -41,10 +42,12 @@ const useFileUpload = (
     formData.append("image", newFile, newFile.name);
     axios
       .post(`/user/upload/${type}`, formData)
-      .then((res) => {
+      .then(async (res) => {
         dispatch(updateData({ which: type, data: res.data.url }));
 
         if (uploadedMedia) dispatch(uploadedMedia({ user, url: res.data.url }));
+        const imageStore = createStore("Emahd", "image-store");
+        await set(type, newFile, imageStore);
       })
       .catch((err) => {
         if (uploadError) dispatch(uploadError());

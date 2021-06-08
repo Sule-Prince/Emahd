@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { makeStyles, TextField, Grid, Typography } from "@material-ui/core";
+import {
+  makeStyles,
+  TextField,
+  Grid,
+  Typography,
+  Button,
+} from "@material-ui/core";
 import { isEmpty } from "../../utils/validators";
 
 const useStyles = makeStyles((theme) => ({
@@ -10,7 +16,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   button: {
-    backgroundColor: theme.palette.primary["main"],
     width: `calc( 100% + ${theme.spacing(2.6)}px)`,
     color: "#fff",
     fontFamily: "Roboto, Helvetica, Arial, sans-serif",
@@ -77,10 +82,11 @@ export default ({
             </Grid>
           </Grid>
           <Grid style={{ marginRight: 14 }} item xs={10}>
-            <button
+            <Button
               className={classes.button}
-              type="button"
-              page="2"
+              variant="contained"
+              size="small"
+              color="primary"
               onClick={(e) => {
                 if (isEmpty(firstName) && isEmpty(lastName)) {
                   setError({
@@ -135,10 +141,10 @@ export default ({
                   lastName: { message: "", hasError: false },
                 });
 
-                props.next(e);
+                props.next(2);
               }}>
               Next
-            </button>
+            </Button>
           </Grid>
         </Grid>
       </Grid>

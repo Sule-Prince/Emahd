@@ -73,7 +73,7 @@ const useAuth = () => {
           return;
         })
         .catch((err) => {
-          if (err.code === "auth/network-request-failed") {
+          if (err.response === undefined) {
             setResponse({
               error: [
                 "Please make sure you have a network connection and try again",

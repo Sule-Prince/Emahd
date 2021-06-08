@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { projectFirestore } from "../firebase/FBConfig";
 import { randomMsgs, randomNames } from "../utils/generateData";
 import { objectToArray } from "../utils/helperFunctions";
 
@@ -24,7 +25,7 @@ const generateDataObjs = (noOfObjects) => {
 const initialState = {
   chats: {
     isLoading: false,
-    data: generateDataObjs(10),
+    data: {},
     error: "",
   },
   messages: {
@@ -34,15 +35,99 @@ const initialState = {
   },
 };
 
-export const userChatsThunk = createAsyncThunk(
-  "user/chats",
-  (args, { getState, rejectWithValue }) => {}
+export const createRoomThunk = createAsyncThunk(
+  "user/createroom",
+  async (
+    { roomId, type, handle: otherUserHandle },
+    { getState, rejectWithValue }
+  ) => {
+    try {
+      const userHandle = getState().user.data.handle;
+      const userId = getState().user.data.userId;
+      const otherUserId = roomId.split("-").filter((id) => id !== userId)[0];
+      console.log({ roomId, type, otherUserHandle, userId, otherUserId });
+
+      let exists = (
+        await projectFirestore.collection("messages").doc(roomId).get()
+      ).exists;
+
+      if (exists) return;
+      const data = {
+        type,
+        roomId,
+        lastMessage: "",
+        noOfUnreadMsgs: 0,
+        createdAt: Date.now(),
+      };
+      await projectFirestore
+        .collection("chats")
+        .doc(userId)
+        .update({
+          roomId: {
+            ...data,
+            userId,
+            handle: userHandle,
+          },
+        });
+
+      await projectFirestore
+        .collection("chats")
+        .doc(otherUserId)
+        .update({
+          roomId: { ...data, handle: otherUserHandle, userId: otherUserId },
+        });
+
+      await projectFirestore
+        .collection("messages")
+        .doc(roomId)
+        .set({
+          [userId]: userHandle,
+          [otherUserId]: otherUserHandle,
+        });
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        "Something seems to have gone wrong, please try again"
+      );
+    }
+  }
 );
 
-export const socketHandShakeThunk = createAsyncThunk(
-  "user/socketHandshake",
-  (args, { rejectWithValue }) => {
-    // projectFir
+export const getUserMsgsThunk = createAsyncThunk(
+  "user/getMsgs",
+  async (roomId, { getState, rejectWithValue }) => {
+    try {
+      const data = await projectFirestore
+        .collection("messages")
+        .doc(roomId)
+        .get();
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        "Something seems to have gone wrong, please try again"
+      );
+    }
+  }
+);
+
+export const setUserMsgsThunk = createAsyncThunk(
+  "user/setMsgs",
+  async ({ roomId, data }, { getState, rejectWithValue }) => {
+    try {
+      await projectFirestore
+        .collection("messages")
+        .doc(roomId)
+        .update({
+          [data.createdAt]: data,
+        });
+
+      return data;
+    } catch (error) {
+      return rejectWithValue(
+        "Something seems to have gone wrong, please try again"
+      );
+    }
   }
 );
 
@@ -51,40 +136,45 @@ const userChatsSlice = createSlice({
   initialState,
   reducers: {
     updateChatMessages: (state, action) => {
-      const { handle, data } = action.payload;
-      if (!state.messages.data[handle])
-        state.messages.data[handle] = { read: [], unread: [] };
-      state.messages.data[handle].unread.push(data);
+      const { roomId, data } = action.payload;
+      if (!state.messages.data[roomId])
+        state.messages.data[roomId] = { read: [], unread: [] };
+      state.messages.data[roomId].unread = [
+        ...state.messages.data[roomId].unread,
+        data,
+      ];
     },
     markRead: (state, action) => {
-      const handle = action.payload;
-      const userMsg = state.messages.data[handle];
+      const roomId = action.payload;
+      const userMsg = state.messages.data[roomId];
       userMsg.read = [...userMsg.read, ...userMsg.unread];
       userMsg.unread = [];
     },
-    performSocketHandShake: (state, action) => {},
     updateLastMessage: (state, action) => {
-      const [i, lastMsg] = action.payload;
-      state.chats.data[i].lastMsg = lastMsg;
+      const { roomId, lastMsg, createdAt } = action.payload;
+      if (!state.chats.data[roomId]) state.chats.data[roomId] = {};
+      state.chats.data[roomId] = {
+        ...state.chats.data[roomId],
+        lastMsg,
+        createdAt,
+      };
     },
   },
   extraReducers: {
-    [userChatsThunk.pending]: (state) => {
+    [getUserMsgsThunk.pending]: (state) => {
       state.chats.isLoading = true;
       state.chats.error = "";
     },
-    [userChatsThunk.fulfilled]: (state, action) => {
+    [getUserMsgsThunk.fulfilled]: (state, action) => {
       state.chats.isLoading = false;
       state.chats.error = "";
 
-      // Data of friends chat is expected to come in an object form
-      // So it is converted to an array so as to display it in the DOM
-      state.chats.data = makeSingleArray(objectToArray(action.payload));
+      state.chats.data = action.payload;
     },
-    [userChatsThunk.rejected]: (state, action) => {
+    [getUserMsgsThunk.rejected]: (state, action) => {
       state.chats.isLoading = false;
       state.chats.error = action.payload;
-      state.chats.data = [];
+      state.chats.data = {};
     },
   },
 });

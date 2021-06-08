@@ -6,7 +6,7 @@ import {
   InputAdornment,
   Typography,
   InputBase,
-  ButtonBase,
+  Button,
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
@@ -26,7 +26,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   button: {
-    backgroundColor: theme.palette.primary["main"],
     width: " 100% ",
     fontFamily: "Roboto, Helvetica, Arial, sans-serif",
     color: "#fff",
@@ -104,7 +103,7 @@ export default ({ setEmail, email, handle, ...props }) => {
       .post("/verifycode", { code, email })
       .then((res) => {
         dispatch(closeSnackBar());
-        if (res.data.feedback.correct) return props.next(e);
+        if (res.data.feedback.correct) return props.next(4);
 
         return setCodeError(res.data.feedback.message);
       })
@@ -187,7 +186,7 @@ export default ({ setEmail, email, handle, ...props }) => {
                   </InputAdornment>
                 }
                 value={code}
-                type="text"
+                type="number"
                 style={{
                   fontSize: "2rem",
                   letterSpacing: "3px",
@@ -203,17 +202,15 @@ export default ({ setEmail, email, handle, ...props }) => {
             </Grid>
           ) : null}
           <Grid item xs={10}>
-            <ButtonBase
-              style={{ height: 30.5, width: "100%" }}
-              component="span">
-              <button
-                className={classes.button}
-                page="4"
-                value={displayCodeInput ? "Verify" : "Send Verification Code"}
-                onClick={handleEmail}>
-                {displayCodeInput ? "Verify" : "Send Verification Code"}
-              </button>
-            </ButtonBase>
+            <Button
+              className={classes.button}
+              variant="contained"
+              size="small"
+              color="primary"
+              value={displayCodeInput ? "Verify" : "Send Verification Code"}
+              onClick={handleEmail}>
+              {displayCodeInput ? "Verify" : "Send Verification Code"}
+            </Button>
           </Grid>
         </Grid>
       </Grid>

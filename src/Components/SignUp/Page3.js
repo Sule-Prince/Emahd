@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from "react";
-import { makeStyles, TextField, Grid, Typography } from "@material-ui/core";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  makeStyles,
+  TextField,
+  Grid,
+  Typography,
+  InputAdornment,
+  CircularProgress,
+  Button,
+} from "@material-ui/core";
 import MenuItem from "@material-ui/core/MenuItem";
 import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import CancelRoundedIcon from "@material-ui/icons/CancelRounded";
+import CheckCircleIcon from "@material-ui/icons/CheckCircle";
+
 import { courses } from "../assets/courses";
 import { universities } from "../assets/universities";
 import { isEmpty, isAllowedChar } from "../../utils/validators";
+import { axios } from "../../config/axiosConfig";
 
 const useStyles = makeStyles((theme) => ({
   textField: {
@@ -14,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   button: {
-    backgroundColor: theme.palette.primary["main"],
+    // backgroundColor: theme.palette.primary["main"],
     width: " 100% ",
     fontFamily: "Roboto, Helvetica, Arial, sans-serif",
     color: "#fff",
@@ -27,6 +39,8 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let timeoutId;
+
 export default ({
   setHandle,
   setCourse,
@@ -38,16 +52,91 @@ export default ({
 }) => {
   const [error, setError] = useState({ message: "", hasError: false });
 
+  const [shouldDisplay, setShouldDisplay] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [textMeta, setTextMeta] = useState({
+    isLoading: false,
+    error: false,
+  });
+
+  const inputChanged = useRef(false);
+
   useEffect(() => {
+    if (handle.length <= 0) {
+      setError({ message: "", hasError: false });
+
+      return setShouldDisplay(false);
+    }
+    let error = false;
     for (let i = 0; i < handle.length; i++) {
-      if (!isAllowedChar(handle[i]))
-        return setError({
+      if (!isAllowedChar(handle[i])) {
+        error = true;
+        setError({
           message: "Username can only contain alphabets, digits, . and _",
           hasError: true,
         });
-      setError({ message: "", hasError: false });
+
+        return setShouldDisplay(false);
+      }
     }
+
+    if (error) return;
+
+    setError({ message: "", hasError: false });
+    setShouldDisplay(true);
   }, [handle]);
+
+  useEffect(() => {
+    clearTimeout(timeoutId);
+    console.log(inputChanged);
+
+    if (handle.length > 0 && shouldDisplay && inputChanged.current) {
+      setTextMeta({
+        isLoading: true,
+        error: false,
+      });
+
+      timeoutId = setTimeout(async () => {
+        try {
+          const data = (
+            await axios.post("/exists", {
+              user: handle,
+            })
+          ).data;
+          const exists = data.exists;
+          if (exists) {
+            setError({
+              message: "handle is already in use",
+              hasError: true,
+            });
+
+            setTextMeta({
+              isLoading: false,
+              error: true,
+            });
+          } else {
+            setError({
+              message: "",
+              hasError: false,
+            });
+
+            setTextMeta({
+              isLoading: false,
+              error: false,
+            });
+          }
+          setIsLoading(false);
+        } catch (error) {
+          setError({
+            message: "something went wrong, try again later",
+            hasError: true,
+          });
+          setIsLoading(false);
+        }
+      }, 1500);
+    }
+  }, [handle, shouldDisplay]);
 
   const classes = useStyles();
   return (
@@ -79,8 +168,37 @@ export default ({
                 error={error.hasError}
                 id="handle"
                 onChange={(e) => {
-                  setHandle(e.target.value);
+                  setIsLoading(true);
+                  const value = e.target.value;
+                  setHandle(value);
+                  inputChanged.current = true;
                 }}
+                InputProps={
+                  shouldDisplay
+                    ? {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {textMeta.isLoading ? (
+                              <CircularProgress
+                                thickness={4}
+                                style={{ width: 20, height: 20 }}
+                              />
+                            ) : textMeta.error ? (
+                              <CancelRoundedIcon
+                                fontSize="small"
+                                color="error"
+                              />
+                            ) : (
+                              <CheckCircleIcon
+                                fontSize="small"
+                                style={{ color: "#4BB543" }}
+                              />
+                            )}
+                          </InputAdornment>
+                        ),
+                      }
+                    : {}
+                }
               />
               <div className="error">{error.message}</div>
             </Grid>
@@ -125,20 +243,24 @@ export default ({
           {/*End Select School Form */}
 
           <Grid item xs={10}>
-            <button
+            <Button
               className={classes.button}
-              page="3"
+              variant="contained"
+              size="small"
+              color="primary"
+              disabled={isLoading || error.hasError}
               onClick={(e) => {
-                if (error.hasError) return;
+                e.preventDefault();
+                if (error.hasError || isLoading) return;
                 if (isEmpty(handle)) {
                   setError({ message: "Must not be empty", hasError: true });
                   return;
                 }
 
-                props.next(e);
+                props.next(3);
               }}>
               Next
-            </button>
+            </Button>
           </Grid>
         </Grid>
       </Grid>

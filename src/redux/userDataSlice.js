@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createStore, get } from "idb-keyval";
 import { axios } from "../config/axiosConfig";
 import { getLocalStorageData } from "../utils/getlocalStorageData";
 
@@ -20,11 +21,40 @@ const initialState = {
   error: "",
 };
 
-/* Get all the user related data */
+const imageUrlThunk = createAsyncThunk(
+  "user/dataUrl",
+  async (args, { rejectWithValue }) => {
+    try {
+      const imageStore = createStore("Emahd", "image-store");
+      const imgFile = await get("imageUrl", imageStore);
+      const coverFIle = await get("coverPhoto", imageStore);
 
+      const dataUrl = {
+        imageUrl: "",
+        coverPhoto: "",
+      };
+
+      const imgDataUrl = URL.createObjectURL(imgFile);
+      const coverDataUrl = URL.createObjectURL(coverFIle);
+
+      if (imgDataUrl) dataUrl.imageUrl = imgDataUrl;
+      if (coverDataUrl) dataUrl.coverPhoto = coverDataUrl;
+
+      return dataUrl;
+    } catch (error) {
+      return rejectWithValue(
+        "Something seems to have gone wrong, please try again"
+      );
+    }
+  }
+);
+
+/* Get all the user related data */
 export const userDataThunk = createAsyncThunk(
   "user/getData",
-  async (args, { getState, rejectWithValue }) => {
+  async (args, { getState, rejectWithValue, dispatch }) => {
+    dispatch(imageUrlThunk());
+
     const isLoading = getState().user.isLoading;
     if (!isLoading) {
       return;
@@ -40,7 +70,6 @@ export const userDataThunk = createAsyncThunk(
     }
   }
 );
-
 /* Get all the posts a user has liked */
 
 export const userLikedPostsThunk = createAsyncThunk(
@@ -107,19 +136,23 @@ const userData = createSlice({
     },
   },
   extraReducers: {
+    [imageUrlThunk.fulfilled]: (state, action) => {
+      state.data = { ...state.data, ...action.payload };
+    },
+
     /* userDataThunk */
 
     [userDataThunk.pending]: (state) => {
       state.isLoading = true;
       let userData = getLocalStorageData("userData");
-      let imageUrl = getLocalStorageData("imageUrl");
 
       if (userData) userData = JSON.parse(userData);
 
-      if (userData && typeof userData === "object") {
-        state.data = userData;
+      if (!userData || typeof userData !== "object") {
+        userData = {};
       }
-      if (imageUrl) state.data.imageUrl = imageUrl;
+
+      state.data = { ...state.data, ...userData };
     },
     [userDataThunk.fulfilled]: (state, action) => {
       state.isLoading = false;
@@ -194,3 +227,13 @@ export const {
 const userDataReducer = userData.reducer;
 
 export default userDataReducer;
+
+async function getDataFromDB(data) {
+  const imageStore = createStore("Emahd", "image-store");
+  const file = await get(data, imageStore);
+
+  const dataUrl = URL.createObjectURL(file);
+  if (dataUrl) return dataUrl;
+
+  return "";
+}

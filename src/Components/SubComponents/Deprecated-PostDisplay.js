@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const PostDisplay = ({ userData }) => {
+export default ({ userData }) => {
   const classes = useStyles();
   return (
     <div>
@@ -51,13 +51,14 @@ const PostDisplay = ({ userData }) => {
           <MediaConatiner userData={userData} classes={classes} />
         </Grid>
         <ReactionBar />
-        <Typography variant="caption" > Guy Howfa you na me i no sabi you again ohh...</Typography>
+        <Typography variant="caption">
+          {" "}
+          Guy Howfa you na me i no sabi you again ohh...
+        </Typography>
       </Grid>
     </div>
   );
 };
-
-export default PostDisplay;
 
 const MediaConatiner = ({ classes, userData }) => {
   return (
@@ -74,17 +75,15 @@ const MediaConatiner = ({ classes, userData }) => {
 };
 
 const ReactionBar = () => {
- 
   const [favouriteIcon, setFavouriteIcon] = useState(false);
- 
+
   return (
     <Grid container justify="space-around" item>
       <Grid item>
         <IconButton
           onClick={(e) => {
             changeDisplayIcon(e, favouriteIcon, setFavouriteIcon);
-          }}
-        >
+          }}>
           {favouriteIcon ? (
             <FavoriteSharpIcon fontSize="small" style={{ color: "#f00" }} />
           ) : (
@@ -99,7 +98,7 @@ const ReactionBar = () => {
       </Grid>
       <Grid item>
         <IconButton>
-            <ShareOutlinedIcon fontSize="small" />
+          <ShareOutlinedIcon fontSize="small" />
         </IconButton>
       </Grid>
     </Grid>

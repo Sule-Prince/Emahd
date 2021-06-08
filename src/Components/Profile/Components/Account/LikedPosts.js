@@ -30,8 +30,6 @@ const LikedPosts = ({ setDisplayPosts }) => {
   const likedPosts = useSelector((state) => state.user.likedPosts);
   const dispatch = useDispatch();
 
-  console.log(likedPosts.data);
-
   useEffect(() => {
     if (likedPosts.error)
       dispatch(
@@ -45,9 +43,10 @@ const LikedPosts = ({ setDisplayPosts }) => {
 
   /* Reverse the values of the array */
   const reArrangeArray = (array) => {
-    const newArray = Array(array.length);
-    for (let i = array.length - 1; i >= 0; i--) {
-      newArray[array.length - 1 - i] = array[i];
+    const length = array.length;
+    const newArray = Array(length);
+    for (let i = length - 1; i >= 0; i--) {
+      newArray[length - 1 - i] = array[i];
     }
     return newArray;
   };

@@ -4,7 +4,7 @@ import { Badge, CardActionArea, Grid, makeStyles } from "@material-ui/core";
 
 import Header from "../SubComponents/Header";
 import { useSelector } from "react-redux";
-import Messages from "./Messages/Deprecated-Messages";
+import Messages from "./Messages/Messages";
 import UserInfo from "../SubComponents/UserInfo";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,11 +39,27 @@ const Chat = ({ setDisplay }) => {
   const [displayMsg, setDisplayMsg] = useState(false);
   const [msgStyles, setMsgStyles] = useState("110vh");
 
+  const audioStreamRef = useRef(null);
+
   const classes = useStyles();
 
   const userChats = useSelector((state) => state.chats.chats.data);
   const userMsgs = useSelector((state) => state.chats.messages.data);
-  const { imageUrl, userId } = useSelector((state) => state.user.data);
+  const { imageUrl } = useSelector((state) => state.user.data);
+
+  useEffect(() => {
+    const getAudioStream = async () => {
+      const constraint = {
+        video: false,
+        audio: true,
+      };
+      const audioStream = await navigator.mediaDevices.getUserMedia(constraint);
+
+      audioStreamRef.current = audioStream;
+    };
+
+    getAudioStream();
+  }, []);
 
   return (
     <div className={classes.root}>
@@ -57,22 +73,22 @@ const Chat = ({ setDisplay }) => {
           />
         </Grid>
 
-        {userChats.map((chat, index) => (
+        {userChats.map((chat, i) => (
           <Grid
             container
             alignItems="center"
             item
-            key={chat.roomId}
+            key={chat.socketId}
             onClick={() => {
               setMsgsData({
-                type: chat.type,
+                socketId: chat.socketId,
+                i,
                 handle: chat.handle,
-                userId: chat.userId,
-                roomId: chat.roomId,
                 imageUrl: chat.imageUrl,
               });
               setDisplayMsg(true);
               setMsgStyles("0px");
+              // document.documentElement.requestFullscreen()
             }}>
             <CardActionArea className={classes.userInfoRoot}>
               <Grid
@@ -111,6 +127,7 @@ const Chat = ({ setDisplay }) => {
         <Grid container item xs={12}>
           {displayMsg && (
             <Messages
+              audioStream={audioStreamRef}
               setDisplay={setDisplayMsg}
               setStyles={setMsgStyles}
               styles={msgStyles}

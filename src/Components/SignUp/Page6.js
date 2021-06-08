@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { makeStyles, Grid, Typography } from "@material-ui/core";
+import { makeStyles, Grid, Typography, Button } from "@material-ui/core";
 
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -21,7 +21,6 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   button: {
-    backgroundColor: theme.palette.primary["main"],
     color: "#fff",
     fontFamily: "Roboto, Helvetica, Arial, sans-serif",
     width: " 100% ",
@@ -87,11 +86,12 @@ export default ({ setGender, setDOB, gender, DOB, ...props }) => {
 
           {/* End of Date Form */}
 
-          {/* Button */}
           <Grid item xs={10}>
-            <button
+            <Button
               className={classes.button}
-              page="6"
+              variant="contained"
+              size="small"
+              color="primary"
               onClick={(e) => {
                 const DOB = getData("DOB");
                 if (isEmpty(DOB)) {
@@ -100,10 +100,10 @@ export default ({ setGender, setDOB, gender, DOB, ...props }) => {
                 }
 
                 setDOB(DOB);
-                props.next(e);
+                props.next(6);
               }}>
               Next
-            </button>
+            </Button>
           </Grid>
         </Grid>
       </Grid>

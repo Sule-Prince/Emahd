@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme) => ({
     width: "calc(130px + 2vw)",
   },
   header: {
-    color: theme.palette.grey[400],
+    color: "#bbb",
     height: "15px",
   },
   photoContainer: {
@@ -147,7 +147,7 @@ const ChannelPhoto = ({ classes, imageUrl }) => {
 
 const ChannelUserName = ({ classes, fullName, handle }) => {
   return (
-    <Link to={handle}>
+    <Link to={`user/${handle}`}>
       <Typography
         className={classes.channelUserName}
         color="textPrimary"
@@ -159,7 +159,7 @@ const ChannelUserName = ({ classes, fullName, handle }) => {
 };
 const ChannelName = ({ classes, handle }) => {
   return (
-    <Link to={handle}>
+    <Link to={`user/${handle}`}>
       <Typography
         className={classes.channelName}
         color="textSecondary"

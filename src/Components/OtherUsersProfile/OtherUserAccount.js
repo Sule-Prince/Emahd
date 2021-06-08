@@ -1,14 +1,20 @@
-import React, { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Grid,
-  Paper,
   Typography,
   Button,
   Avatar,
   IconButton,
+  Paper,
+  MenuList,
+  MenuItem,
+  Popover,
+  Portal,
 } from "@material-ui/core";
 
 import KeyboardBackspaceIcon from "@material-ui/icons/KeyboardBackspace";
+import MoreVertIcon from "@material-ui/icons/MoreVert";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -19,14 +25,15 @@ import "../Profile/Components/Account/Account.css";
 import UserPosts from "../Profile/Components/Account/UserPosts/UserPosts";
 import Loading from "../SubComponents/Loading";
 
-import { useState } from "react";
 import { useStyles } from "../Profile/Components/Account/styles";
-import { useEffect } from "react";
 
 import { otherUsersThunk } from "../../redux/otherUserSlice";
 import { axios } from "../../config/axiosConfig";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
 import FollowTab from "../SubComponents/FollowTab";
+import UserBio from "../SubComponents/UserBio";
+import HeaderBase from "../SubComponents/HeaderBase";
+import Messages from "../Chat/Messages/Messages";
 
 export default ({ setSelectedTab }) => {
   const classes = useStyles();
@@ -56,7 +63,8 @@ export default ({ setSelectedTab }) => {
 
   const error = useSelector((state) => state.otherUser.error.trim());
 
-  const { coverPhoto, imageUrl, noOfPosts, friends, followers } = userData;
+  const { coverPhoto, imageUrl, noOfPosts, friends, followers, userId } =
+    userData;
 
   if (isLoading) {
     return (
@@ -80,6 +88,7 @@ export default ({ setSelectedTab }) => {
   return (
     <div
       className={classes.root}
+      ref={rootRef}
       style={{
         position: "fixed",
         top: 0,
@@ -94,10 +103,16 @@ export default ({ setSelectedTab }) => {
           <CoverPhoto classes={classes} coverPhoto={coverPhoto} />
         </Grid>
         <Grid xs={12} item>
-          <ProfilePic classes={classes} friend={user} imageUrl={imageUrl} />
+          <ProfilePic
+            classes={classes}
+            friend={user}
+            userId={userId}
+            imageUrl={imageUrl}
+            rootRef={rootRef}
+          />
         </Grid>
         <Grid container item xs={12}>
-          <Bio data={userData} />
+          <UserBio data={userData} />
         </Grid>
         <Grid container className={classes.followTab} item xs={12}>
           <FollowTab
@@ -108,12 +123,7 @@ export default ({ setSelectedTab }) => {
         </Grid>
 
         <Grid container item xs>
-          <UserPosts
-            posts={userPost}
-            otherUser={true}
-            error={error}
-            rootRef={rootRef}
-          />
+          <UserPosts posts={userPost} otherUser={true} error={error} />
         </Grid>
       </Grid>
       <div style={{ height: 70, width: "100%" }} />
@@ -127,8 +137,9 @@ const Header = ({ classes, handle }) => {
     push("/");
   };
   return (
-    <Paper style={{ borderBottom: "1px solid #aaa" }} elevation={0}>
+    <HeaderBase elevation={0}>
       <Grid className={classes.headerRoot} container>
+        .
         <Grid className={classes.headerNameContainer} item>
           <IconButton
             color="primary"
@@ -143,8 +154,13 @@ const Header = ({ classes, handle }) => {
             {handle}
           </Typography>
         </Grid>
+        <Grid item>
+          <IconButton>
+            <MoreVertIcon color="primary" className={classes.settings} />
+          </IconButton>
+        </Grid>
       </Grid>
-    </Paper>
+    </HeaderBase>
   );
 };
 
@@ -160,10 +176,17 @@ const CoverPhoto = ({ classes, coverPhoto }) => {
   );
 };
 
-const ProfilePic = ({ classes, friend, imageUrl }) => {
+const ProfilePic = ({ classes, friend, imageUrl, rootRef, userId }) => {
   const dispatch = useDispatch();
   const friends = useSelector((state) => state.user.data.friends);
   const [value, setValue] = useState("Follow");
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const MoreOptionsHandler = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
 
   const handleFollowReq = (friend) => {
     if (value.toLowerCase() === "follow") {
@@ -188,15 +211,21 @@ const ProfilePic = ({ classes, friend, imageUrl }) => {
 
   return (
     <Grid container>
+      <MoreOptions
+        setAnchorEl={setAnchorEl}
+        anchorEl={anchorEl}
+        rootRef={rootRef}
+        handle={friend}
+        userId={userId}
+        imageUrl={imageUrl}
+      />
       <Grid
         xs={5}
         justify="center"
         container
         className={classes.avatarContainer}
         item>
-        <Avatar
-          className={classes.avatar}
-          src={imageUrl ? imageUrl : null}></Avatar>
+        <Avatar className={classes.avatar} src={imageUrl ? imageUrl : null} />
       </Grid>
 
       <Grid
@@ -214,7 +243,22 @@ const ProfilePic = ({ classes, friend, imageUrl }) => {
             onClick={() => {
               handleFollowReq(friend);
             }}>
-            {value}
+            <span
+              style={{
+                display: "inline-flex",
+                flex: 2,
+                justifyContent: "flex-end",
+              }}>
+              {value}
+            </span>
+            <span
+              style={{
+                display: "inline-flex",
+                flex: 1,
+                justifyContent: "flex-end",
+              }}>
+              <ExpandMoreIcon fontSize="small" onClick={MoreOptionsHandler} />
+            </span>
           </Button>
         </Grid>
       </Grid>
@@ -222,39 +266,83 @@ const ProfilePic = ({ classes, friend, imageUrl }) => {
   );
 };
 
-const Bio = ({ data }) => {
+const MoreOptions = ({
+  anchorEl,
+  setAnchorEl,
+  rootRef,
+  userId,
+  handle,
+  imageUrl,
+}) => {
+  const [openMsgs, setOpenMsgs] = useState(false);
+  const [msgsData, setMsgsData] = useState({});
+  const [msgStyles, setMsgStyles] = useState("110vh");
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+
   return (
-    <Grid style={{ paddingLeft: "8px", marginTop: -10 }} container xs={12} item>
-      {data.fullName && (
-        <Grid item xs={10}>
-          <Typography
-            style={{ fontWeight: "bold", fontSize: "1.1rem" }}
-            variant="caption">
-            {data.fullName}
-          </Typography>
-        </Grid>
+    <>
+      {openMsgs && (
+        <Portal container={rootRef.current}>
+          <Messages
+            setDisplay={setOpenMsgs}
+            setStyles={setMsgStyles}
+            styles={msgStyles}
+            msgsData={msgsData}
+          />
+        </Portal>
       )}
-      {data.course && (
-        <Grid item xs={10}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {data.course}
-          </Typography>
-        </Grid>
-      )}
-      {data.university && (
-        <Grid item xs={10}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {data.university}
-          </Typography>
-        </Grid>
-      )}
-      {data.bio && (
-        <Grid item xs={10}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {data.bio}
-          </Typography>
-        </Grid>
-      )}
-    </Grid>
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}>
+        <Paper>
+          <MenuList>
+            <MenuItem
+              style={{
+                padding: "10px 36px",
+              }}
+              onClick={() => {}}>
+              Block
+            </MenuItem>
+            <MenuItem
+              style={{
+                padding: "10px 36px",
+              }}
+              onClick={() => {
+                setMsgsData({
+                  handle: handle,
+                  userId: userId,
+                  imageUrl: imageUrl,
+                });
+                setMsgStyles("0px");
+                setOpenMsgs(true);
+                handleClose();
+              }}>
+              Message
+            </MenuItem>
+            <MenuItem
+              style={{
+                padding: "10px 36px",
+              }}
+              onClick={() => {}}>
+              Mute
+            </MenuItem>
+          </MenuList>
+        </Paper>
+      </Popover>
+    </>
   );
 };

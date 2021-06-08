@@ -1,10 +1,9 @@
 import React from "react";
-import { Typography, makeStyles } from "@material-ui/core";
+import { Typography, makeStyles, Button } from "@material-ui/core";
 import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   button: {
-    backgroundColor: theme.palette.primary["main"],
     color: "#fff",
     width: "74%",
     fontFamily: "Roboto, Helvetica, Arial, sans-serif",
@@ -26,13 +25,17 @@ export default (props) => {
             &#128521;&#128521;
           </span>
         </Typography>
-        <button
+        <Button
           className={classes.button}
+          variant="contained"
+          size="small"
+          color="primary"
           style={{ marginTop: "10vmin" }}
-          page="1"
-          onClick={props.next}>
+          onClick={() => {
+            props.next(1);
+          }}>
           Next
-        </button>
+        </Button>
       </div>
       <Typography
         style={{

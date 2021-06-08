@@ -78,7 +78,9 @@ const MediaPost = ({ post: scream, rootRef }) => {
           }
           title={
             <div>
-              <Link style={{ color: "#000", fontWeight: "bold" }} to={handle}>
+              <Link
+                style={{ color: "#000", fontWeight: "bold" }}
+                to={`user/${handle}`}>
                 {handle}
               </Link>
               <Typography variant="caption" color="textSecondary" component="p">

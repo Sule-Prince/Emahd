@@ -125,7 +125,7 @@ const MediaUpload = ({ setStyles }) => {
     setClearId(
       setTimeout(() => {
         fileRef.current.blur();
-      }, 2000)
+      }, 500)
     );
   }, [blurred]);
   return (

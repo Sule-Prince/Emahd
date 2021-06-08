@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axios } from "../config/axiosConfig";
+import IDGenerator from "../utils/IDGenerator";
 
 const initialState = {
   isLoading: false,
@@ -73,6 +74,25 @@ const screamsData = createSlice({
       state.uploadProfilePic.isLoading = false;
       state.uploadProfilePic.error = "Failed to update profile picture";
     },
+
+    updatePost: (state, { payload: { index, user, type, ...data } }) => {
+      if (user) {
+        const newPost = {
+          ...state.posts.userPost[type][index],
+          [Object.keys(data)[0]]: Object.values(data)[0],
+        };
+
+        state.posts.userPost[type] = updateObjectInArray(
+          state.posts.userPost[type],
+          {
+            index,
+            item: newPost,
+          }
+        );
+        // state.posts.userPost[type][index] = { ...newPost };
+      } else
+        state.posts[type][index][Object.keys(data)[0]] = Object.values(data)[0];
+    },
   },
   extraReducers: {
     [screamsDataThunk.pending]: (state) => {
@@ -90,7 +110,7 @@ const screamsData = createSlice({
         state.error = action.payload;
         return;
       }
-      if (state.retries === 5) {
+      if (state.retries === 3) {
         state.error = action.payload;
       }
     },
@@ -101,7 +121,23 @@ export const {
   uploadedProfilePic,
   uploadingProfilePic,
   uploadProfilePicError,
+  updatePost,
 } = screamsData.actions;
 
 const screamDataReducer = screamsData.reducer;
 export default screamDataReducer;
+
+function updateObjectInArray(array, action) {
+  return array.map((item, index) => {
+    if (index !== action.index) {
+      // This isn't the item we care about - keep it as-is
+      return item;
+    }
+
+    // Otherwise, this is the one we want - return an updated value
+    return {
+      ...item,
+      ...action.item,
+    };
+  });
+}

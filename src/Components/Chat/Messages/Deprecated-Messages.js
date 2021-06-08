@@ -1,21 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React, { useState, useEffect } from "react";
 
 import { Grid, Typography, makeStyles, Avatar } from "@material-ui/core";
 import KeyboardBackspaceIcon from "@material-ui/icons/KeyboardBackspace";
-
-import ContentLoader from "react-content-loader";
-
+import TextBox from "./TextBox";
+import { useDispatch, useSelector } from "react-redux";
 import {
   markRead,
-  createRoomThunk,
+  performSocketHandShake,
   updateChatMessages,
+  updateLastMessage,
 } from "../../../redux/userChatsSlice";
-
-import TextBox from "./TextBox";
 import MyAudio from "../../SubComponents/MyAudio";
 import ScrollToBottom from "../../SubComponents/Scroll-To-Bottom";
-import { projectFirestore } from "../../../firebase/FBConfig";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,98 +52,63 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let connected = false;
+
 const Messages = ({
-  msgsData: {
-    roomId,
-    imageUrl,
-    type = "private",
-    userId: otherUserId,
-    handle: otherUserHandle,
-  },
+  msgsData: { socketId, handle, imageUrl, i },
+  audioStream,
   setDisplay,
   setStyles,
   styles,
 }) => {
-  const [audio, setAudio] = useState({ size: 0, src: "" });
-  const [modRoomId, setModRoomId] = useState(roomId);
+  const [roomId, setRoomId] = useState(socketId);
 
-  const audioStreamRef = useRef(null);
+  const [audio, setAudio] = useState({ size: 0, src: "" });
 
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  const messages = useSelector((state) => state.chats.messages.data[modRoomId]);
-  const { imageUrl: userImageUrl, userId } = useSelector(
-    (state) => state.user.data
-  );
+  const messages = useSelector((state) => state.chats.messages.data[handle]);
+  const { imageUrl: userImageUrl } = useSelector((state) => state.user.data);
 
-  useEffect(() => {
-    if (!userId || !otherUserId) return;
-    if (roomId) return;
+  //   let socket = window.socket || {};
+  /* 
+	useEffect(() => {
+		// connected = socket.connected
+		if (connected) return;
 
-    let length =
-      userId.length > otherUserId.length ? otherUserId.length : userId.length;
+		if (roomId && !connected) socket.emit("join", { roomId, handle });
+		else {
+			dispatch(performSocketHandShake());
+		}
 
-    for (let i = 0; i < length; i++) {
-      if (userId[0] > otherUserId[0]) setModRoomId(`${userId}-${otherUserId}`);
-      else if (otherUserId[0] > userId[0])
-        setModRoomId(`${otherUserId}-${userId}`);
-    }
-  }, [roomId, userId, otherUserId]);
+		socket.on("connected", () => (connected = true));
 
-  useEffect(() => {
-    const getAudioStream = async () => {
-      const constraint = {
-        video: false,
-        audio: true,
-      };
-      const audioStream = await navigator.mediaDevices.getUserMedia(constraint);
+		socket.on("message", message => {
+			dispatch(
+				updateChatMessages({
+					handle,
+					data: { sender: "other-user", message },
+				})
+			);
+			dispatch(updateLastMessage([i, message]));
+		});
 
-      audioStreamRef.current = audioStream;
-    };
+		return () => {
+			// socket.emit("disconnect");
+			// socket.off();
+		};
 
-    getAudioStream();
-  }, []);
-
-  useEffect(() => {
-    if (roomId || !modRoomId) return;
-
-    dispatch(
-      createRoomThunk({
-        roomId: modRoomId,
-        type,
-        handle: otherUserHandle,
-      })
-    );
-
-    // eslint-disable-next-line
-  }, [roomId, modRoomId]);
-
+		// eslint-disable-next-line
+	}, [socketId, handle]);
+ */
   useEffect(() => {
     if (!messages) return;
     if (messages.unread.length === 0) return;
-    dispatch(markRead(modRoomId));
+    dispatch(markRead(handle));
 
     // eslint-disable-next-line
   }, [messages ? messages.unread : null]);
-
-  useEffect(() => {
-    if (!modRoomId) return;
-
-    const unsubscribe = projectFirestore
-      .collection("messages")
-      .doc(modRoomId)
-      .onSnapshot((doc) => {
-        updateChatMessages({
-          roomId: modRoomId,
-          data: doc.data(),
-        });
-      });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [modRoomId]);
 
   return (
     <div
@@ -159,11 +120,7 @@ const Messages = ({
       }}
       style={{ transform: `translateY(${styles})` }}>
       <div className={classes.wrapper}>
-        <Header
-          setStyles={setStyles}
-          handle={otherUserHandle}
-          imageUrl={imageUrl}
-        />
+        <Header setStyles={setStyles} handle={handle} imageUrl={userImageUrl} />
 
         <Grid
           container
@@ -179,7 +136,7 @@ const Messages = ({
           <ScrollToBottom>
             {messages &&
               messages.read.map((data, i) =>
-                data.sender === userId ? (
+                data.sender === "user" ? (
                   <div key={i} className={classes.userMsgs}>
                     <Typography variant="body2" component="span">
                       {data.message}
@@ -218,10 +175,11 @@ const Messages = ({
         </Grid>
 
         <TextBox
-          userId={userId}
-          roomId={modRoomId}
+          handle={handle}
+          roomId={roomId}
+          i={i}
           setAudio={setAudio}
-          audioStream={audioStreamRef}
+          audioStream={audioStream}
         />
       </div>
     </div>
@@ -263,18 +221,5 @@ const Header = ({ setStyles, handle, imageUrl }) => {
         </Typography>
       </Grid>
     </Grid>
-  );
-};
-
-const CleanChat = (props) => {
-  return (
-    <ContentLoader viewBox="0 0 400 160" height={160} width={400} {...props}>
-      <rect x="0" y="12" rx="5" ry="5" width="220" height="10" />
-      <rect x="0" y="29" rx="5" ry="5" width="220" height="10" />
-      <rect x="179" y="76" rx="5" ry="5" width="220" height="10" />
-      <rect x="179" y="58" rx="5" ry="5" width="220" height="10" />
-      <rect x="0" y="104" rx="5" ry="5" width="220" height="10" />
-      <rect x="0" y="122" rx="5" ry="5" width="220" height="10" />
-    </ContentLoader>
   );
 };

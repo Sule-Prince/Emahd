@@ -12,10 +12,9 @@ import Page7 from "./Page7";
 
 export default ({ history, ...props }) => {
   const [page, setPage] = useState(0);
-
+  console.log(page);
   // Function to take user to the next page
-  function next(ev) {
-    let value = ev.target.getAttribute("page");
+  function next(value) {
     setPage(parseInt(value));
   }
 

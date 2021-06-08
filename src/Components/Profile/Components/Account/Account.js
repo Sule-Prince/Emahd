@@ -1,47 +1,53 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+
 import {
   Grid,
-  Typography,
-  IconButton,
   Card,
   CardActionArea,
+  Typography,
+  IconButton,
   Divider,
-  // Button,
+  Button,
   CircularProgress,
 } from "@material-ui/core";
 
 import SettingsIcon from "@material-ui/icons/Settings";
+import EmailIcon from "@material-ui/icons/Email";
 import PhotoCameraIcon from "@material-ui/icons/PhotoCamera";
 
-import FollowCard from "../../../SubComponents/FollowCard";
+import BackDrop from "../../../SubComponents/BackDrop";
 
-import { useSelector, useDispatch } from "react-redux";
+import {
+  uploadCoverPhotoError,
+  uploadedCoverPhoto,
+  uploadingCoverPhoto,
+} from "../../../../redux/userActionsSlice";
+
+import useFileUpload from "../../../../utils/customHooks/useFileUpload";
+
+import FollowCard from "../../../SubComponents/FollowCard";
 
 import "./Account.css";
 
 import { useStyles } from "./styles";
 import ProfilePic from "./ProfilePic";
 import UserPosts from "./UserPosts/UserPosts";
-import useFileUpload from "../../../../utils/customHooks/useFileUpload";
 import Settings from "./Settings";
-// import Chat from "../../../Chat/Chat";
+import Chat from "../../../Chat/Chat";
 import { followSuggestThunk } from "../../../../redux/extraDataSlice";
 import HeaderBase from "../../../SubComponents/HeaderBase";
 import Loader from "../../../SubComponents/Loader";
-import {
-  uploadCoverPhotoError,
-  uploadedCoverPhoto,
-  uploadingCoverPhoto,
-} from "../../../../redux/userActionsSlice";
-import BackDrop from "../../../SubComponents/BackDrop";
+
 import RefreshWrapper from "../../../SubComponents/RefreshWrapper";
 import useRefresh from "../../../../utils/customHooks/useRefresh";
 import { userDataThunk } from "../../../../redux/userDataSlice";
+import UserBio from "../../../SubComponents/UserBio";
 
 const Account = () => {
   // Styles to be used by the settings Component to display the Settings
   const [styles, setStyles] = useState("110vw");
-  // const [display, setDisplay] = useState(false);
+  const [display, setDisplay] = useState(false);
 
   const rootRef = useRef(null);
 
@@ -69,6 +75,7 @@ const Account = () => {
     <>
       <div className={classes.root} ref={rootRef}>
         <Settings styles={styles} setStyles={setStyles} />
+        {display && <Chat setDisplay={setDisplay} />}
 
         <Grid container style={{ height: "100%" }}>
           <Grid item style={{ width: "100%", top: 0, zIndex: 10 }}>
@@ -79,20 +86,20 @@ const Account = () => {
             />
           </Grid>
 
-          {/* <RefreshWrapper onRefresh={onRefresh}> */}
-          <Grid style={{ width: "100%" }} item>
-            <CoverPhoto classes={classes} coverPhoto={userData.coverPhoto} />
-          </Grid>
-          <Grid xs={12} item test="test">
-            <ProfilePic classes={classes} imageUrl={userData.imageUrl} />
-          </Grid>
-          <Grid container item xs={12}>
-            <Bio data={userData} />
-          </Grid>
-          <Grid justify="center" container item xs={12}>
-            {/* {display && <Chat setDisplay={setDisplay} />}
+          <RefreshWrapper onRefresh={onRefresh}>
+            <Grid style={{ width: "100%" }} item>
+              <CoverPhoto classes={classes} coverPhoto={userData.coverPhoto} />
+            </Grid>
+            <Grid xs={12} item test="test">
+              <ProfilePic classes={classes} imageUrl={userData.imageUrl} />
+            </Grid>
+            <Grid container item xs={12}>
+              <UserBio data={userData} />
+            </Grid>
+
+            <Grid justify="center" container item xs={12}>
               <Button
-                variant="contained"
+                variant="outlined"
                 size="small"
                 onClick={() => setDisplay(true)}
                 style={{
@@ -102,41 +109,49 @@ const Account = () => {
                   marginTop: "1rem",
                 }}
                 fullWidth>
+                <span
+                  style={{
+                    paddingRight: 10,
+                    lineHeight: 0,
+                  }}>
+                  <EmailIcon fontSize="small" />
+                </span>
                 Messages
-              </Button> */}
-            <Grid
-              container
-              alignItems="flex-end"
-              item
-              xs={12}
-              style={{ height: 14 }}>
-              <Divider style={{ width: "100%" }} />
+              </Button>
+              <Grid
+                container
+                alignItems="flex-end"
+                item
+                xs={12}
+                style={{ height: 14 }}>
+                <Divider style={{ width: "100%" }} />
+              </Grid>
             </Grid>
-          </Grid>
-          <Grid container className={classes.followTab} item xs={12}>
-            <FollowTab />
-          </Grid>
 
-          <Grid
-            style={{
-              borderBottom: "1px solid #ccc",
-              maxHeight: 230,
-              overflow: "hidden",
-            }}
-            xs={12}
-            item>
-            {followSuggest.isLoading ? (
-              <Loader />
-            ) : (
-              followSuggest.users.length > 0 && (
-                <UtilsNavBar users={followSuggest.users} classes={classes} />
-              )
-            )}
-          </Grid>
-          <Grid container item xs>
-            <UserPosts posts={posts.userPost} rootRef={rootRef} />
-          </Grid>
-          {/* </RefreshWrapper> */}
+            <Grid container className={classes.followTab} item xs={12}>
+              <FollowTab />
+            </Grid>
+
+            <Grid
+              style={{
+                borderBottom: "1px solid #ccc",
+                maxHeight: 230,
+                overflow: "hidden",
+              }}
+              xs={12}
+              item>
+              {followSuggest.isLoading ? (
+                <Loader />
+              ) : (
+                followSuggest.users.length > 0 && (
+                  <UtilsNavBar users={followSuggest.users} classes={classes} />
+                )
+              )}
+            </Grid>
+            <Grid container item xs>
+              <UserPosts posts={posts.userPost} rootRef={rootRef} />
+            </Grid>
+          </RefreshWrapper>
         </Grid>
         <div className="positionFix"></div>
       </div>
@@ -231,50 +246,15 @@ const CoverPhoto = ({ classes, coverPhoto }) => {
   );
 };
 
-const Bio = ({ data }) => {
-  return (
-    <Grid style={{ paddingLeft: "8px", marginTop: -10 }} container xs={12} item>
-      {data.fullName && (
-        <Grid item xs={10}>
-          <Typography
-            style={{ fontWeight: "bold", fontSize: "1.1rem" }}
-            variant="caption">
-            {data.fullName}
-          </Typography>
-        </Grid>
-      )}
-      {data.course && (
-        <Grid item xs={10}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {data.course}
-          </Typography>
-        </Grid>
-      )}
-      {data.university && (
-        <Grid item xs={10}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {data.university}
-          </Typography>
-        </Grid>
-      )}
-      {data.bio && (
-        <Grid item xs={10}>
-          <Typography style={{ fontWeight: "bold" }} variant="caption">
-            {data.bio}
-          </Typography>
-        </Grid>
-      )}
-    </Grid>
-  );
-};
-
 const FollowTab = () => {
   const [displayFollowers, setDisplayFollowers] = useState(false);
   const [displayFollowing, setDisplayFollowing] = useState(false);
 
-  const { friends: following, followers, noOfPosts } = useSelector(
-    (state) => state.user.data
-  );
+  const {
+    friends: following,
+    followers,
+    noOfPosts,
+  } = useSelector((state) => state.user.data);
 
   let noOfFollowers, noOfFollowing;
   if (following && followers) {
@@ -349,18 +329,19 @@ const FollowTab = () => {
 const UtilsNavBar = ({ classes, users }) => {
   return (
     <div className={classes.utilsNavBar}>
-      {users.map((user, i) => (
-        <span
-          key={user.handle}
-          style={{ display: "inline-block", margin: "8px 16px" }}>
-          <FollowCard
-            handle={user.handle}
-            fullName={user.fullName}
-            imageUrl={user.imageUrl}
-            index={i}
-          />
-        </span>
-      ))}
+      {users.length > 0 &&
+        users.map((user, i) => (
+          <span
+            key={user.handle}
+            style={{ display: "inline-block", margin: "8px 16px" }}>
+            <FollowCard
+              handle={user.handle}
+              fullName={user.fullName}
+              imageUrl={user.imageUrl}
+              index={i}
+            />
+          </span>
+        ))}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Grid, makeStyles, Typography } from "@material-ui/core";
+import { Grid, makeStyles, Typography, Button } from "@material-ui/core";
 import PswInput from "../SubComponents/PswInput";
 import { isEmpty } from "../../utils/validators";
 
@@ -10,7 +10,6 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1.3),
   },
   button: {
-    backgroundColor: theme.palette.primary["main"],
     width: " 100% ",
     fontFamily: "Roboto, Helvetica, Arial, sans-serif",
     color: "#fff",
@@ -48,19 +47,21 @@ export default ({ setPassword, ...props }) => {
             </Grid>
           </Grid>
           <Grid item xs={10}>
-            <button
+            <Button
               className={classes.button}
-              page="5"
+              variant="contained"
+              size="small"
+              color="primary"
               onClick={(e) => {
                 if (isEmpty(psw)) {
                   setError({ message: "Must not be empty", hasError: true });
                   return;
                 }
-                props.next(e);
+                props.next(5);
                 setPassword(getData("psw"));
               }}>
               Next
-            </button>
+            </Button>
           </Grid>
         </Grid>
       </Grid>

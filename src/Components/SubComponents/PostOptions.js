@@ -53,7 +53,7 @@ const PostOptions = ({ user = false, postId, handle }) => {
       dispatch(screamsDataThunk());
       dispatch(
         openSnackBar({
-          message: `${handle} unfollowed uccessfully`,
+          message: `${handle} unfollowed successfully`,
           duration: 3000,
         })
       );

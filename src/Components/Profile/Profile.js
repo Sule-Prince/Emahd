@@ -42,6 +42,7 @@ import {
   bannerPostsThunk,
   followSuggestThunk,
 } from "../../redux/extraDataSlice";
+import BottomModal from "../SubComponents/BottomModal";
 
 export const StorageContext = React.createContext();
 
@@ -50,9 +51,11 @@ export const StorageContext = React.createContext();
 window.jwt = jwtDecode;
 
 const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
-  const { handle: user, userId, ...data } = useSelector(
-    (state) => state.user.data
-  );
+  const {
+    handle: user,
+    userId,
+    ...data
+  } = useSelector((state) => state.user.data);
 
   const userImg = useSelector((state) => state.user.data.imageUrl);
   const noOfUnread = useSelector(
@@ -65,6 +68,8 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
   const [media, setMedia] = useState(null);
   const [fileCodec, setFileCodec] = useState(null);
   const [mediaUrl, setMediaUrl] = useState("");
+
+  // const [display, setDisplay] = useState(true);
 
   const { progress, storeData } = useStorage(
     "scream",
@@ -174,6 +179,9 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
           href="https://fonts.googleapis.com/css2?family=Ewert&display=swap"
         />
       </Helmet>
+      {/*   <BottomModal display={display} setDisplay={setDisplay}>
+        <h4>Hello World</h4>
+      </BottomModal> */}
       <TalkBubble />
       <div className="bottom-tab">
         <BottomNavigation

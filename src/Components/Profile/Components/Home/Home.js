@@ -35,10 +35,10 @@ import ProgressBar from "../../../SubComponents/ProgressBar";
 import useStyles from "./styles";
 import { StorageContext } from "../../Profile";
 import { screamsDataThunk } from "../../../../redux/postsSlice";
-import { followSuggestThunk } from "../../../../redux/extraDataSlice";
 import MultiPosts from "../../../SubComponents/MultiPosts";
 import useRefresh from "../../../../utils/customHooks/useRefresh";
 import FollowCardTwo from "../../../SubComponents/FollowCardTwo";
+import ContentLoader from "react-content-loader";
 
 const Home = ({ AccountTab }) => {
   const classes = useStyles();
@@ -138,7 +138,7 @@ const Screams = ({ classes }) => {
   return (
     <div
       style={{
-        height: "calc(100% - (130px + 1vw))",
+        height: "calc(100% - (140px + 1vw))",
         overflowY: "auto",
         paddingBottom: 16,
       }}>
@@ -162,7 +162,6 @@ const Media = ({ classes }) => {
   const users = useSelector((state) => state.extra.followSuggest.users);
 
   const onRefresh = useRefresh(screamsDataThunk);
-  const followRefresh = useRefresh(followSuggestThunk);
 
   const rootRef = useRef();
 
@@ -204,12 +203,14 @@ const Media = ({ classes }) => {
       </div> */}
 
       <Divider />
-      {!isLoading || posts.media.length > 0 ? (
-        <MultiPosts posts={posts.media} onRefresh={onRefresh} />
-      ) : (
-        <RefreshWrapper onRefresh={followRefresh}>
-          <UtilsNavBar users={users} classes={classes} />
+      {isLoading && <PostSkeletons />}
+      {!isLoading && posts.media.length > 0 && (
+        <RefreshWrapper onRefresh={onRefresh}>
+          <MultiPosts posts={posts.media} />
         </RefreshWrapper>
+      )}
+      {!isLoading && posts.media.length <= 0 && (
+        <UtilsNavBar users={users} classes={classes} />
       )}
     </div>
   );
@@ -255,5 +256,32 @@ const UtilsNavBar = ({ classes, users }) => {
         </div>
       </Grid>
     </Grid>
+  );
+};
+
+const PostSkeletons = () => {
+  const skeletons = new Array(5).fill(<></>).map(() => (
+    <ContentLoader
+      key={Math.round(Math.random() * 100000000000)}
+      viewBox="0 0 400 460"
+      backgroundColor="#d9d9d9"
+      foregroundColor="#e9e9e9"
+      style={{
+        marginBottom: 16,
+      }}>
+      <circle cx="31" cy="31" r="25" />
+      <rect x="70" y="18" rx="2" ry="2" width="170" height="10" />
+      <rect x="70" y="34" rx="2" ry="2" width="140" height="10" />
+      <rect x="0" y="65" rx="2" ry="2" width="400" height="400" />
+    </ContentLoader>
+  ));
+  return (
+    <div
+      style={{
+        maxHeight: "100%",
+        overflowY: "auto",
+      }}>
+      {skeletons}
+    </div>
   );
 };

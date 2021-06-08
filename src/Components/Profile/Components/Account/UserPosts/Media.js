@@ -49,7 +49,7 @@ const Media = ({ posts, error, otherUser }) => {
           </NoPostUpload>
         )
       ) : (
-        <MultiPosts posts={posts} onRefresh={refresh} />
+        <MultiPosts posts={posts} onRefresh={refresh} userpost />
       )}
     </>
   );

@@ -27,17 +27,21 @@ const Notification = ({ notification, color }) => {
       hh: "%dh",
       d: "1d",
       dd: "%dd",
-      M: "1m",
-      MM: "%dm",
-      y: "1y",
-      yy: "%dy",
+      M: "a month",
+      MM: "%dmonths",
+      y: "1yr",
+      yy: "%dyrs",
     },
   });
 
   return (
     <Grid item xs={12}>
       <CardActionArea style={{ height: 70, backgroundColor: color }}>
-        <Link to="" style={{ height: "inherit", width: "inherit" }}>
+        <Link
+          to={
+            notification.type === "follow" ? `/user/${notification.sender}` : ""
+          }
+          style={{ height: "inherit", width: "inherit" }}>
           <CardHeader
             style={{ height: 60, background: "none", paddingLeft: 10 }}
             title={

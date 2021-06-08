@@ -20,18 +20,17 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     position: "relative",
     margin: theme.spacing(2.5),
-    boxShadow: ({ variant }) => (variant > 0 ? theme.shadows[variant] : ""),
+    boxShadow: ({ shadow }) => (shadow > 0 ? theme.shadows[shadow] : ""),
     borderRadius: "3px",
   },
   header: {
-    color: theme.palette.grey[400],
+    color: "#fff",
     height: "15px",
   },
   cover_root: {
     width: "100%",
     height: ({ size }) => (size === "large" ? 140 : 100),
-    background:
-      "linear-gradient(360deg, #3f51b5 0%, #2196f3 75%, #64b5f6 100%)",
+    background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
   },
   cover_img: {
     width: "100%",
@@ -83,10 +82,10 @@ function FollowCardTwo({
   index,
   style = {},
   noBorder,
-  variant,
+  shadow,
   size,
 }) {
-  const classes = useStyles({ size, variant });
+  const classes = useStyles({ size, shadow });
 
   const dispatch = useDispatch();
   // const friends = useSelector(state => state.user.data.friends);
@@ -206,7 +205,7 @@ const UserInfo = ({ handle, fullName, classes }) => {
   return (
     <Grid container item className={classes.userInfo_root}>
       <Grid container item justify="center">
-        <Link to={handle}>
+        <Link to={`user/${handle}`}>
           <Typography
             className={classes.channelUserName}
             color="textPrimary"
@@ -216,7 +215,7 @@ const UserInfo = ({ handle, fullName, classes }) => {
         </Link>
       </Grid>
       <Grid container item justify="center">
-        <Link to={handle}>
+        <Link to={`user/${handle}`}>
           <Typography color="textSecondary" variant="caption">
             {handle}
           </Typography>

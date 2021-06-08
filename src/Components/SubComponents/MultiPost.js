@@ -79,7 +79,9 @@ function MultiPost({ mediaPost, rootRef }) {
             />
           }
           title={
-            <Link style={{ color: "#000", fontWeight: "bold" }} to={handle}>
+            <Link
+              style={{ color: "#000", fontWeight: "bold" }}
+              to={`user/${handle}`}>
               {handle}
             </Link>
           }

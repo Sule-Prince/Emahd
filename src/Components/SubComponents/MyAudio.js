@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 
-import { makeStyles, Grid, Avatar, ButtonBase } from "@material-ui/core";
+import {
+  makeStyles,
+  Grid,
+  Avatar,
+  ButtonBase,
+  Slider,
+} from "@material-ui/core";
 import PlayArrowRoundedIcon from "@material-ui/icons/PlayArrowRounded";
 import PauseRoundedIcon from "@material-ui/icons/PauseRounded";
 
@@ -16,72 +22,44 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     position: "relative",
-    margin: "15px 0px",
-
-    "& > :nth-child(1)": {
-      borderRadius: "50%",
-      position: "absolute",
-      backgroundColor: theme.palette.primary["main"],
-    },
-    "& > :nth-child(2)": {
-      width: "100%",
-      height: 3,
-      backgroundColor: "#eee",
-      borderRadius: 3,
-    },
+    margin: "6px 0px",
+    paddingRight: 6,
   },
 }));
 
 const MyAudio = ({ audio, imageUrl }) => {
-  const slideBall = useState(11)[0];
-  const [slideStyle, setSlideStyle] = useState({ left: -(slideBall / 2) });
   const [audMeta, setAudMeta] = useState({ currTime: 0, duration: 0 });
   const [isPlaying, setIsPlaying] = useState(false);
-  const sliderRef = useRef(null);
+  const [sliderVal, setSliderVal] = useState(0);
+  const [efSlider, setEfSlider] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const timeoutId = useRef(null);
+
   const audioRef = useRef(null);
-  const audDur = useRef({ duration: 0, currTime: 0 }).current;
-  const slidePos = useRef({ x: 0, width: 0 }).current;
-  const audData = useRef({ playing: false, loaded: false }).current;
+  const audDur = useRef(0);
 
   const classes = useStyles();
 
-  const updateSlideBar = () => {
-    if (audDur.duration === 0) return;
-    const halfSize = slideBall / 2;
-
-    let barLength = (audDur.currTime * slidePos.width) / audDur.duration;
-    barLength = barLength - halfSize;
-    setSlideStyle((prev) => ({ ...prev, left: barLength }));
-  };
-
-  const updateAudioPos = () => {
-    if (isNaN(audDur.duration) || audDur.duration === Infinity) return;
-    const halfSize = slideBall / 2;
-    let currentTime =
-      ((slideStyle.left + halfSize) * audDur.duration) / slidePos.width;
-    audioRef.current.currentTime = currentTime;
+  const handleChange = (event, newValue) => {
+    setSliderVal(newValue);
+    setEfSlider(newValue);
   };
 
   useEffect(() => {
     const audioEl = audioRef.current;
     audioEl.parentNode.append(audioEl);
-    const { x, width } = sliderRef.current.getBoundingClientRect();
-    slidePos.x = x;
-    slidePos.width = width;
+
     audioEl.ondurationchange = (e) => {
-      audDur.duration = audioEl.duration;
       setAudMeta((prev) => ({ ...prev, duration: audioEl.duration }));
 
-      updateSlideBar();
+      audDur.current = audioEl.duration;
     };
     audioEl.ontimeupdate = (e) => {
-      audDur.currTime = audioEl.currentTime;
       setAudMeta((prev) => ({
         ...prev,
         currTime: audioEl.currentTime,
       }));
-
-      updateSlideBar();
     };
 
     audioEl.onplay = () => {
@@ -93,6 +71,29 @@ const MyAudio = ({ audio, imageUrl }) => {
 
     // eslint-disable-next-line
   }, []);
+
+  useEffect(() => {
+    console.log(isUpdating);
+    if (isUpdating) return;
+    const newValue = (audMeta.currTime * 100) / audMeta.duration;
+
+    setSliderVal(newValue);
+  }, [audMeta, isUpdating]);
+
+  useEffect(() => {
+    clearTimeout(timeoutId.current);
+    const duration = audioRef.current.duration;
+    if (isNaN(duration) || duration === Infinity) return;
+    setIsUpdating(true);
+
+    const currentTime = (efSlider * duration) / 100;
+
+    audioRef.current.currentTime = currentTime;
+
+    timeoutId.current = setTimeout(() => {
+      setIsUpdating(false);
+    }, 500);
+  }, [efSlider]);
 
   return (
     <>
@@ -123,49 +124,10 @@ const MyAudio = ({ audio, imageUrl }) => {
 
         <Grid item style={{ flexGrow: 1 }}>
           <div className={classes.slideWrapper}>
-            <span
-              onTouchStart={(e) => {
-                audioRef.current.pause();
-              }}
-              onTouchMove={(e) => {
-                e.persist();
-                let posX = e.touches[0].clientX,
-                  halfSize = slideBall / 2;
-                if (
-                  posX >= slidePos.x - halfSize &&
-                  posX <= slidePos.width + (slidePos.x - halfSize)
-                ) {
-                  setSlideStyle((prev) => ({
-                    ...prev,
-                    left: posX - slidePos.x,
-                  }));
-                }
-              }}
-              style={{ ...slideStyle, width: slideBall, height: slideBall }}
-              onTouchEnd={(e) => {
-                updateAudioPos();
-                // audioRef.current.play();
-              }}></span>
-
-            <span
-              ref={sliderRef}
-              onTouchStart={(e) => {
-                e.persist();
-                let posX = e.touches[0].clientX;
-                setSlideStyle((prev) => ({ ...prev, left: posX - slidePos.x }));
-              }}
-              onTouchEnd={(e) => {
-                e.persist();
-                updateAudioPos();
-              }}></span>
+            <Slider value={sliderVal} onChange={handleChange} />
           </div>
         </Grid>
-        <Audio
-          audio={audio}
-          audioRef={audioRef}
-          audData={audData}
-          audDur={audDur}
-        />
+        <Audio audio={audio} audioRef={audioRef} />
       </Grid>
     </>
   );
@@ -173,7 +135,7 @@ const MyAudio = ({ audio, imageUrl }) => {
 
 export default React.memo(MyAudio);
 
-const Audio = React.memo(({ audioRef, audio, audData }) => {
+const Audio = React.memo(({ audioRef, audio }) => {
   return (
     <audio
       style={{ display: "none" }}
@@ -181,9 +143,7 @@ const Audio = React.memo(({ audioRef, audio, audData }) => {
       ref={audioRef}
       onLoadedData={(e) => {
         const audioEl = audioRef.current;
-        if (!audData.loaded) {
-          audData.loaded = true;
-        }
+
         if (audioEl.duration === Infinity) {
           audioEl.currentTime = 1e101;
           setTimeout(() => {
