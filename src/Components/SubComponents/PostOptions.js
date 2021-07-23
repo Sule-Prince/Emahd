@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import {
   Grid,
@@ -23,13 +23,17 @@ import { screamsDataThunk } from "../../redux/postsSlice";
 import MessagePage from "./MessagePage";
 import FixedModal from "./FixedModal";
 import { closeSnackBar, openSnackBar } from "../../redux/userActionsSlice";
+import { addFriend, removeFriend } from "../../redux/userDataSlice";
 
-const PostOptions = ({ user = false, postId, handle }) => {
+const PostOptions = ({ user = false, postId, section, handle }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [deletePost, setDeletePost] = useState(false);
   const [openReport, setOpenReport] = useState(false);
 
+  const [followVal, setFollowVal] = useState("Follow");
+
+  const friends = useSelector((state) => state.user.data.friends);
+  const admin = useSelector((state) => state.user.data.admin);
   const dispatch = useDispatch();
 
   const handleClick = (event) => {
@@ -48,19 +52,71 @@ const PostOptions = ({ user = false, postId, handle }) => {
     handleClose();
   };
 
-  const unfollowUser = () => {
-    axios.post("/user/unfollowrequest", { friend: handle }).then(() => {
-      dispatch(screamsDataThunk());
-      dispatch(
-        openSnackBar({
-          message: `${handle} unfollowed successfully`,
-          duration: 3000,
-        })
-      );
-    });
+  const addToPost = () => {
+    dispatch(
+      openSnackBar({
+        loading: true,
+        message: ` adding post to top stories`,
+      })
+    );
+    axios
+      .post(`/admin/addpost/${postId}`, { section })
+      .then(() => {
+        dispatch(closeSnackBar());
+        dispatch(
+          openSnackBar({
+            message: `${postId} added to top stories successfully!`,
+            duration: 3000,
+          })
+        );
+      })
+      .catch(() => {
+        dispatch(closeSnackBar());
+        dispatch(
+          openSnackBar({
+            type: "error",
+            message: `Post couldn't be added to top posts`,
+            duration: 3000,
+          })
+        );
+      });
+  };
+
+  const handleFollowReq = (friend) => {
+    if (followVal.toLowerCase() === "follow") {
+      axios.post("/user/followrequest", { friend }).then(() => {
+        setFollowVal("Unfollow");
+        dispatch(addFriend(friend));
+        dispatch(screamsDataThunk());
+        dispatch(
+          openSnackBar({
+            message: `${handle} followed successfully`,
+            duration: 3000,
+          })
+        );
+      });
+    } else {
+      axios.post("/user/unfollowrequest", { friend }).then(() => {
+        setFollowVal("Follow");
+        dispatch(removeFriend(friend));
+        dispatch(screamsDataThunk());
+        dispatch(
+          openSnackBar({
+            message: `${handle} unfollowed successfully`,
+            duration: 3000,
+          })
+        );
+      });
+    }
 
     handleClose();
   };
+
+  useEffect(() => {
+    if (!friends) return;
+    if (friends.includes(handle)) setFollowVal("Unfollow");
+    else setFollowVal("Follow");
+  }, [friends, handle]);
 
   const openReportHandle = () => {
     setOpenReport(true);
@@ -95,31 +151,25 @@ const PostOptions = ({ user = false, postId, handle }) => {
     handleClose();
   };
 
-  useEffect(() => {
-    if (!deletePost) return;
-
-    const sendDeleteReq = () => {
-      dispatch(
-        openSnackBar({
-          message: "Deleting post...",
-          shouldClose: false,
-          loading: true,
-        })
-      );
-      axios.post("/deletescream", { postId }).then(() => {
-        dispatch(screamsDataThunk());
-        dispatch(closeSnackBar());
-        dispatch(
-          openSnackBar({
-            message: "Post deleted successfully",
-            duration: 3000,
-          })
-        );
-        setDeletePost(false);
-      });
-    };
-    sendDeleteReq();
-  }, [deletePost, postId, dispatch]);
+  const sendDeleteReq = async () => {
+    dispatch(
+      openSnackBar({
+        message: "Deleting post...",
+        shouldClose: false,
+        loading: true,
+      })
+    );
+    await axios.post(`/deletescream/${handle}`, { postId });
+    dispatch(screamsDataThunk());
+    dispatch(closeSnackBar());
+    dispatch(
+      openSnackBar({
+        type: "success",
+        message: "Post deleted successfully",
+        duration: 3000,
+      })
+    );
+  };
 
   return (
     <>
@@ -140,42 +190,38 @@ const PostOptions = ({ user = false, postId, handle }) => {
             horizontal: "right",
           }}>
           <Paper>
-            {user ? (
-              <MenuList>
-                <MenuItem onClick={copyLink}>Copy Link</MenuItem>
+            <MenuList>
+              <MenuItem onClick={copyLink}>Copy Link</MenuItem>
+              <MenuItem
+                onClick={() => {
+                  dispatch(
+                    openSnackBar({
+                      message: "Post archived successfully",
+                      duration: 3000,
+                    })
+                  );
+                  handleClose();
+                }}>
+                Archive post
+              </MenuItem>
+              {user ? (
                 <MenuItem onClick={handleDelete}>Delete Post</MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    dispatch(
-                      openSnackBar({
-                        message: "Post archived successfully",
-                        duration: 3000,
-                      })
-                    );
-                    handleClose();
-                  }}>
-                  Archive post
-                </MenuItem>
-              </MenuList>
-            ) : (
-              <MenuList>
-                <MenuItem onClick={unfollowUser}>Unfollow</MenuItem>
-                <MenuItem onClick={copyLink}>Copy Link</MenuItem>
-                <MenuItem
-                  onClick={() => {
-                    dispatch(
-                      openSnackBar({
-                        message: "Post archived successfully",
-                        duration: 3000,
-                      })
-                    );
-                    handleClose();
-                  }}>
-                  Archive post
-                </MenuItem>
-                <MenuItem onClick={openReportHandle}>Report Post</MenuItem>
-              </MenuList>
-            )}
+              ) : (
+                <div>
+                  <MenuItem
+                    onClick={() => {
+                      handleFollowReq(handle);
+                    }}>
+                    {followVal}
+                  </MenuItem>
+
+                  <MenuItem onClick={openReportHandle}>Report Post</MenuItem>
+                </div>
+              )}
+              {admin && (
+                <MenuItem onClick={addToPost}>Add To Top Posts</MenuItem>
+              )}
+            </MenuList>
           </Paper>
         </Popover>
       </div>
@@ -208,8 +254,7 @@ const PostOptions = ({ user = false, postId, handle }) => {
                 <IconButton
                   color="primary"
                   onClick={() => {
-                    setDeletePost(true);
-                    setOpenModal(false);
+                    sendDeleteReq().then(() => setOpenModal(false));
                   }}>
                   <DoneIcon />
                 </IconButton>

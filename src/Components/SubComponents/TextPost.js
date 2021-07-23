@@ -40,6 +40,7 @@ const Textpost = ({ post: scream }) => {
     likeCount,
     commentCount,
     createdAt,
+    userId,
     imageUrl: userImg,
     handle,
   } = scream;
@@ -49,6 +50,11 @@ const Textpost = ({ post: scream }) => {
   const classes = useStyles();
 
   const user = useSelector((state) => state.user.data.handle);
+  const personalizedHandle = useSelector((state) => {
+    if (state.user.personalized[userId])
+      return state.user.personalized[userId].handle;
+    else return null;
+  });
 
   const [commentNo, setCommentNo] = useState(commentCount);
 
@@ -62,6 +68,7 @@ const Textpost = ({ post: scream }) => {
           }
           action={
             <PostOptions
+              section="scream"
               postId={postId}
               handle={handle}
               user={user === handle ? true : false}
@@ -72,7 +79,7 @@ const Textpost = ({ post: scream }) => {
               <Link
                 style={{ color: "#000", fontWeight: "bold" }}
                 to={`user/${handle}`}>
-                {handle}
+                {personalizedHandle || handle}
               </Link>
               <Typography variant="caption" color="textSecondary" component="p">
                 {dayjs(createdAt).fromNow()}

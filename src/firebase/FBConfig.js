@@ -29,4 +29,5 @@ firebase
   });
 export const projectStorage = firebase.storage();
 export const projectFirestore = firebase.firestore();
+export const firestoreInit = firebase.firestore
 export const projectAuth = firebase.auth();

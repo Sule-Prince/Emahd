@@ -10,6 +10,7 @@ import {
   markRead,
   createRoomThunk,
   updateChatMessages,
+  clearRead,
 } from "../../../redux/userChatsSlice";
 
 import TextBox from "./TextBox";
@@ -32,6 +33,16 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 40,
     overflowY: "auto",
   },
+  adminMsg: {
+    backgroundColor: "rgba(50, 50, 50, .8)",
+    borderRadius: 10,
+    padding: "3px 16px",
+    color: "#eee",
+    margin: "6px 0px",
+    maxWidth: "90%",
+    boxShadow: theme.shadows[3],
+    alignSelf: "center",
+  },
   userMsgs: {
     // background: "linear-gradient(45deg, #e040fb, #aa00ff)",
     backgroundColor: "#ccc",
@@ -39,8 +50,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "6px 12px",
     margin: "3px 0px",
     maxWidth: "90%",
-    boxShadow:
-      "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+    boxShadow: theme.shadows[3],
     alignSelf: "flex-end",
   },
   otherMsgs: {
@@ -50,8 +60,7 @@ const useStyles = makeStyles((theme) => ({
     padding: "6px 12px",
     margin: "3px 0px",
     maxWidth: "90%",
-    boxShadow:
-      "0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)",
+    boxShadow: theme.shadows[3],
     alignSelf: "flex-start",
   },
 }));
@@ -137,16 +146,25 @@ const Messages = ({
     const unsubscribe = projectFirestore
       .collection("messages")
       .doc(modRoomId)
+      .collection("messages")
       .onSnapshot((doc) => {
-        updateChatMessages({
-          roomId: modRoomId,
-          data: doc.data(),
-        });
+        const data = [];
+        doc.docChanges().forEach((docs) => data.push(docs.doc.data()));
+
+        dispatch(
+          updateChatMessages({
+            roomId: modRoomId,
+            data,
+          })
+        );
       });
 
     return () => {
+      dispatch(clearRead(modRoomId));
       unsubscribe();
     };
+
+    // eslint-disable-next-line
   }, [modRoomId]);
 
   return (
@@ -179,7 +197,13 @@ const Messages = ({
           <ScrollToBottom>
             {messages &&
               messages.read.map((data, i) =>
-                data.sender === userId ? (
+                data.sender === "admin" ? (
+                  <div key={i} className={classes.adminMsg}>
+                    <Typography variant="body2" component="span">
+                      {data.message}
+                    </Typography>
+                  </div>
+                ) : data.sender === userId ? (
                   <div key={i} className={classes.userMsgs}>
                     <Typography variant="body2" component="span">
                       {data.message}
@@ -195,7 +219,7 @@ const Messages = ({
               )}
             {messages &&
               messages.unread.map((data, i) =>
-                data.sender === "user" ? (
+                data.sender === userId ? (
                   <div key={i} className={classes.userMsgs}>
                     <Typography variant="body2" component="span">
                       {data.message}
@@ -277,4 +301,8 @@ const CleanChat = (props) => {
       <rect x="0" y="122" rx="5" ry="5" width="220" height="10" />
     </ContentLoader>
   );
+};
+
+const sortMsgs = (array) => {
+  const sortedArr = array.sort();
 };

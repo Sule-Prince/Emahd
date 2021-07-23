@@ -56,7 +56,8 @@ const MySnackBar = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const handleClose = (event, reason) => {
-    if (!shouldClose) return;
+    console.log(loading);
+    if (!shouldClose || loading) return;
     dispatch(closeSnackBar());
   };
 

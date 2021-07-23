@@ -1,5 +1,6 @@
 import { makeStyles } from "@material-ui/core";
-import { openSnackBar } from "../../redux/userActionsSlice";
+
+import { useState, useRef } from "react";
 
 // Styles for the Camera functionality
 // Located at the CameraDevices component
@@ -62,181 +63,129 @@ export const useStyles = makeStyles((theme) => ({
   },
 }));
 
-/* =================== This is the heart of the Camera Functionality =================== */
+const useCamera = () => {
+  const [timer, setTimer] = useState(0),
+    [size, setSize] = useState(0),
+    [data, setData] = useState(null),
+    [view, setView] = useState("user"),
+    [type, setType] = useState("video"),
+    videoConstraint = {
+      video: { facingMode: "user", width: 4096, height: 4096 },
+      audio: true,
+    };
 
-/**
- * This Function gets the Media of the device i.e the Device's camera & microphone
- * It streams the data from the camera to the video element in the DOM
- * It combines multiple audio nodes if present to be fed into the Recorder interface
- *
- */
-export const getDeviceCamera = async (
-  streamRef,
-  videoRef,
-  imgRef,
-  recorderRef,
-  videoConstraint,
-  chunks,
-  media,
-  setTimer
-) => {
-  try {
-    // let stream = streamRef.current;
-    recorderRef.current = null;
+  let startTime;
 
-    if (streamRef.current) {
-      const tracks = streamRef.current.getTracks();
-      tracks.forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-      streamRef.current = null;
-      recorderRef.current = null;
-    }
-    streamRef.current = await navigator.mediaDevices.getUserMedia(
+  const recorderStream = useRef(null),
+    cameraStream = useRef(null),
+    chunks = useRef([]),
+    typeRef = useRef("video"),
+    intervalId = useRef(null);
+
+  const getCameraAccess = async (callback) => {
+    cameraStream.current = await navigator.mediaDevices.getUserMedia(
       videoConstraint
     );
-    /* 
-		const audioCtx = new AudioContext();
-		const gainOpts = { gain: 1 };
-		const gainNode = new GainNode(audioCtx, gainOpts);
-		// const panOpts = { pan: 0 };
-		// const panNode = new StereoPannerNode(audioCtx, panOpts);
+    recorderStream.current = new MediaRecorder(cameraStream.current);
+    if (!callback) return;
+    callback(cameraStream.current);
+  };
 
-		const destination = audioCtx.createMediaStreamDestination();
+  const start = (callback) => {
+    if (!cameraStream.current) return;
+    chunks.current = [];
+    setTimer(0);
+    setSize(0);
+    setData(null);
 
-		const source = audioCtx.createMediaStreamSource(streamRef.current);
-		source.connect(gainNode).connect(destination);
-
-
-		const tracks = [
-			...streamRef.current.getVideoTracks(),
-			...destination.stream.getAudioTracks(),
-		];
-		const newStream = new MediaStream(tracks);
- */
-
-    // const
-    videoRef.current.srcObject = streamRef.current;
-    videoRef.current.volume = 0;
-
-    // Media Recorder Initialization
-    recorderRef.current = new MediaRecorder(streamRef.current);
-    recorderRef.current.ondataavailable = (e) => {
-      if (chunks) chunks = [];
-      chunks.push(e.data);
+    if (recorderStream.current.state === "recording")
+      recorderStream.current.stop();
+    recorderStream.current.onstart = () => {
+      if (callback) callback();
+    };
+    recorderStream.current.ondataavailable = (e) => {
+      chunks.current.push(e.data);
     };
 
-    recorderRef.current.onstart = (e) => {
-      chunks = [];
+    recorderStream.current.start();
+    startTime = Date.now();
+    intervalId.current = setInterval(() => {
+      setTimer((prev) => (prev += 1));
+    }, 1000);
+
+    return { timer, size };
+  };
+
+  const stop = (callback) => {
+    if (recorderStream.current.state !== "recording") return;
+    clearInterval(intervalId.current);
+
+    recorderStream.current.onstop = () => {
+      const blob = new Blob(chunks.current, { type: "video/mp4" });
+
+      setSize(blob.size / 1048576);
+      const timeDiff = (Date.now() - startTime) / 1000;
+      if (timeDiff <= 0.6) setType("image");
+      if (callback) callback(typeRef.current, blob);
+      chunks.current = [];
     };
 
-    recorderRef.current.onstop = (e) => {
-      const blob = new Blob(chunks, { type: "video/mp4" });
+    setType("video");
+    const timeDiff = (Date.now() - startTime) / 1000;
 
-      let src;
-      chunks = [];
+    /*  if (timeDiff < 0.3) {
+      setTimeout(() => {
+        recorderStream.current.stop();
+        setType("image");
+      }, 120);
 
-      setTimer((prev) => ({ ...prev, size: blob.size / 1048576 }));
-      if (media.media === "image") {
-        const canvas = document.createElement("canvas");
-        const height = videoRef.current.videoHeight,
-          width = videoRef.current.videoWidth;
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(videoRef.current, 0, 0, width, height);
-        canvas.toBlob(
-          (blob) => {
-            src = URL.createObjectURL(blob);
-            imgRef.current.src = src;
-            videoRef.current.srcObject = null;
-            // URL.revokeObjectURL(src);
-          },
-          "image/jpeg",
-          1
-        );
+      return;
+    } */
+    if (timeDiff <= 0.6) {
+      setType("image");
+      typeRef.current = "image";
+      recorderStream.current.stop();
+      return;
+    }
+    recorderStream.current.stop();
+  };
 
-        return;
-      }
-      videoRef.current.srcObject = null;
-      src = URL.createObjectURL(blob);
-      videoRef.current.volume = 1;
-      videoRef.current.src = src;
-      // URL.revokeObjectURL(src);
-    };
-  } catch (error) {
-    console.log(error);
-  }
-};
+  const getMediaStream = () => {
+    return cameraStream.current;
+  };
+  const resetData = () => {
+    setTimer(0);
+    setSize(0);
+    setData(null);
+    setType("video");
+  };
 
-/* =================== This Function switches the camera =================== */
+  const changeView = (callback) => {
+    if (videoConstraint.video.facingMode === "user") {
+      setView("environment");
+      videoConstraint.video.facingMode = "environment";
+    } else {
+      videoConstraint.video.facingMode = "user";
+      setView("user");
+    }
+    if (cameraStream.current) {
+      const tracks = cameraStream.current.getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+    if (!callback) return;
+    getCameraAccess(callback);
+    return view;
+  };
 
-/**
- *
- *All it does is to switch between the front and rear cameras if present
- *It also changes the views as the original media stream of the front camera is inverted
- */
-
-export const returnChangeView = (setVideoConstraint, setVidScale) => {
-  return function () {
-    setVideoConstraint((prev) => {
-      if (prev.video.facingMode === "user") {
-        setVidScale("scaleX(1)");
-        return {
-          ...prev,
-          video: { facingMode: "environment" },
-        };
-      } else {
-        setVidScale("scaleX(-1)");
-        return {
-          ...prev,
-          video: { facingMode: "user" },
-        };
-      }
-    });
+  return {
+    getCameraAccess,
+    getMediaStream,
+    start,
+    stop,
+    resetData,
+    changeView,
+    metaData: { view, type, size, timer },
   };
 };
 
-/* =================== This Function Sets and/or Stops Recording =================== */
-
-// It decides whether the recording is a picture or video depending on the time frame recorded
-
-export const setStopRecord = (
-  hasRecorded,
-  media,
-  dispatch,
-  recorderRef,
-  setRecord
-) => {
-  const time = (hasRecorded.time2 - hasRecorded.time1) / 1000;
-  media.media = "video";
-  if (time < 0.1) {
-    setTimeout(() => {
-      setRecord({ isRecording: false, recorded: true });
-      media.media = "image";
-      recorderRef.current.stop();
-    }, 120);
-    return;
-  }
-  if (time <= 0.3) {
-    setRecord({ isRecording: false, recorded: true });
-    media.media = "image";
-    recorderRef.current.stop();
-    return;
-  }
-  if (time <= 0.9) {
-    dispatch(
-      openSnackBar({
-        message: "Video is too short",
-        duration: 3000,
-        type: "error",
-      })
-    );
-    recorderRef.current.stop();
-    setRecord({ isRecording: false, recorded: false });
-
-    return;
-  }
-
-  setRecord({ isRecording: false, recorded: true });
-  recorderRef.current.stop();
-};
+export default useCamera;

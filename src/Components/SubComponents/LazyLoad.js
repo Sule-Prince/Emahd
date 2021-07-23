@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-function LazyLoad({ children, aspectRatio, rootRef }) {
+function LazyLoad({ children, rootRef, onLoad }) {
   const [load, setLoad] = useState(false);
 
   const loadRef = useRef(null);
@@ -23,7 +23,7 @@ function LazyLoad({ children, aspectRatio, rootRef }) {
       entry = entry[0];
 
       if (entry.intersectionRatio !== 1 || load) return;
-
+      if (onLoad) onLoad();
       setLoad(true);
     }
 

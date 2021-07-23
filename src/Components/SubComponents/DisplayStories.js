@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DisplayStory from "./DisplayStory";
-import TapElement from "../../../../SubComponents/TapElement";
+import TapElement from "./TapElement";
 
 export default function DisplayStories({ stories, setDisplay }) {
   const [index, setIndex] = useState(0);

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { projectFirestore } from "../firebase/FBConfig";
 import { randomMsgs, randomNames } from "../utils/generateData";
-import { objectToArray } from "../utils/helperFunctions";
+import { makeSingleArray, objectToArray } from "../utils/helperFunctions";
 
 const generateDataObjs = (noOfObjects) => {
   const arrayOfObjs = [];
@@ -45,11 +45,9 @@ export const createRoomThunk = createAsyncThunk(
       const userHandle = getState().user.data.handle;
       const userId = getState().user.data.userId;
       const otherUserId = roomId.split("-").filter((id) => id !== userId)[0];
-      console.log({ roomId, type, otherUserHandle, userId, otherUserId });
 
-      let exists = (
-        await projectFirestore.collection("messages").doc(roomId).get()
-      ).exists;
+      const roomRef = projectFirestore.collection("messages").doc(roomId);
+      let exists = (await roomRef.get()).exists;
 
       if (exists) return;
       const data = {
@@ -63,7 +61,7 @@ export const createRoomThunk = createAsyncThunk(
         .collection("chats")
         .doc(userId)
         .update({
-          roomId: {
+          [roomId]: {
             ...data,
             userId,
             handle: userHandle,
@@ -74,16 +72,15 @@ export const createRoomThunk = createAsyncThunk(
         .collection("chats")
         .doc(otherUserId)
         .update({
-          roomId: { ...data, handle: otherUserHandle, userId: otherUserId },
+          [roomId]: { ...data, handle: otherUserHandle, userId: otherUserId },
         });
 
-      await projectFirestore
-        .collection("messages")
-        .doc(roomId)
-        .set({
-          [userId]: userHandle,
-          [otherUserId]: otherUserHandle,
-        });
+      await roomRef.set({});
+      await roomRef.collection("messages").doc(data.createdAt.toString()).set({
+        message: "You are now connected!",
+        sender: "admin",
+        createdAt: data.createdAt,
+      });
     } catch (error) {
       console.log(error);
       return rejectWithValue(
@@ -100,6 +97,7 @@ export const getUserMsgsThunk = createAsyncThunk(
       const data = await projectFirestore
         .collection("messages")
         .doc(roomId)
+        .collection("messages")
         .get();
 
       return data;
@@ -113,16 +111,37 @@ export const getUserMsgsThunk = createAsyncThunk(
 
 export const setUserMsgsThunk = createAsyncThunk(
   "user/setMsgs",
-  async ({ roomId, data }, { getState, rejectWithValue }) => {
+  async ({ roomId, data, createdAt }, { rejectWithValue }) => {
     try {
       await projectFirestore
         .collection("messages")
         .doc(roomId)
-        .update({
-          [data.createdAt]: data,
-        });
+        .collection("messages")
+        .doc(createdAt.toString())
+        .set(data);
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue(
+        "Something seems to have gone wrong, please try again"
+      );
+    }
+  }
+);
 
-      return data;
+export const markReadThunk = createAsyncThunk(
+  "user/markread",
+  async ({ roomId, createdAt, data }, { getState, rejectWithValue }) => {
+    try {
+      const userId = getState().user.data.userId;
+
+      await projectFirestore
+        .collection("messages")
+        .doc(roomId)
+        .collection("messages")
+        .doc(createdAt.toString())
+        .update({
+          [userId]: data.createdAt,
+        });
     } catch (error) {
       return rejectWithValue(
         "Something seems to have gone wrong, please try again"
@@ -139,16 +158,23 @@ const userChatsSlice = createSlice({
       const { roomId, data } = action.payload;
       if (!state.messages.data[roomId])
         state.messages.data[roomId] = { read: [], unread: [] };
+
       state.messages.data[roomId].unread = [
         ...state.messages.data[roomId].unread,
-        data,
+        ...data,
       ];
     },
     markRead: (state, action) => {
-      const roomId = action.payload;
-      const userMsg = state.messages.data[roomId];
-      userMsg.read = [...userMsg.read, ...userMsg.unread];
+      const roomId = action.payload,
+        userMsg = state.messages.data[roomId],
+        read = new Set([...userMsg.read, ...userMsg.unread]);
+      userMsg.read = [...read];
       userMsg.unread = [];
+    },
+    clearRead: (state, action) => {
+      const roomId = action.payload;
+
+      state.messages.data[roomId] = { read: [], unread: [] };
     },
     updateLastMessage: (state, action) => {
       const { roomId, lastMsg, createdAt } = action.payload;
@@ -181,6 +207,7 @@ const userChatsSlice = createSlice({
 
 export const {
   markRead,
+  clearRead,
   updateChatMessages,
   performSocketHandShake,
   updateLastMessage,
@@ -188,12 +215,3 @@ export const {
 const userChatsReducer = userChatsSlice.reducer;
 
 export default userChatsReducer;
-
-function makeSingleArray(array) {
-  const singleArray = [];
-  for (let arr of array) {
-    singleArray.push(arr[1]);
-  }
-
-  return singleArray;
-}

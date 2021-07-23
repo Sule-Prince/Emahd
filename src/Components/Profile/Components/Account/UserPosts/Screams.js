@@ -61,7 +61,7 @@ const ScreamPost = ({ posts, rootRef }) =>
         <TextPost post={post} />
       </Grid>
     ) : (
-      <Grid key={post.postId} item xs={12} style={{ marginBottom: 100 }}>
+      <Grid key={post.postId} item xs={12}>
         <MediaPost post={post} rootRef={rootRef} />
       </Grid>
     )

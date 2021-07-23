@@ -5,7 +5,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useStyles } from "../Profile/Components/Account/styles";
 import HeaderBase from "./HeaderBase";
 
-const Header = ({ setDisplay, data, avatar, imageUrl }) => {
+const Header = ({ setDisplay, data, imageUrl, ...props }) => {
   const classes = useStyles();
 
   const handleCancelButton = () => {
@@ -13,7 +13,7 @@ const Header = ({ setDisplay, data, avatar, imageUrl }) => {
   };
   return (
     <>
-      <HeaderBase style={{ zIndex: 1, position: "absolute" }}>
+      <HeaderBase style={{ zIndex: 1, position: "absolute" }} {...props}>
         <Grid className={classes.headerRoot} container>
           <Grid
             style={{ display: "flex", alignItems: "center" }}
@@ -37,7 +37,7 @@ const Header = ({ setDisplay, data, avatar, imageUrl }) => {
               </Typography>
             </Grid>
           </Grid>
-          {avatar && (
+          {imageUrl && (
             <Grid item style={{ marginRight: 10 }}>
               <Avatar src={imageUrl} style={{ height: 35, width: 35 }} />
             </Grid>

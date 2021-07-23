@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { createStore, get } from "idb-keyval";
 import { axios } from "../config/axiosConfig";
+import { projectFirestore } from "../firebase/FBConfig";
+import { getData } from "../utils/customHooks/persist";
 import { getLocalStorageData } from "../utils/getlocalStorageData";
 
 const initialState = {
@@ -18,6 +19,7 @@ const initialState = {
     error: "",
     hasRequested: false,
   },
+  personalized: {},
   error: "",
 };
 
@@ -25,9 +27,14 @@ const imageUrlThunk = createAsyncThunk(
   "user/dataUrl",
   async (args, { rejectWithValue }) => {
     try {
-      const imageStore = createStore("Emahd", "image-store");
-      const imgFile = await get("imageUrl", imageStore);
-      const coverFIle = await get("coverPhoto", imageStore);
+      const imgFile = await getData("imageUrl", {
+        storeName: "image-store",
+        dbName: "Emahd-image",
+      });
+      const coverFIle = await getData("coverPhoto", {
+        storeName: "image-store",
+        dbName: "Emahd-image",
+      });
 
       const dataUrl = {
         imageUrl: "",
@@ -90,6 +97,37 @@ export const userLikedPostsThunk = createAsyncThunk(
   }
 );
 
+export const onlineThunk = createAsyncThunk(
+  "user/getLikedPosts",
+  async (args, { rejectWithValue, getState }) => {
+    const userId = getState().user.data.userId;
+
+    try {
+      projectFirestore.collection("chats").doc(userId).update({
+        online: true,
+      });
+    } catch (err) {
+      return rejectWithValue(
+        "Something seems to have gone wrong, please try again"
+      );
+    }
+  }
+);
+
+export const personalizedThunk = createAsyncThunk(
+  "user/personalized",
+  async (user, { getState, rejectWithValue }) => {
+    try {
+      const { personalized } = (await axios.get("/extra/getpersonalized")).data;
+      return personalized;
+    } catch (err) {
+      return rejectWithValue(
+        "Failed to get user's persoanlized data, try again later"
+      );
+    }
+  }
+);
+
 const userData = createSlice({
   name: "userData",
   initialState,
@@ -125,8 +163,20 @@ const userData = createSlice({
     },
     notifications: (state, action) => {
       if (action.payload) {
-        state.notifications.unread = [...action.payload.unread];
-        state.notifications.read = [...action.payload.read];
+        state.notifications.unread = [
+          ...action.payload.unread.sort((notA, notB) => {
+            if (notA.createdAt > notB.createdAt) return -1;
+            if (notA.createdAt < notB.createdAt) return 1;
+            return 0;
+          }),
+        ];
+        state.notifications.read = [
+          ...action.payload.read.sort((notA, notB) => {
+            if (notA.createdAt > notB.createdAt) return -1;
+            if (notA.createdAt < notB.createdAt) return 1;
+            return 0;
+          }),
+        ];
         state.notifications.noOfUnread = action.payload.unread.length;
       }
     },
@@ -156,34 +206,8 @@ const userData = createSlice({
     },
     [userDataThunk.fulfilled]: (state, action) => {
       state.isLoading = false;
-      const {
-        bio,
-        handle,
-        fullName,
-        course,
-        university,
-        email,
-        friends,
-        followers,
-        DOB,
-        gender,
-        phoneNo,
-        noOfPosts,
-      } = action.payload.data;
-      const userData = {
-        friends,
-        followers,
-        noOfPosts,
-        bio,
-        handle,
-        gender,
-        fullName,
-        course,
-        university,
-        email,
-        DOB,
-        phoneNo,
-      };
+      const { imageUrl, coverPhoto, ...userData } = action.payload.data;
+
       localStorage.setItem("userData", JSON.stringify(userData));
       state.data = { ...action.payload.data };
       state.likes = [...action.payload.likes];
@@ -210,6 +234,11 @@ const userData = createSlice({
       state.likedPosts.isLoading = false;
       state.likedPosts.error = action.payload;
     },
+
+    /* UserPersonalizedThunk */
+    [personalizedThunk.fulfilled]: (state, action) => {
+      state.personalized = { ...action.payload };
+    },
   },
 });
 
@@ -227,13 +256,3 @@ export const {
 const userDataReducer = userData.reducer;
 
 export default userDataReducer;
-
-async function getDataFromDB(data) {
-  const imageStore = createStore("Emahd", "image-store");
-  const file = await get(data, imageStore);
-
-  const dataUrl = URL.createObjectURL(file);
-  if (dataUrl) return dataUrl;
-
-  return "";
-}

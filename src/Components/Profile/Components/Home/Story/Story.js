@@ -8,7 +8,7 @@ import CameraDevice from "../../../../SubComponents/CameraDevice";
 import TypeSelect from "./TypeSelect";
 import MediaSelect from "./MediaSelect";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     height: "100vh",
     width: "100vw",
@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     zIndex: 1100,
     top: 0,
     backgroundColor: "#fff",
-    color: "#fff"
+    color: "#fff",
   },
   footerTab: {
     position: "fixed",
@@ -24,8 +24,8 @@ const useStyles = makeStyles(theme => ({
     zIndex: 10,
     width: "100%",
     paddingBottom: 3,
-    background: "linear-gradient(rgba(255, 255, 255, 0), rgba(0, 0, 0, 0.3))"
-  }
+    background: "linear-gradient(rgba(255, 255, 255, 0), rgba(0, 0, 0, 0.3))",
+  },
 }));
 
 const Story = ({ setDisplay }) => {
@@ -45,13 +45,13 @@ const Story = ({ setDisplay }) => {
       className={classes.root}
       style={{
         transform: `translateX(${style})`,
-        transition: "all .5s cubic-bezier(0, .4, .6, 1)"
+        transition: "all .5s cubic-bezier(0, .4, .6, 1)",
       }}>
       <div
         style={{
           height: "100%",
           width: "100%",
-          position: "relative"
+          position: "relative",
         }}>
         <div className={classes.footerTab}>
           <Tabs
@@ -63,34 +63,34 @@ const Story = ({ setDisplay }) => {
             <Tab
               style={{
                 fontSize: ".7rem",
-                FontWeight: "bold"
+                FontWeight: "bold",
               }}
               label="TYPE"
             />
             <Tab
               style={{
                 fontSize: ".7rem",
-                FontWeight: "bold"
+                FontWeight: "bold",
               }}
               label="CAMERA"
             />
             <Tab
               style={{
                 fontSize: ".7rem",
-                FontWeight: "bold"
+                FontWeight: "bold",
               }}
               label="MEDIA"
             />
-          </Tabs>{" "}
+          </Tabs>
         </div>
         {selected === 0 && (
           <TypeSelect setStyle={setStyle} setDisplay={setDisplay} />
-        )}{" "}
-        {selected === 1 && <CameraDevice classes={classes} />}{" "}
+        )}
+        {selected === 1 && <CameraDevice classes={classes} />}
         {selected === 2 && (
           <MediaSelect setStyle={setStyle} setDisplay={setDisplay} />
-        )}{" "}
-      </div>{" "}
+        )}
+      </div>
     </motion.div>
   );
 };

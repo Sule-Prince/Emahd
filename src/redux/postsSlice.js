@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axios } from "../config/axiosConfig";
-import IDGenerator from "../utils/IDGenerator";
+import { dataEntries, getData } from "../utils/customHooks/persist";
+import { arrayToObj } from "../utils/helperFunctions";
 
 const initialState = {
   isLoading: false,
@@ -46,6 +47,45 @@ export const screamsDataThunk = createAsyncThunk(
   }
 );
 
+export const getPostsFromIndexDB = createAsyncThunk(
+  "user/getIndexedData",
+  async (args, { rejectWithValue }) => {
+    try {
+      const posts = [];
+      const postsArr = await dataEntries({
+        storeName: "postData",
+        dbName: "Emahd-post",
+      });
+
+      const mediaFiles = arrayToObj(
+        await dataEntries({
+          storeName: "image-store",
+          dbName: "Emahd-image",
+        })
+      );
+
+      for (let index = 0; index < postsArr.length; index++) {
+        let mediaUrl;
+        const postId = postsArr[index][0];
+        const post = postsArr[index][1];
+        if (post.multiple) {
+          mediaUrl = mediaFiles[postId].map((mediaFile) =>
+            URL.createObjectURL(mediaFile)
+          );
+        } else mediaUrl = URL.createObjectURL(mediaFiles[postId]);
+        const transPost = { ...post, mediaUrl };
+
+        posts.push(transPost);
+      }
+
+      return posts;
+    } catch (error) {
+      console.error(error);
+      return rejectWithValue("Cannot get posts, please try again later");
+    }
+  }
+);
+
 const screamsData = createSlice({
   name: "postsData",
   initialState,
@@ -55,10 +95,11 @@ const screamsData = createSlice({
       state.uploadProfilePic.isLoading = true;
     },
     uploadedProfilePic: (state, action) => {
-      const payload = action.payload,
+      state.uploadProfilePic.isLoading = false;
+
+      /*  const payload = action.payload,
         length = state.posts.length,
         userPostLength = state.posts[length - 1].length;
-      state.uploadProfilePic.isLoading = false;
 
       if (length === 0) return;
       if (userPostLength === 0) return;
@@ -68,7 +109,7 @@ const screamsData = createSlice({
 
           return post;
         });
-      }
+      } */
     },
     uploadProfilePicError: (state) => {
       state.uploadProfilePic.isLoading = false;
@@ -95,6 +136,18 @@ const screamsData = createSlice({
     },
   },
   extraReducers: {
+    [getPostsFromIndexDB.fulfilled]: (state, action) => {
+      const posts = action.payload,
+        media = [],
+        scream = [];
+      for (let i = 0; i < posts.length; i++) {
+        const post = posts[i];
+        if (post.section === "scream") scream.push(post);
+        else media.push(post);
+      }
+      state.posts.media = media;
+      state.posts.scream = scream;
+    },
     [screamsDataThunk.pending]: (state) => {
       state.isLoading = true;
     },

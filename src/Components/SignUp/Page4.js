@@ -134,8 +134,9 @@ export default ({ setEmail, email, handle, ...props }) => {
     e.persist();
     e.preventDefault();
 
-    const textValue = e.target.value;
-    if (textValue === "Send Verification Code") {
+    const textValue = e.target.innerText.toLowerCase();
+    console.log(textValue);
+    if (textValue === "send verification code") {
       sendVerCode(e);
     } else {
       verifyCode(e);

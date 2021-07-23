@@ -31,13 +31,20 @@ const useStyles = makeStyles({
   },
 });
 
-const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
+const LazyLoadMedia = ({
+  type,
+  src,
+  thumb,
+  rootRef,
+  settings,
+  mediaLoaded,
+  setMediaLoaded,
+}) => {
   const mediaPad = useState(() => {
     return 100 / settings.aspectRatio;
   })[0];
 
   const [showThumb, setShowThumb] = useState(true);
-  const [mediaLoaded, setMediaLoaded] = useState(false);
   const [playOpacity, setPlayOpacity] = useState(1);
 
   const mediaRef = useRef(null);
@@ -49,7 +56,7 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
     const mediaElem = mediaRef.current;
     if (type === "image") {
       const thumbConfig = {
-        root: rootRef.current || null,
+        root: (rootRef && rootRef.current) || null,
         threshold: 0.01,
         rootMargin: "150px 0px",
       };
@@ -61,7 +68,7 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
     }
 
     const mediaConfig = {
-      root: rootRef.current || null,
+      root: (rootRef && rootRef.current) || null,
       threshold: [0.01, 1],
       rootMargin: "50px 0px",
     };
@@ -85,13 +92,13 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
         return;
       }
       if (entry.intersectionRatio < 1 && type !== "image") {
-        mediaElem.pause();
+        if (!mediaElem.paused) mediaElem.pause();
         setPlayOpacity(1);
       }
 
       if (entry.intersectionRatio === 1 && type !== "image") {
         setPlayOpacity(0);
-        mediaElem.play();
+        if (mediaElem.paused) mediaElem.play();
       }
     }
 
@@ -136,7 +143,13 @@ const LazyLoadMedia = ({ type, src, thumb, rootRef, settings }) => {
           </>
         ) : (
           <>
-            <video ref={mediaRef} loop />
+            <video
+              ref={mediaRef}
+              loop
+              onCanPlayThrough={() => {
+                setMediaLoaded(true);
+              }}
+            />
             <span
               style={{
                 opacity: playOpacity,

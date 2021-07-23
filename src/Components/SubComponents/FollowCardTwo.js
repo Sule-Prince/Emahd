@@ -29,12 +29,13 @@ const useStyles = makeStyles((theme) => ({
   },
   cover_root: {
     width: "100%",
+    position: "relative",
     height: ({ size }) => (size === "large" ? 140 : 100),
     background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
   },
   cover_img: {
     width: "100%",
-    height: ({ size }) => (size === "large" ? 140 : 100),
+    height: "100%",
     objectFit: "cover",
   },
   profile_root: {
@@ -84,6 +85,8 @@ function FollowCardTwo({
   noBorder,
   shadow,
   size,
+  rootRef,
+  ...props
 }) {
   const classes = useStyles({ size, shadow });
 
@@ -113,7 +116,12 @@ function FollowCardTwo({
     });
   };
   return (
-    <Grid container className={classes.root} style={style}>
+    <Grid
+      container
+      className={classes.root}
+      style={style}
+      ref={rootRef}
+      {...props}>
       <Header classes={classes} i={index} />
       <CoverPhoto coverPhoto={coverPhoto} classes={classes} />
 
@@ -163,8 +171,8 @@ const Header = ({ classes, i }) => {
 const CoverPhoto = ({ coverPhoto, classes }) => {
   return (
     <Grid
-      container
       item
+      container
       justify="center"
       alignItems="center"
       className={classes.cover_root}>
@@ -174,9 +182,10 @@ const CoverPhoto = ({ coverPhoto, classes }) => {
             style={{
               position: "absolute",
               width: "100%",
-              height: 20,
+              height: 25,
               top: 0,
-              background: "linear-gradient(180deg, #000, transparent)",
+              background:
+                "linear-gradient(180deg, rgba(0,0,0,.6), transparent)",
             }}></div>
           <img
             src={coverPhoto}
@@ -185,7 +194,10 @@ const CoverPhoto = ({ coverPhoto, classes }) => {
           />
         </>
       ) : (
-        <Typography variant="body1" component="span" style={{ color: "#fff" }}>
+        <Typography
+          variant="body1"
+          component="span"
+          style={{ color: "#fff", position: "absolute" }}>
           A Cover Photo
         </Typography>
       )}

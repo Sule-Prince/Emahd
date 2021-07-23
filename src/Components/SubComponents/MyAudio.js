@@ -73,7 +73,6 @@ const MyAudio = ({ audio, imageUrl }) => {
   }, []);
 
   useEffect(() => {
-    console.log(isUpdating);
     if (isUpdating) return;
     const newValue = (audMeta.currTime * 100) / audMeta.duration;
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -22,6 +22,9 @@ import CommentField from "./CommentField";
 import LazyLoad from "./LazyLoad";
 import ScreamActions from "./ScreamActions";
 import PostOptions from "./PostOptions";
+import { replaciveMerge, urlToBlob } from "../../utils/helperFunctions";
+import toFile from "../../utils/toFile";
+import { useDataStore } from "../../utils/customHooks/persist";
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -43,13 +46,14 @@ function MultiPost({ mediaPost, rootRef }) {
     mediaUrl: slides,
     multiple,
     post,
-    imageUrl,
+    userId,
+    imageUrl: userImg,
     handle,
-    scream,
     postId,
     likeCount,
     commentCount,
     createdAt,
+    section,
     postSettings,
   } = mediaPost;
   dayjs.extend(relativeTime);
@@ -59,20 +63,45 @@ function MultiPost({ mediaPost, rootRef }) {
   const classes = useStyles();
 
   const user = useSelector((state) => state.user.data.handle);
+  const personalizedHandle = useSelector((state) => {
+    if (state.user.personalized[userId])
+      return state.user.personalized[userId].handle;
+    else return null;
+  });
+  const { setData } = useDataStore();
+
+  const storeLoadedData = () => {
+    const data = {
+      multiple,
+      post,
+      userImg,
+      handle,
+      userId,
+      postId,
+      section,
+      likeCount,
+      commentCount,
+      createdAt,
+      postSettings,
+    };
+
+    setData(
+      { ref: postId, data },
+      { storeName: "postData", dbName: "Emahd-post" }
+    );
+  };
 
   return (
-    <LazyLoad rootRef={rootRef}>
+    <LazyLoad rootRef={rootRef} onLoad={storeLoadedData}>
       <Card style={{ width: "100%" }}>
         <CardHeader
           style={{ paddingLeft: 8, paddingRight: 8 }}
           avatar={
-            <Avatar
-              src={imageUrl ? imageUrl : null}
-              className={classes.avatar}
-            />
+            <Avatar src={userImg ? userImg : null} className={classes.avatar} />
           }
           action={
             <PostOptions
+              section={section}
               postId={postId}
               handle={handle}
               user={user === handle ? true : false}
@@ -82,21 +111,25 @@ function MultiPost({ mediaPost, rootRef }) {
             <Link
               style={{ color: "#000", fontWeight: "bold" }}
               to={`user/${handle}`}>
-              {handle}
+              {personalizedHandle || handle}
             </Link>
           }
         />
         <CardActionArea component="div">
           {multiple ? (
-            <Multiple slides={slides} settings={postSettings} />
+            <Multiple slides={slides} settings={postSettings} postId={postId} />
           ) : (
-            <Single src={slides} aspectRatio={postSettings[0].aspectRatio} />
+            <Single
+              src={slides}
+              aspectRatio={postSettings[0].aspectRatio}
+              postId={postId}
+            />
           )}
         </CardActionArea>
 
         {/* Card Actions */}
         <ScreamActions
-          scream={scream}
+          scream={mediaPost}
           postId={postId}
           likeCount={likeCount}
           commentCount={commentNo}
@@ -120,12 +153,31 @@ function MultiPost({ mediaPost, rootRef }) {
 
 export default MultiPost;
 
-const Single = ({ src, aspectRatio }) => {
+const Single = ({ src, aspectRatio, postId }) => {
   const [load, setLoad] = useState(false);
 
   const mediaPad = useState(() => {
     return 100 / aspectRatio;
   })[0];
+
+  const { setData, exists } = useDataStore();
+
+  const createData = async () => {
+    const isPresent = await exists(postId, {
+      storeName: "image-store",
+      dbName: "Emahd-image",
+    });
+
+    if (isPresent) return;
+    const blob = await urlToBlob(src);
+
+    const data = toFile(blob, blob.type);
+
+    setData(
+      { ref: postId, data },
+      { storeName: "image-store", dbName: "Emahd-image" }
+    );
+  };
 
   return (
     <div
@@ -152,6 +204,7 @@ const Single = ({ src, aspectRatio }) => {
         alt="A post slide"
         onLoad={() => {
           setLoad(true);
+          createData();
         }}
         style={{
           width: "100%",
@@ -166,8 +219,36 @@ const Single = ({ src, aspectRatio }) => {
   );
 };
 
-const Multiple = ({ slides, settings }) => {
+const Multiple = ({ slides, settings, postId }) => {
   const [index, setIndex] = useState(0);
+  const [createdFile, setCreatedFile] = useState(Array.from(slides).fill(""));
+
+  const { setData, getData } = useDataStore();
+  useEffect(() => {
+    const storeData = async () => {
+      const dbData = await getData(postId, {
+        storeName: "image-store",
+        dbName: "Emahd-image",
+      });
+      if (dbData && !dbData.includes("")) return;
+      if (dbData && dbData.includes("")) {
+        const mergedFiles = replaciveMerge([dbData, createdFile]);
+        setData(
+          { ref: postId, data: mergedFiles },
+          { storeName: "image-store", dbName: "Emahd-image" }
+        );
+
+        return;
+      }
+      setData(
+        { ref: postId, data: createdFile },
+        { storeName: "image-store", dbName: "Emahd-image" }
+      );
+    };
+    storeData();
+
+    // eslint-disable-next-line
+  }, [createdFile]);
   return (
     <>
       <SwipeableViews
@@ -178,6 +259,8 @@ const Multiple = ({ slides, settings }) => {
           <CarouselContent
             key={i}
             src={slide}
+            index={i}
+            setCreatedFile={setCreatedFile}
             aspectRatio={settings[i].aspectRatio}
           />
         ))}
@@ -196,12 +279,23 @@ const Multiple = ({ slides, settings }) => {
   );
 };
 
-const CarouselContent = ({ src, aspectRatio }) => {
+const CarouselContent = ({ src, aspectRatio, index, setCreatedFile }) => {
   const [load, setLoad] = useState(false);
 
   const mediaPad = useState(() => {
     return 100 / aspectRatio;
   })[0];
+
+  const createData = async () => {
+    const blob = await urlToBlob(src);
+
+    const data = toFile(blob, blob.type);
+    setCreatedFile((prev) => {
+      const fileArr = [...prev];
+      fileArr[index] = data;
+      return fileArr;
+    });
+  };
 
   return (
     <div
@@ -228,6 +322,7 @@ const CarouselContent = ({ src, aspectRatio }) => {
         alt="A post slide"
         onLoad={() => {
           setLoad(true);
+          createData();
         }}
         style={{
           width: "100%",

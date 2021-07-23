@@ -30,19 +30,25 @@ import Notification from "./Components/Notification/Notifications";
 import Account from "./Components/Account/Account";
 
 import "./Profile.css";
-import { notifications, userDataThunk } from "../../redux/userDataSlice";
-import { screamsDataThunk } from "../../redux/postsSlice";
+import {
+  notifications,
+  personalizedThunk,
+  userDataThunk,
+} from "../../redux/userDataSlice";
+import { getPostsFromIndexDB, screamsDataThunk } from "../../redux/postsSlice";
 
 import { projectFirestore, projectAuth } from "../../firebase/FBConfig";
 import TalkBubble from "../SubComponents/TalkBubble";
 import AddMedia from "./Components/AddMedia/AddMedia";
-import useStorage from "../../utils/customHooks/useStorage";
+import useStoreScream from "../../utils/customHooks/useStoreScream";
 import encryptor from "../../utils/encryptor";
 import {
   bannerPostsThunk,
   followSuggestThunk,
+  getFeaturedThunk,
+  getFeaturesThunk,
 } from "../../redux/extraDataSlice";
-import BottomModal from "../SubComponents/BottomModal";
+import { BOTTOMTAB_HEIGHT } from "../../utils/constants";
 
 export const StorageContext = React.createContext();
 
@@ -71,7 +77,7 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
 
   // const [display, setDisplay] = useState(true);
 
-  const { progress, storeData } = useStorage(
+  const { progress, storeData } = useStoreScream(
     "scream",
     fileCodec === "image" ? mediaUrl : media
   );
@@ -109,9 +115,13 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
   }, []);
 
   useEffect(() => {
+    dispatch(personalizedThunk());
     dispatch(userDataThunk());
+    dispatch(getPostsFromIndexDB());
     dispatch(screamsDataThunk());
     dispatch(bannerPostsThunk());
+    dispatch(getFeaturesThunk());
+    dispatch(getFeaturedThunk());
     dispatch(followSuggestThunk());
 
     // eslint-disable-next-line
@@ -137,7 +147,7 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
   }, [userId]);
 
   return (
-    <div className="profile-page" onDrag={(e) => e.preventDefault()}>
+    <div className="profile-page">
       <Helmet>
         <title>{user}</title>
         {data.followers && (
@@ -183,6 +193,31 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
         <h4>Hello World</h4>
       </BottomModal> */}
       <TalkBubble />
+
+      <div
+        style={{
+          height: `calc(100% - ${BOTTOMTAB_HEIGHT}px)`,
+        }}>
+        {selectedTab === 0 && <Account />}
+        {selectedTab === 1 && <Search />}
+        {selectedTab === 2 && <AddMedia />}
+        {selectedTab === 3 && <Notification />}
+        {selectedTab === 4 && (
+          <StorageContext.Provider
+            value={{
+              fileCodec,
+              mediaUrl,
+              progress,
+              storeData,
+              setMedia,
+              setMediaUrl,
+              setFileCodec,
+            }}>
+            <Home AccountTab={AccountTab} />
+          </StorageContext.Provider>
+        )}
+      </div>
+
       <div className="bottom-tab">
         <BottomNavigation
           value={selectedTab}
@@ -238,25 +273,6 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
           />
         </BottomNavigation>
       </div>
-
-      {selectedTab === 0 && <Account />}
-      {selectedTab === 1 && <Search />}
-      {selectedTab === 2 && <AddMedia />}
-      {selectedTab === 3 && <Notification />}
-      {selectedTab === 4 && (
-        <StorageContext.Provider
-          value={{
-            fileCodec,
-            mediaUrl,
-            progress,
-            storeData,
-            setMedia,
-            setMediaUrl,
-            setFileCodec,
-          }}>
-          <Home AccountTab={AccountTab} />
-        </StorageContext.Provider>
-      )}
     </div>
   );
 };

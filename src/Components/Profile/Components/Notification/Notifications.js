@@ -8,6 +8,8 @@ import Notification from "./Notification";
 import { useStyles } from "../Account/styles";
 import { projectFirestore } from "../../../../firebase/FBConfig";
 
+import notificationSvg from "../../../assets/graphics/placeholder_svg/push_notifications.svg";
+
 export default () => {
   const readNotifications = useSelector(
     (state) => state.user.notifications.read
@@ -60,20 +62,28 @@ export default () => {
             container
             direction="column"
             justify="center"
-            alignItems="center"
-            style={{ padding: "0px 16px", height: "calc(90vh - 60px)" }}>
-            <NotificationsActiveIcon
-              color="action"
-              style={{ height: 80, width: 80, marginBottom: 10 }}
-            />
-            <Typography
-              variant="h4"
-              style={{ fontWeight: "bold" }}
-              align="center"
-              color="textSecondary">
-              Catch up with the activities going on around you, friends and
-              family.
-            </Typography>
+            spacing={1}
+            style={{
+              padding: "0px 16px",
+              height: "calc(100vh - 100px - 1.6vmin)",
+            }}>
+            <Grid item>
+              <img
+                style={{ width: "100%" }}
+                src={notificationSvg}
+                alt="notifications placeholder"
+              />
+            </Grid>
+            <Grid item>
+              <Typography
+                variant="h5"
+                style={{ fontWeight: "bold" }}
+                align="center"
+                color="textSecondary">
+                Catch up with the activities going on around you, friends and
+                family.
+              </Typography>
+            </Grid>
           </Grid>
         ) : null}
 

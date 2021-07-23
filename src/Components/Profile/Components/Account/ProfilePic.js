@@ -19,6 +19,9 @@ import {
   uploadingProfilePic,
   uploadProfilePicError,
 } from "../../../../redux/postsSlice";
+import { useDataStore } from "../../../../utils/customHooks/persist";
+import { urlToBlob } from "../../../../utils/helperFunctions";
+import toFile from "../../../../utils/toFile";
 
 const ProfilePic = ({ classes, imageUrl }) => {
   const [display, setDisplay] = useState(false);
@@ -37,10 +40,24 @@ const ProfilePic = ({ classes, imageUrl }) => {
     setDisplay(true);
   };
 
+  const { setData } = useDataStore();
+
+  const createData = async () => {
+    if (!imageUrl || typeof imageUrl === "undefined") return;
+    const blob = await urlToBlob(imageUrl);
+
+    const data = toFile(blob, blob.type);
+
+    setData(
+      { ref: "imageUrl", data },
+      { storeName: "image-store", dbName: "Emahd-image" }
+    );
+  };
+
   return (
     <>
       {display && (
-        <Portal container={document.body}>
+        <Portal>
           <EdituserInfo setDisplay={setDisplay} />
         </Portal>
       )}
@@ -63,9 +80,13 @@ const ProfilePic = ({ classes, imageUrl }) => {
                   color="primary"
                   component="span"
                   disabled={isLoading ? true : false}>
-                  <div className={classes.uploadIconContainer}>
+                  <Grid
+                    container
+                    alignItems="center"
+                    justify="center"
+                    className={classes.uploadIconContainer}>
                     <AddAPhotoIcon style={{ fontSize: "1.1rem" }} />
-                  </div>
+                  </Grid>
                 </IconButton>
               </label>
             }>
@@ -88,7 +109,14 @@ const ProfilePic = ({ classes, imageUrl }) => {
               onChange={fileUpload}
             />
           </Badge>
-          <img src={imageUrl} alt="preload Pic" style={{ display: "none" }} />
+          <img
+            src={imageUrl}
+            alt="preload Pic"
+            onLoad={() => {
+              createData();
+            }}
+            style={{ display: "none" }}
+          />
         </Grid>
 
         <Grid
@@ -101,7 +129,8 @@ const ProfilePic = ({ classes, imageUrl }) => {
             <Button
               style={{ fontSize: ".7rem", minWidth: "100%" }}
               size="small"
-              variant="contained"
+              color="primary"
+              variant="outlined"
               onClick={openEditProfile}>
               Edit Profile
             </Button>

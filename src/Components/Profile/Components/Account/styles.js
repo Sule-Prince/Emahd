@@ -1,15 +1,16 @@
 import { makeStyles } from "@material-ui/core";
+import { HEADER_HEIGHT } from "../../../../utils/constants";
 
 export const useStyles = makeStyles((theme) => ({
   root: {
     overflowY: "auto",
     overflowX: "hidden",
-    height: "100vh",
-    width: "100vw",
+    height: "100%",
+    width: "100%",
   },
   headerRoot: {
     alignItems: "center",
-    height: "calc(40px + 1.6vmin)",
+    height: `${HEADER_HEIGHT}px`,
   },
   headerNameContainer: {
     flexGrow: 1,
@@ -49,13 +50,42 @@ export const useStyles = makeStyles((theme) => ({
   },
   uploadIconContainer: {
     backgroundColor: "#f0f0f0",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
     height: 32,
     width: 32,
     borderRadius: "50%",
     border: "2px solid #fff",
+  },
+  btnWrapper: {
+    marginTop: "1rem",
+    "& > *": {
+      padding: theme.spacing(0, 1),
+      "& > button": {
+        boxShadow: theme.shadows[2],
+      },
+    },
+  },
+  featureAvatar: {
+    width: 50,
+    height: 50,
+    border: "2px solid #bbb",
+  },
+  featureAdd: {
+    boxShadow: theme.shadows[5],
+    color: "#555",
+    backgroundColor: "#ececec",
+    border: "none",
+  },
+  featureWrapper: {
+    "& > *": {
+      paddingBottom: 8,
+    },
+  },
+  featuresWrapper: {
+    whiteSpace: "nowrap",
+    "& > *": {
+      width: 90,
+      display: "inline-flex",
+    },
   },
   followTab: {
     paddingTop: 15,

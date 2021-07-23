@@ -6,11 +6,8 @@ import NoPostUpload from "./NoPostUpload";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 import PhotoCameraIcon from "@material-ui/icons/PhotoCamera";
 import MultiPosts from "../../../../SubComponents/MultiPosts";
-import useRefresh from "../../../../../utils/customHooks/useRefresh";
-import { screamsDataThunk } from "../../../../../redux/postsSlice";
 
 const Media = ({ posts, error, otherUser }) => {
-  const refresh = useRefresh(screamsDataThunk);
   return (
     <>
       {error ? (
@@ -49,7 +46,7 @@ const Media = ({ posts, error, otherUser }) => {
           </NoPostUpload>
         )
       ) : (
-        <MultiPosts posts={posts} onRefresh={refresh} userpost />
+        <MultiPosts posts={posts} userpost />
       )}
     </>
   );

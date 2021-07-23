@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100vh",
     width: "100vw",
     backgroundColor: theme.palette.background.paper,
-    zIndex: 1200,
+    zIndex: theme.zIndex.drawer,
     overflowY: "auto",
     transition: "all .5s cubic-bezier(0, .4, .6, 1)",
     position: "absolute",

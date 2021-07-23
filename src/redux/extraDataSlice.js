@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axios } from "../config/axiosConfig";
+import { makeSingleArray, objectToArray } from "../utils/helperFunctions";
 
 export const followSuggestThunk = createAsyncThunk(
   "followSuggest/getData",
@@ -18,9 +19,32 @@ export const bannerPostsThunk = createAsyncThunk(
   async (args, { rejectWithValue }) => {
     try {
       const data = (await axios.get("/bannerposts")).data;
-      console.log(data.data);
 
       return data.data;
+    } catch (error) {
+      return rejectWithValue("Something went wrong, please try again later");
+    }
+  }
+);
+
+export const getFeaturesThunk = createAsyncThunk(
+  "features/getData",
+  async (args, { rejectWithValue }) => {
+    try {
+      const features = (await axios.get("/extra/getfeatures")).data;
+      return features;
+    } catch (error) {
+      return rejectWithValue("Something went wrong, please try again later");
+    }
+  }
+);
+
+export const getFeaturedThunk = createAsyncThunk(
+  "featured/getData",
+  async (args, { rejectWithValue }) => {
+    try {
+      const featured = (await axios.get("/extra/getfeatured")).data;
+      return featured;
     } catch (error) {
       return rejectWithValue("Something went wrong, please try again later");
     }
@@ -34,6 +58,16 @@ const initialState = {
     error: "",
   },
   bannerPosts: {
+    data: [],
+    isLoading: false,
+    error: "",
+  },
+  features: {
+    data: [],
+    isLoading: false,
+    error: "",
+  },
+  featured: {
     data: [],
     isLoading: false,
     error: "",
@@ -76,6 +110,28 @@ const extraData = createSlice({
     [bannerPostsThunk.rejected]: (state, action) => {
       state.bannerPosts.isLoading = false;
       state.bannerPosts.error = action.payload;
+    },
+    [getFeaturesThunk.pending]: (state) => {
+      state.features.isLoading = true;
+    },
+    [getFeaturesThunk.fulfilled]: (state, action) => {
+      state.features.isLoading = false;
+
+      state.features.data = action.payload;
+    },
+    [getFeaturesThunk.rejected]: (state) => {
+      state.features.isLoading = false;
+    },
+    [getFeaturedThunk.pending]: (state) => {
+      state.featured.isLoading = true;
+    },
+    [getFeaturedThunk.fulfilled]: (state, action) => {
+      state.featured.isLoading = false;
+      const featuredData = makeSingleArray(objectToArray(action.payload));
+      state.featured.data = featuredData;
+    },
+    [getFeaturedThunk.rejected]: (state) => {
+      state.featured.isLoading = false;
     },
   },
 });

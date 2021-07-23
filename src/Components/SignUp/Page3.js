@@ -169,7 +169,7 @@ export default ({
                 id="handle"
                 onChange={(e) => {
                   setIsLoading(true);
-                  const value = e.target.value;
+                  const value = e.target.value.toLowerCase();
                   setHandle(value);
                   inputChanged.current = true;
                 }}

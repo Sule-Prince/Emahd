@@ -11,6 +11,7 @@ import {
   Toolbar,
   AppBar,
   Divider,
+  useTheme,
 } from "@material-ui/core";
 
 import { useSelector } from "react-redux";
@@ -39,6 +40,9 @@ import MultiPosts from "../../../SubComponents/MultiPosts";
 import useRefresh from "../../../../utils/customHooks/useRefresh";
 import FollowCardTwo from "../../../SubComponents/FollowCardTwo";
 import ContentLoader from "react-content-loader";
+import ScaleOnScroll, {
+  ScrollChild,
+} from "../../../SubComponents/ScaleOnScroll";
 
 const Home = ({ AccountTab }) => {
   const classes = useStyles();
@@ -238,24 +242,39 @@ const UtilsNavBar = ({ classes, users }) => {
         </Grid>
       )}
       <Grid item xs={12}>
-        <div className={classes.utilsNavBar}>
+        <ScaleOnScroll className={classes.utilsNavBar}>
           {users.map((user, i) => (
-            <span key={user.handle} style={{ display: "inline-block" }}>
-              <FollowCardTwo
-                handle={user.handle}
-                fullName={user.fullName}
-                imageUrl={user.imageUrl}
-                coverPhoto={user.coverPhoto}
-                index={i}
-                noBorder
-                variant={10}
-                size="small"
-              />
-            </span>
+            <FollowCardWithRef user={user} i={i} key={user.handle} />
           ))}
-        </div>
+        </ScaleOnScroll>
       </Grid>
     </Grid>
+  );
+};
+
+const FollowCardWithRef = ({ user, i }) => {
+  const theme = useTheme();
+  const followCardRef = useRef(null);
+  return (
+    <ScrollChild
+      setScrollX={(ref, posX) => {
+        const shadow = Math.floor(posX * 10);
+        followCardRef.current.style.boxShadow =
+          shadow > 0 ? theme.shadows[shadow] : theme.shadows[1];
+      }}>
+      <FollowCardTwo
+        handle={user.handle}
+        fullName={user.fullName}
+        imageUrl={user.imageUrl}
+        coverPhoto={user.coverPhoto}
+        index={i}
+        noBorder
+        shadow={4}
+        variant={10}
+        size="small"
+        rootRef={followCardRef}
+      />
+    </ScrollChild>
   );
 };
 

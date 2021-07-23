@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -20,6 +20,9 @@ import ScreamActions from "./ScreamActions";
 import CommentField from "./CommentField";
 import LazyLoadMedia from "./LazyLoadMedia";
 import PostOptions from "./PostOptions";
+import { useDataStore } from "../../utils/customHooks/persist";
+import toFile from "../../utils/toFile";
+import { urlToBlob } from "../../utils/helperFunctions";
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -39,12 +42,14 @@ const useStyles = makeStyles((theme) => ({
 const MediaPost = ({ post: scream, rootRef }) => {
   const {
     mediaUrl,
+    userId,
     post,
     postId,
     likeCount,
     commentCount,
     createdAt,
     imageUrl: userImg,
+    section,
     handle,
     thumb,
     postSettings,
@@ -52,6 +57,7 @@ const MediaPost = ({ post: scream, rootRef }) => {
   } = scream;
 
   const [commentNo, setCommentNo] = useState(commentCount);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
 
   dayjs.extend(relativeTime);
 
@@ -60,6 +66,63 @@ const MediaPost = ({ post: scream, rootRef }) => {
   // const [commentNo, setCommentNo] = useState(commentCount);
 
   const user = useSelector((state) => state.user.data.handle);
+  const personalizedHandle = useSelector((state) => {
+    if (state.user.personalized[userId])
+      return state.user.personalized[userId].handle;
+    else return null;
+  });
+  const { setData, exists } = useDataStore();
+
+  useEffect(() => {
+    const storeLoadedData = () => {
+      const data = {
+        post,
+        postId,
+        likeCount,
+        commentCount,
+        createdAt,
+        userImg,
+        userId,
+        section,
+        handle,
+        postSettings,
+        mediaType,
+      };
+
+      setData(
+        { ref: postId, data },
+        { storeName: "postData", dbName: "Emahd-post" }
+      );
+    };
+    storeLoadedData();
+
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    if (!mediaLoaded) return;
+
+    const createData = async () => {
+      const isPresent = await exists(postId, {
+        storeName: "image-store",
+        dbName: "Emahd-image",
+      });
+
+      if (isPresent) return;
+      const blob = await urlToBlob(mediaUrl);
+
+      const data = toFile(blob, blob.type);
+
+      setData(
+        { ref: postId, data },
+        { storeName: "image-store", dbName: "Emahd-image" }
+      );
+    };
+
+    createData();
+
+    // eslint-disable-next-line
+  }, [mediaLoaded]);
 
   return (
     <div>
@@ -71,6 +134,7 @@ const MediaPost = ({ post: scream, rootRef }) => {
           }
           action={
             <PostOptions
+              section={section}
               postId={postId}
               handle={handle}
               user={user === handle ? true : false}
@@ -81,7 +145,7 @@ const MediaPost = ({ post: scream, rootRef }) => {
               <Link
                 style={{ color: "#000", fontWeight: "bold" }}
                 to={`user/${handle}`}>
-                {handle}
+                {personalizedHandle || handle}
               </Link>
               <Typography variant="caption" color="textSecondary" component="p">
                 {dayjs(createdAt).fromNow()}
@@ -101,6 +165,8 @@ const MediaPost = ({ post: scream, rootRef }) => {
             rootRef={rootRef}
             thumb={thumb}
             settings={postSettings.media}
+            mediaLoaded={mediaLoaded}
+            setMediaLoaded={setMediaLoaded}
           />
         </CardActionArea>
 

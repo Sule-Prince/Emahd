@@ -1,11 +1,11 @@
 import { makeStyles } from "@material-ui/core";
+import { BOTTOMTAB_HEIGHT } from "../../../../utils/constants";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: "#fff",
-    minHeight: "100vh",
-    height: "100%",
-    maxHeight: "100vh",
+    height: `calc(100% - ${BOTTOMTAB_HEIGHT})`,
+    maxHeight: `calc(100% - ${BOTTOMTAB_HEIGHT})`,
     color: "#000",
     overflow: "hidden",
   },

@@ -34,18 +34,33 @@ import FollowTab from "../SubComponents/FollowTab";
 import UserBio from "../SubComponents/UserBio";
 import HeaderBase from "../SubComponents/HeaderBase";
 import Messages from "../Chat/Messages/Messages";
+import BottomModal from "../SubComponents/BottomModal";
+import PersonalizeUser from "./PersonalizeUser";
 
 export default ({ setSelectedTab }) => {
-  const classes = useStyles();
+  const [bottomModal, setBottomModal] = useState(false);
+  const [personalize, setPersonalize] = useState(false);
+  const [report, setReport] = useState(false);
 
   const rootRef = useRef(null);
 
   const user = useParams().user;
+
+  const { push } = useHistory();
+
   const dispatch = useDispatch();
 
   const mainUser = useSelector((state) => state.user.data.handle);
 
-  const { push } = useHistory();
+  const { userData, userPost, isLoading } = useSelector(
+    (state) => state.otherUser
+  );
+
+  const error = useSelector((state) => state.otherUser.error.trim());
+
+  const { coverPhoto, imageUrl, noOfPosts, friends, followers, userId } =
+    userData;
+
   useEffect(() => {
     if (user === mainUser) {
       setSelectedTab(0);
@@ -57,14 +72,12 @@ export default ({ setSelectedTab }) => {
     // eslint-disable-next-line
   }, [mainUser]);
 
-  const { userData, userPost, isLoading } = useSelector(
-    (state) => state.otherUser
-  );
+  const displayWhich = (bool, type) => {
+    if (type === "personalize") setPersonalize(bool);
+    else if (type === "report") setReport(bool);
+  };
 
-  const error = useSelector((state) => state.otherUser.error.trim());
-
-  const { coverPhoto, imageUrl, noOfPosts, friends, followers, userId } =
-    userData;
+  const classes = useStyles();
 
   if (isLoading) {
     return (
@@ -79,88 +92,134 @@ export default ({ setSelectedTab }) => {
           height: "100vh",
         }}>
         <Grid item xs={12}>
-          <Header classes={classes} handle={user} />
+          <Header classes={classes} handle={user} isLoading={isLoading} />
         </Grid>
         <Loading />
       </Grid>
     );
   }
   return (
-    <div
-      className={classes.root}
-      ref={rootRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        backgroundColor: "#fff",
-        zIndex: 1000,
-      }}>
-      <Grid direction="column" container>
-        <Grid xs={12} item>
-          <Header classes={classes} handle={user} />
-        </Grid>
-        <Grid xs={12} item>
-          <CoverPhoto classes={classes} coverPhoto={coverPhoto} />
-        </Grid>
-        <Grid xs={12} item>
-          <ProfilePic
-            classes={classes}
-            friend={user}
-            userId={userId}
-            imageUrl={imageUrl}
-            rootRef={rootRef}
-          />
-        </Grid>
-        <Grid container item xs={12}>
-          <UserBio data={userData} />
-        </Grid>
-        <Grid container className={classes.followTab} item xs={12}>
-          <FollowTab
-            friends={friends}
-            noOfPosts={noOfPosts}
-            followers={followers}
-          />
-        </Grid>
+    <>
+      {personalize && (
+        <PersonalizeUser setDisplay={setPersonalize} userId={userId} />
+      )}
+      <div
+        className={classes.root}
+        ref={rootRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          backgroundColor: "#fff",
+          zIndex: 1000,
+        }}>
+        <Grid direction="column" container>
+          <Grid xs={12} item>
+            <Header
+              classes={classes}
+              handle={user}
+              userId={userId}
+              setDisplayOptions={displayWhich}
+              setBottomModal={setBottomModal}
+              bottomModal={bottomModal}
+            />
+          </Grid>
+          <Grid xs={12} item>
+            <CoverPhoto classes={classes} coverPhoto={coverPhoto} />
+          </Grid>
+          <Grid xs={12} item>
+            <ProfilePic
+              classes={classes}
+              friend={user}
+              userId={userId}
+              imageUrl={imageUrl}
+              rootRef={rootRef}
+            />
+          </Grid>
+          <Grid container item xs={12}>
+            <UserBio data={userData} />
+          </Grid>
+          <Grid container className={classes.followTab} item xs={12}>
+            <FollowTab
+              friends={friends}
+              noOfPosts={noOfPosts}
+              followers={followers}
+            />
+          </Grid>
 
-        <Grid container item xs>
-          <UserPosts posts={userPost} otherUser={true} error={error} />
+          <Grid container item xs>
+            <UserPosts posts={userPost} otherUser={true} error={error} />
+          </Grid>
         </Grid>
-      </Grid>
-      <div style={{ height: 70, width: "100%" }} />
-    </div>
+        <div style={{ height: 70, width: "100%" }} />
+      </div>
+    </>
   );
 };
 
-const Header = ({ classes, handle }) => {
+const Header = ({
+  classes,
+  handle,
+  userId,
+  setBottomModal,
+  bottomModal,
+  setDisplayOptions,
+  isLoading,
+}) => {
   const { push } = useHistory();
   const handleBackButton = () => {
     push("/");
   };
+
+  const personalizedHandle = useSelector((state) => {
+    if (state.user.personalized[userId])
+      return state.user.personalized[userId].handle;
+    else return null;
+  });
+
   return (
-    <HeaderBase elevation={0}>
-      <Grid className={classes.headerRoot} container>
-        .
-        <Grid className={classes.headerNameContainer} item>
-          <IconButton
-            color="primary"
-            onClick={handleBackButton}
-            style={{ marginRight: 5, marginLeft: "-1rem" }}>
-            <KeyboardBackspaceIcon />
-          </IconButton>
-          <Typography
-            className={classes.headerName}
-            variant="body2"
-            component="span">
-            {handle}
-          </Typography>
+    <>
+      <HeaderBase elevation={0}>
+        <Grid className={classes.headerRoot} container>
+          <Grid className={classes.headerNameContainer} item>
+            <IconButton
+              color="primary"
+              onClick={handleBackButton}
+              style={{ marginRight: 5, marginLeft: "-1rem" }}>
+              <KeyboardBackspaceIcon />
+            </IconButton>
+            <Typography
+              className={classes.headerName}
+              variant="body2"
+              component="span">
+              {personalizedHandle || handle}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <IconButton
+              disabled={isLoading}
+              onClick={() => setBottomModal(true)}>
+              <MoreVertIcon color="primary" className={classes.settings} />
+            </IconButton>
+          </Grid>
         </Grid>
-        <Grid item>
-          <IconButton>
-            <MoreVertIcon color="primary" className={classes.settings} />
-          </IconButton>
-        </Grid>
-      </Grid>
-    </HeaderBase>
+      </HeaderBase>
+
+      <BottomModal setDisplay={setBottomModal} display={bottomModal}>
+        <MenuList>
+          <MenuItem>Report</MenuItem>
+          <MenuItem
+            onClick={() => {
+              setDisplayOptions(true, "personalize");
+              setBottomModal(false);
+            }}>
+            Personalize
+          </MenuItem>
+          <MenuItem>Block</MenuItem>
+          <MenuItem>Copy Profile Url</MenuItem>
+          {/* <MenuItem>About Account</MenuItem> */}
+        </MenuList>
+      </BottomModal>
+    </>
   );
 };
 
@@ -203,10 +262,9 @@ const ProfilePic = ({ classes, friend, imageUrl, rootRef, userId }) => {
   };
 
   useEffect(() => {
-    if (friends) {
-      if (friends.includes(friend)) setValue("Unfollow");
-      else setValue("Follow");
-    }
+    if (!friends) return;
+    if (friends.includes(friend)) setValue("Unfollow");
+    else setValue("Follow");
   }, [friends, friend]);
 
   return (
@@ -246,7 +304,7 @@ const ProfilePic = ({ classes, friend, imageUrl, rootRef, userId }) => {
             <span
               style={{
                 display: "inline-flex",
-                flex: 2,
+                flex: 3,
                 justifyContent: "flex-end",
               }}>
               {value}
@@ -254,7 +312,7 @@ const ProfilePic = ({ classes, friend, imageUrl, rootRef, userId }) => {
             <span
               style={{
                 display: "inline-flex",
-                flex: 1,
+                flex: 2,
                 justifyContent: "flex-end",
               }}>
               <ExpandMoreIcon fontSize="small" onClick={MoreOptionsHandler} />

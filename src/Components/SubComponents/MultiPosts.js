@@ -1,17 +1,11 @@
 import React, { useRef } from "react";
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import MultiPost from "./MultiPost";
 
-function MultiPosts({ posts, onRefresh, style = {}, userpost }) {
+function MultiPosts({ posts, userpost, ...props }) {
   const rootRef = useRef(null);
   return (
-    <div
-      ref={rootRef}
-      style={{
-        height: "100%",
-        width: "100%",
-        ...style,
-      }}>
+    <Box ref={rootRef} height="100%" width="100%" {...props}>
       {userpost ? (
         <Grid container>
           {posts
@@ -26,7 +20,6 @@ function MultiPosts({ posts, onRefresh, style = {}, userpost }) {
         </Grid>
       ) : (
         <Grid container>
-          <></>
           {posts
             ? posts.map((post) => (
                 <MultiPost
@@ -38,7 +31,7 @@ function MultiPosts({ posts, onRefresh, style = {}, userpost }) {
             : null}
         </Grid>
       )}
-    </div>
+    </Box>
   );
 }
 

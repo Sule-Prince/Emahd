@@ -14,7 +14,7 @@ export const handleLike = (postId, dispatch, setLikes, scream) => {
   dispatch(likePost(postId));
   axios
     .get(`/post/like/${postId}`)
-    .then(() => {
+    .then((res) => {
       dispatch(updateLikedPosts(scream));
     })
     .catch((err) => {});

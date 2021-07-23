@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Paper, Portal, makeStyles } from "@material-ui/core";
-import MoveGesture from "./MoveGesture";
+import {
+  Paper,
+  Portal,
+  makeStyles,
+  ClickAwayListener,
+} from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,71 +33,81 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function BottomModal({ children, styles = {}, display, setDisplay }) {
-  const [dy, setDy] = useState(0);
-  const [eventEnd, setEventEnd] = useState(false);
+function BottomModal({ children, display, setDisplay, ...props }) {
+  return (
+    <Portal>
+      <AnimatePresence>
+        {display && (
+          <MountModal setDisplay={setDisplay} {...props}>
+            {children}
+          </MountModal>
+        )}
+      </AnimatePresence>
+    </Portal>
+  );
+}
 
-  console.log(dy);
+export default BottomModal;
+
+const MountModal = ({ setDisplay, children, ...props }) => {
+  const [modalHeight, setModalHeight] = useState(0);
+  const dy = useRef(0);
+  const modalRef = useRef(null);
+  const dragRef = useRef(0);
 
   const modalVariant = {
     initial: {
-      y: 30,
-      opacity: 0.4,
+      y: 0,
     },
     animate: {
-      y: -dy,
-      opacity: [0.6, 0.8, 1],
+      y: 0,
       transition: {
-        delay: 3,
+        // stiffness: 50,
         type: "spring",
-        // stiffness: 100,
-        // damping: 10,
       },
     },
     exit: {
-      y: 30,
-      opacity: [0.8, 0.6, 0],
+      y: modalHeight,
       transition: {
-        delay: 0,
         type: "spring",
       },
     },
   };
 
-  const classes = useStyles();
-
   useEffect(() => {
-    if (eventEnd !== true) return;
+    setModalHeight(modalRef.current.getBoundingClientRect().height);
+  }, []);
 
-    if (dy > -50) setDisplay(false);
-
-    //   eslint-disable-next-line
-  }, [eventEnd, dy]);
-
+  const classes = useStyles();
   return (
-    <>
-      <AnimatePresence>
-        {display && (
-          <Portal container={document.body}>
-            <motion.div
-              variants={modalVariant}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className={classes.root}
-              style={styles}>
-              <MoveGesture setY={setDy} setEventEnd={setEventEnd}>
-                <Paper elevation={4} className={classes.paper}>
-                  <div className={classes.handleBar} />
-                  {children}
-                </Paper>
-              </MoveGesture>
-            </motion.div>
-          </Portal>
-        )}
-      </AnimatePresence>
-    </>
+    <ClickAwayListener onClickAway={() => setDisplay(false)}>
+      <motion.div
+        ref={modalRef}
+        drag="y"
+        dragConstraints={dragRef}
+        dragElastic={0.1}
+        onDragStart={(e) => (dy.current = e.y)}
+        onDragEnd={(e) => {
+          if (e.y - dy.current > 0) setDisplay(false);
+        }}
+        variants={modalVariant}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className={classes.root}
+        {...props}>
+        <Paper elevation={4} className={classes.paper}>
+          <div className={classes.handleBar} />
+          {children}
+        </Paper>
+        <div
+          ref={dragRef}
+          style={{
+            position: "fixed",
+            bottom: -100,
+            height: modalHeight + 100,
+          }}></div>
+      </motion.div>
+    </ClickAwayListener>
   );
-}
-
-export default BottomModal;
+};

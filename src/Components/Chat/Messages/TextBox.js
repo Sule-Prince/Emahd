@@ -55,20 +55,14 @@ const TextBox = ({ userId, roomId, audioStream, setAudio }) => {
     if (!message.trim()) return;
 
     const createdAt = Date.now(),
-      data = { sender: userId, message, createdAt };
+      data = { sender: userId, message, type: "text", [userId]: createdAt };
 
     /* 
     TODO:: Update UI to give pending and done status 
            of messages to be delivered to other user
     */
-    dispatch(setUserMsgsThunk({ roomId, data }));
+    dispatch(setUserMsgsThunk({ roomId, data, createdAt }));
 
-    dispatch(
-      updateChatMessages({
-        roomId,
-        data,
-      })
-    );
     dispatch(updateLastMessage({ message, createdAt, roomId }));
     setMessage("");
   };

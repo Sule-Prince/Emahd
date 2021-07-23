@@ -88,13 +88,7 @@ const Comments = ({ postId, setOpenComments }) => {
         )}
         {status === "success" &&
           comments.map((comment) => (
-            <Comment
-              key={comment.commentId}
-              comment={comment.comment}
-              createdAt={comment.createdAt}
-              handle={comment.handle}
-              imgUrl={comment.imageUrl}
-            />
+            <Comment key={comment.commentId} data={comment} />
           ))}
       </div>
     </div>

@@ -3,7 +3,7 @@ import { axios } from "../config/axiosConfig";
 import { projectStorage } from "../firebase/FBConfig";
 import IDGenerator from "../utils/IDGenerator";
 import ImageEdits from "../utils/ImageEditor";
-import toFile from "../utils/toFIle";
+import toFile from "../utils/toFile";
 import { screamsDataThunk } from "./postsSlice";
 
 export const userPostThunk = createAsyncThunk(
@@ -32,7 +32,7 @@ export const dataStoreThunk = createAsyncThunk(
       media,
       data: { route, post, mediaType, postSettings, multiple = false },
     },
-    { dispatch, rejectWithValue }
+    { dispatch, getState, rejectWithValue }
   ) => {
     try {
       // Logic for uploading posts that contain any form of media content
@@ -102,11 +102,9 @@ const userPost = createSlice({
     },
     [dataStoreThunk.pending]: (state) => {
       state.userPosts.posting = true;
-      console.log("posting");
     },
     [dataStoreThunk.fulfilled]: (state) => {
       state.userPosts.posting = false;
-      console.log("posted");
     },
     [dataStoreThunk.rejected]: (state, action) => {
       state.userPosts.posting = false;

@@ -1,9 +1,14 @@
 import React from "react";
+
+import { useSelector } from "react-redux";
+
 import { Grid, Typography, Avatar, makeStyles } from "@material-ui/core";
+
+import { Link } from "react-router-dom";
+
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
-import { Link } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -25,7 +30,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const Comment = ({ comment, createdAt, handle, imgUrl }) => {
+const Comment = ({
+  data: { comment, createdAt, handle, imageUrl, userId },
+}) => {
   dayjs.extend(updateLocale);
   dayjs.extend(relativeTime);
   dayjs.updateLocale("en", {
@@ -48,10 +55,16 @@ const Comment = ({ comment, createdAt, handle, imgUrl }) => {
 
   const classes = useStyles();
 
+  const personalizedHandle = useSelector((state) => {
+    if (state.user.personalized[userId])
+      return state.user.personalized[userId].handle;
+    else return null;
+  });
+
   return (
     <Grid container style={{ flexWrap: "nowrap", paddingRight: 6 }}>
       <Grid className={classes.avatarGrid} item>
-        <Avatar src={imgUrl} />
+        <Avatar src={imageUrl} />
       </Grid>
       <Grid item>
         <Typography
@@ -59,7 +72,7 @@ const Comment = ({ comment, createdAt, handle, imgUrl }) => {
           className={classes.handle}
           gutterBottom={true}
           component="span">
-          <Link to={handle}>{handle}</Link>
+          <Link to={handle}>{personalizedHandle || handle}</Link>
         </Typography>
         <Typography variant="body2" color="textPrimary" component="span">
           {comment}

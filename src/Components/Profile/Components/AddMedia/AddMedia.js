@@ -137,6 +137,7 @@ const UtilsNavBar = ({ classes, users }) => {
             fullName={user.fullName}
             imageUrl={user.imageUrl}
             coverPhoto={user.coverPhoto}
+            shadow={4}
             index={i}
           />
         </span>
