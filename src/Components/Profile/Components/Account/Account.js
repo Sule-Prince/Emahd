@@ -42,6 +42,7 @@ import {
   RefreshWrapper,
   FollowCard,
   UserBio,
+  DisplayStories,
 } from "../../../SubComponents";
 
 import { urlToBlob } from "../../../../utils/helperFunctions";
@@ -54,6 +55,7 @@ import Features from "./Features/Features";
 import Chat from "../../../Chat/Chat";
 import { HEADER_HEIGHT } from "../../../../utils/constants";
 import FeaturedDisplay from "./Features/FeaturedDisplay";
+import FeatureDisplay from "./Features/FeatureDisplay";
 
 const Account = () => {
   // Styles to be used by the settings Component to display the Settings
@@ -309,83 +311,100 @@ const CoverPhoto = ({ classes, coverPhoto }) => {
 const FeaturesTab = ({ classes }) => {
   const [display, setDisplay] = useState(false);
 
-  const features = useSelector((state) => state.extra.features.data);
+  const [openViewFeature, setOpenViewFeature] = useState(false);
+  const [metaData, setMetaData] = useState({
+    featureName: "",
+    imageUrl: "",
+    handle: "",
+    featureId: "",
+  });
+
+  const features = useSelector((state) => state.extra.features.feature);
+  const featuredData = useSelector((state) => state.extra.features.data);
 
   return (
-    <div style={{ padding: "16px 8px", width: "100%" }}>
-      <Portal>
-        <AnimatePresence>
-          {display && <Features setDisplay={setDisplay} />}
-        </AnimatePresence>
-      </Portal>
-      <Grid container style={{ overflowX: "auto" }}>
-        <div className={classes.featuresWrapper}>
-          <div>
-            <Grid container className={classes.featureWrapper}>
-              <Grid container justify="center" item xs={12}>
-                <IconButton size="small" onClick={() => setDisplay(true)}>
-                  <Avatar
-                    className={`${classes.featureAvatar} ${classes.featureAdd}`}>
-                    <AddRoundedIcon />
-                  </Avatar>
-                </IconButton>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  variant="caption"
-                  component="p"
-                  style={{
-                    fontWeight: 500,
-                    textAlign: "center",
-                    fontSize: ".7rem",
-                  }}>
-                  Feature
-                </Typography>
-              </Grid>
-            </Grid>
-          </div>
-          {features &&
-            features.map((feature) => (
-              <FeatureDisplay
-                classes={classes}
-                key={feature.createdAt}
-                imageUrl={feature.imageUrl}
-                featureName={feature.featureName}
-              />
-            ))}
-        </div>
-      </Grid>
-    </div>
-  );
-};
-
-const FeatureDisplay = ({ imageUrl, featureName, classes }) => {
-  return (
-    <div>
-      <Grid container className={classes.featureWrapper}>
-        <Grid container item justify="center" xs={12}>
-          <IconButton size="small">
-            <Avatar className={classes.featureAvatar} src={imageUrl} />
-          </IconButton>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography
-            variant="caption"
-            component="p"
+    <>
+      {openViewFeature && (
+        <Portal>
+          <DisplayStories
             style={{
-              paddingRight: 8,
-              paddingLeft: 4,
-              fontWeight: 500,
-              textAlign: "center",
-              overflow: "hidden",
-              fontSize: ".7rem",
-              textOverflow: "ellipsis",
-            }}>
-            {featureName}
-          </Typography>
+              width: "100vw",
+              height: "100vh",
+              top: 0,
+              zIndex: 1200,
+              position: "fixed",
+            }}
+            handle={metaData.handle}
+            imageUrl={metaData.imageUrl}
+            stories={featuredData[metaData.featureId]}
+            setDisplay={setOpenViewFeature}
+          />
+        </Portal>
+      )}
+
+      <div style={{ padding: "16px 8px", width: "100%" }}>
+        <Portal>
+          <AnimatePresence>
+            {display && <Features setDisplay={setDisplay} />}
+          </AnimatePresence>
+        </Portal>
+        <Grid container style={{ overflowX: "auto" }}>
+          <div className={classes.featuresWrapper}>
+            <div>
+              <Grid container className={classes.featureWrapper}>
+                <Grid container justify="center" item xs={12}>
+                  <IconButton size="small" onClick={() => setDisplay(true)}>
+                    <Avatar
+                      className={`${classes.featureAvatar} ${classes.featureAdd}`}>
+                      <AddRoundedIcon />
+                    </Avatar>
+                  </IconButton>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography
+                    variant="caption"
+                    component="p"
+                    style={{
+                      fontWeight: 500,
+                      textAlign: "center",
+                      fontSize: ".7rem",
+                    }}>
+                    Feature
+                  </Typography>
+                </Grid>
+              </Grid>
+            </div>
+            {features &&
+              features.map((feature) => (
+                <FeatureDisplay
+                  classes={classes}
+                  key={feature.createdAt}
+                  imageUrl={feature.imageUrl}
+                  featureName={feature.featureName}
+                  avatarProps={{
+                    onClick: () => {
+                      setMetaData({
+                        handle: feature.handle,
+                        featureName: feature.featureName,
+                        imageUrl: feature.imageUrl,
+                        featureId: feature.id,
+                      });
+
+                      if (
+                        !featuredData[feature.id] ||
+                        featuredData[feature.id].length <= 0
+                      )
+                        return;
+
+                      setOpenViewFeature(true);
+                    },
+                  }}
+                />
+              ))}
+          </div>
         </Grid>
-      </Grid>
-    </div>
+      </div>
+    </>
   );
 };
 

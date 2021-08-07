@@ -47,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
   },
   btn: {
+    color: "#fff",
     letterSpacing: ".5px",
     fontWeight: theme.typography.fontWeightMedium,
     textTransform: "none",

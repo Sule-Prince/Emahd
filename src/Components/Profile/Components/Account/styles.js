@@ -65,8 +65,8 @@ export const useStyles = makeStyles((theme) => ({
     },
   },
   featureAvatar: {
-    width: 50,
-    height: 50,
+    width: 60,
+    height: 60,
     border: "2px solid #bbb",
   },
   featureAdd: {
@@ -82,6 +82,7 @@ export const useStyles = makeStyles((theme) => ({
   },
   featuresWrapper: {
     whiteSpace: "nowrap",
+    display: "flex",
     "& > *": {
       width: 90,
       display: "inline-flex",

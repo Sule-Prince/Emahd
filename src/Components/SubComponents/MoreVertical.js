@@ -7,15 +7,14 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 1,
     padding: 1.5,
     borderRadius: "50%",
-    backgroundColor: "#ededed",
-    border: "2px solid #333",
+    border: "2px solid #2196f3",
   },
 }));
 
 function MoreVertical(props) {
   const classes = useStyles();
   return (
-    <IconButton {...props} size="small">
+    <IconButton component="span" {...props} size="small">
       <Grid
         container
         direction="column"

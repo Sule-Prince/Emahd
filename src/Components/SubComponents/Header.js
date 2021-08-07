@@ -5,7 +5,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useStyles } from "../Profile/Components/Account/styles";
 import HeaderBase from "./HeaderBase";
 
-const Header = ({ setDisplay, data, imageUrl, ...props }) => {
+const Header = ({ setDisplay, data, imageUrl, sticky, ...props }) => {
   const classes = useStyles();
 
   const handleCancelButton = () => {
@@ -13,7 +13,13 @@ const Header = ({ setDisplay, data, imageUrl, ...props }) => {
   };
   return (
     <>
-      <HeaderBase style={{ zIndex: 1, position: "absolute" }} {...props}>
+      <HeaderBase
+        style={{
+          zIndex: 1,
+          position: sticky ? "fixed" : "absolute",
+          top: sticky ? 0 : null,
+        }}
+        {...props}>
         <Grid className={classes.headerRoot} container>
           <Grid
             style={{ display: "flex", alignItems: "center" }}

@@ -1,41 +1,74 @@
 import React, { useState, useEffect } from "react";
+
+import { Link } from "react-router-dom";
+
+import { Grid, Typography, Avatar } from "@material-ui/core";
+import KeyboardBackspaceIcon from "@material-ui/icons/KeyboardBackspace";
+
 import DisplayStory from "./DisplayStory";
 import TapElement from "./TapElement";
 
-export default function DisplayStories({ stories, setDisplay }) {
+export default function DisplayStories({
+  stories,
+  setDisplay,
+  handle,
+  imageUrl,
+  style,
+  ...props
+}) {
   const [index, setIndex] = useState(0);
+  const [translate, setTranslate] = useState(0);
 
   return (
-    <div
+    <Grid
+      container
+      direction="column"
       style={{
-        transition: "all 1s cubic-bezier(0, .4, .6, 1)",
-        transform: index >= stories.length && "translateY(100vh)",
+        transition: "all .5s cubic-bezier(0, .4, .6, 1)",
+        transform: `translateY(${index >= stories.length ? 100 : translate}vh)`,
+        backgroundColor: "#000",
+        width: "100%",
+        height: "100%",
+        ...style,
       }}
-      onTransitionEndCapture={(e) => setDisplay(false)}>
+      onTransitionEnd={(e) => {
+        setDisplay(false);
+      }}
+      {...props}>
       <StoryBars
         storyLength={stories.length}
+        stories={stories}
         setIndex={setIndex}
         index={index}
       />
-      <TapElement
-        onTap={(e) => {
-          if (e.location.which === "left" && index > 0)
-            setIndex((prev) => prev - 1);
-          if (e.location.which === "right") setIndex((prev) => prev + 1);
-        }}>
-        <DisplayStory
-          story={
-            index >= stories.length - 1
-              ? stories[stories.length - 1]
-              : stories[index]
-          }
-        />
-      </TapElement>
-    </div>
+
+      <StoryAvatar
+        handle={handle}
+        imageUrl={imageUrl}
+        setTranslate={setTranslate}
+      />
+
+      <Grid item style={{ flexGrow: 1 }}>
+        <TapElement
+          onTap={(e) => {
+            if (e.location.which === "left" && index > 0)
+              setIndex((prev) => prev - 1);
+            if (e.location.which === "right") setIndex((prev) => prev + 1);
+          }}>
+          <DisplayStory
+            story={
+              index >= stories.length - 1
+                ? stories[stories.length - 1]
+                : stories[index]
+            }
+          />
+        </TapElement>
+      </Grid>
+    </Grid>
   );
 }
 
-const StoryBars = ({ storyLength, style, setIndex, index }) => {
+const StoryBars = ({ storyLength, style, setIndex, index, stories }) => {
   style = style || {};
   const [storyBars, setStoryBars] = useState([]);
   const [barLength, setBarLength] = useState(0);
@@ -61,7 +94,7 @@ const StoryBars = ({ storyLength, style, setIndex, index }) => {
       style={{
         width: "100%",
         position: "relative",
-        top: "3%",
+        top: "1vh",
         left: 0,
         ...style,
       }}>
@@ -78,7 +111,7 @@ const StoryBars = ({ storyLength, style, setIndex, index }) => {
           <AnimateBar
             key={i}
             style={{ margin: `0px ${margin}px` }}
-            duration={30}
+            duration={stories[i].type === "video" ? 30 : 15}
             barLength={barLength}
             setIndex={setIndex}
             index={index}
@@ -94,7 +127,7 @@ const StoryBar = ({ style, classes }) => (
   <div
     className={classes}
     style={{
-      height: "calc(3px + .8vmin)",
+      height: "calc(1px + .8vmin)",
       borderRadius: "calc(4px + .5rem)",
       display: "inline-block",
       backgroundColor: "#bbbd",
@@ -112,7 +145,7 @@ const AnimateBar = ({ index, i, barLength, duration, setIndex, style }) => {
       setWidth(0);
 
       setTimeout(() => {
-        setTransition(`all ${duration}s linear`);
+        setTransition(`all ${duration}s ease-in`);
         setWidth(barLength);
       }, 100);
     } else if (index < i) {
@@ -126,7 +159,7 @@ const AnimateBar = ({ index, i, barLength, duration, setIndex, style }) => {
   return (
     <div
       style={{
-        height: "calc(3px + .8vmin)",
+        height: "calc(1px + .8vmin)",
         borderRadius: "calc(4px + .5rem)",
         display: "inline-block",
         backgroundColor: "#fff",
@@ -135,8 +168,42 @@ const AnimateBar = ({ index, i, barLength, duration, setIndex, style }) => {
         ...style,
       }}
       onTransitionEnd={(e) => {
+        e.stopPropagation();
         setIndex((prev) => prev + 1);
-        console.log("I'm done");
       }}></div>
+  );
+};
+
+const StoryAvatar = ({ setTranslate, handle, imageUrl }) => {
+  const handleBackButton = () => {
+    setTranslate(100);
+  };
+  return (
+    <Grid
+      style={{
+        color: "#fff",
+        marginTop: 16,
+        padding: 8,
+      }}
+      alignItems="center"
+      container>
+      <Grid
+        onClick={handleBackButton}
+        style={{ padding: "0px 12px 0px 4px", height: 24 }}
+        item>
+        <KeyboardBackspaceIcon />
+      </Grid>
+      <Grid item style={{ marginRight: 8, padding: "8px 0px" }}>
+        <Avatar src={imageUrl} style={{ height: 35, width: 35 }} />
+      </Grid>
+      <Grid item>
+        <Typography
+          style={{ fontWeight: "bold" }}
+          variant="caption"
+          component="span">
+          {handle}
+        </Typography>
+      </Grid>
+    </Grid>
   );
 };

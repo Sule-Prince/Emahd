@@ -45,11 +45,11 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: "bold",
   },
 }));
-function FeaturedCard({ src, thumb, featureName, moreOptions }) {
+function FeaturedCard({ src, thumb, featureName, moreOptions, ...props }) {
   const classes = useStyles();
 
   return (
-    <Paper elevation={5} className={classes.root}>
+    <Paper elevation={5} className={classes.root} {...props}>
       <CardMedia image={src} className={classes.media} />
       <MoreVertical className={classes.moreVert} {...moreOptions} />
       <ThumbAvatar thumb={thumb} classes={classes} />

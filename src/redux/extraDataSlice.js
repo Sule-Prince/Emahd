@@ -31,7 +31,7 @@ export const getFeaturesThunk = createAsyncThunk(
   "features/getData",
   async (args, { rejectWithValue }) => {
     try {
-      const features = (await axios.get("/extra/getfeatures")).data;
+      const features = (await axios.post("/extra/getfeatures")).data;
       return features;
     } catch (error) {
       return rejectWithValue("Something went wrong, please try again later");
@@ -63,11 +63,13 @@ const initialState = {
     error: "",
   },
   features: {
+    feature: [],
     data: [],
     isLoading: false,
     error: "",
   },
   featured: {
+    feature: [],
     data: [],
     isLoading: false,
     error: "",
@@ -117,7 +119,8 @@ const extraData = createSlice({
     [getFeaturesThunk.fulfilled]: (state, action) => {
       state.features.isLoading = false;
 
-      state.features.data = action.payload;
+      state.features.feature = action.payload.features;
+      state.features.data = action.payload.featuredData;
     },
     [getFeaturesThunk.rejected]: (state) => {
       state.features.isLoading = false;
@@ -127,8 +130,22 @@ const extraData = createSlice({
     },
     [getFeaturedThunk.fulfilled]: (state, action) => {
       state.featured.isLoading = false;
-      const featuredData = makeSingleArray(objectToArray(action.payload));
-      state.featured.data = featuredData;
+      const feature = makeSingleArray(objectToArray(action.payload.featured));
+      state.featured.feature = feature;
+
+      const data = {};
+      action.payload.data.forEach((featuredData) => {
+        const posts = makeSingleArray(objectToArray(featuredData.data)).sort(
+          (a, b) => {
+            if (a.createdAt > b.createdAt) return 1;
+            if (a.createdAt === b.createdAt) return 0;
+            else return -1;
+          }
+        );
+        data[featuredData.id] = posts;
+      });
+
+      state.featured.data = data;
     },
     [getFeaturedThunk.rejected]: (state) => {
       state.featured.isLoading = false;

@@ -68,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: theme.typography.fontWeightMedium,
     textTransform: "none",
     width: "100%",
+    color: "#fff",
     backgroundColor: theme.palette.primary["main"],
     boxShadow: theme.shadows[3],
     margin: 0,

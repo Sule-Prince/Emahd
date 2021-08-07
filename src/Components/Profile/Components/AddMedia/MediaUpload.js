@@ -98,7 +98,19 @@ const MediaUpload = ({ setStyles }) => {
       urls.push(URL.createObjectURL(file));
     }
 
-    setMediaUrls(urls);
+    // PROTOTYPE TESTING
+
+    setStyles((prev) => ({
+      ...prev,
+      fabOpacity: [0, 0],
+      upperTranslate: ["-100vh", 0.2],
+    }));
+
+    setTimeout(() => {
+      setMediaUrls(urls);
+    }, 1000);
+
+    // END OF PROTOTYPE TESTING
 
     setBlurred(false);
     e.target.value = "";

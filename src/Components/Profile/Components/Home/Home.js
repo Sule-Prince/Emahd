@@ -98,7 +98,6 @@ const NewsFeed = ({ classes }) => {
   return (
     <div
       style={{
-        height: "calc(100% - 60px)",
         backgroundColor: "#f9f9f9",
       }}>
       <Grid item xs={12}>
@@ -128,7 +127,7 @@ const NewsFeed = ({ classes }) => {
 };
 
 const Screams = ({ classes }) => {
-  const { posts } = useSelector((state) => state.posts);
+  const { posts, topPosts } = useSelector((state) => state.posts);
   const [styles, setStyles] = useState("110vh");
 
   const { progress } = useContext(StorageContext);
@@ -140,14 +139,13 @@ const Screams = ({ classes }) => {
   };
 
   return (
-    <div
-      style={{
-        height: "calc(100% - (140px + 1vw))",
-        overflowY: "auto",
-        paddingBottom: 16,
-      }}>
+    <div>
       {progress ? <ProgressBar progress={progress} /> : null}
-      <Posts posts={posts.scream} onRefresh={onRefresh} />
+      <RefreshWrapper onRefresh={onRefresh}>
+        <Posts posts={posts.scream} />
+      </RefreshWrapper>
+
+      <Posts posts={topPosts.scream} />
 
       <AddScreamPage styles={styles} setStyles={setStyles} />
 
@@ -159,9 +157,7 @@ const Screams = ({ classes }) => {
 };
 
 const Media = ({ classes }) => {
-  // const [displayStory, setDisplayStory] = useState(false);
-
-  const { posts, isLoading } = useSelector((state) => state.posts);
+  const { posts, topPosts, isLoading } = useSelector((state) => state.posts);
 
   const users = useSelector((state) => state.extra.followSuggest.users);
 
@@ -170,13 +166,7 @@ const Media = ({ classes }) => {
   const rootRef = useRef();
 
   return (
-    <div
-      ref={rootRef}
-      style={{
-        height: "calc(100% - (110px + 1vw))",
-        paddingBottom: 16,
-        overflowY: "hidden",
-      }}>
+    <div ref={rootRef}>
       {/* {displayStory && <Story classes={classes} setDisplay={setDisplayStory} />}
 
       <div>
@@ -216,6 +206,8 @@ const Media = ({ classes }) => {
       {!isLoading && posts.media.length <= 0 && (
         <UtilsNavBar users={users} classes={classes} />
       )}
+
+      <MultiPosts posts={topPosts.media} />
     </div>
   );
 };

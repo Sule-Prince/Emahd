@@ -53,7 +53,7 @@ export default ({ history, ...props }) => {
           <Typography
             style={{ fontWeight: "bold", color: "#444" }}
             variant="subtitle1">
-            EMahd
+            Emahd
           </Typography>
         </Grid>
       </Paper>

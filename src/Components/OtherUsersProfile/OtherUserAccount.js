@@ -27,7 +27,10 @@ import Loading from "../SubComponents/Loading";
 
 import { useStyles } from "../Profile/Components/Account/styles";
 
-import { otherUsersThunk } from "../../redux/otherUserSlice";
+import {
+  otherUsersThunk,
+  getotherFeaturesThunk,
+} from "../../redux/otherUserSlice";
 import { axios } from "../../config/axiosConfig";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
 import FollowTab from "../SubComponents/FollowTab";
@@ -36,6 +39,8 @@ import HeaderBase from "../SubComponents/HeaderBase";
 import Messages from "../Chat/Messages/Messages";
 import BottomModal from "../SubComponents/BottomModal";
 import PersonalizeUser from "./PersonalizeUser";
+import FeatureDisplay from "../Profile/Components/Account/Features/FeatureDisplay";
+import { DisplayStories } from "../SubComponents";
 
 export default ({ setSelectedTab }) => {
   const [bottomModal, setBottomModal] = useState(false);
@@ -67,7 +72,9 @@ export default ({ setSelectedTab }) => {
       push("/");
       return;
     }
-    dispatch(otherUsersThunk(user));
+    dispatch(otherUsersThunk(user)).then(() => {
+      dispatch(getotherFeaturesThunk());
+    });
 
     // eslint-disable-next-line
   }, [mainUser]);
@@ -138,6 +145,11 @@ export default ({ setSelectedTab }) => {
           <Grid container item xs={12}>
             <UserBio data={userData} />
           </Grid>
+
+          <Grid container item xs={12}>
+            <FeaturesTab classes={classes} />
+          </Grid>
+
           <Grid container className={classes.followTab} item xs={12}>
             <FollowTab
               friends={friends}
@@ -402,5 +414,72 @@ const MoreOptions = ({
         </Paper>
       </Popover>
     </>
+  );
+};
+
+const FeaturesTab = ({ classes }) => {
+  const [openViewFeature, setOpenViewFeature] = useState(false);
+  const [metaData, setMetaData] = useState({
+    featureName: "",
+    imageUrl: "",
+    handle: "",
+    featureId: "",
+  });
+
+  const features = useSelector((state) => state.otherUser.features.feature);
+  const featuredData = useSelector((state) => state.otherUser.features.data);
+
+  return (
+    <div style={{ padding: "16px 8px", width: "100%" }}>
+      {openViewFeature && (
+        <Portal>
+          <DisplayStories
+            style={{
+              width: "100vw",
+              height: "100vh",
+              top: 0,
+              zIndex: 1200,
+              position: "fixed",
+            }}
+            handle={metaData.handle}
+            imageUrl={metaData.imageUrl}
+            stories={featuredData[metaData.featureId]}
+            setDisplay={setOpenViewFeature}
+          />
+        </Portal>
+      )}
+
+      <Grid container style={{ overflowX: "auto" }}>
+        <div className={classes.featuresWrapper}>
+          {features &&
+            features.map((feature) => (
+              <FeatureDisplay
+                classes={classes}
+                key={feature.createdAt}
+                imageUrl={feature.imageUrl}
+                featureName={feature.featureName}
+                avatarProps={{
+                  onClick: () => {
+                    setMetaData({
+                      handle: feature.handle,
+                      featureName: feature.featureName,
+                      imageUrl: feature.imageUrl,
+                      featureId: feature.id,
+                    });
+
+                    if (
+                      !featuredData[feature.id] ||
+                      featuredData[feature.id].length <= 0
+                    )
+                      return;
+
+                    setOpenViewFeature(true);
+                  },
+                }}
+              />
+            ))}
+        </div>
+      </Grid>
+    </div>
   );
 };

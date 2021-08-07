@@ -75,7 +75,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-function AddFeaturePost({ setDisplay }) {
+function AddFeaturePost({ setDisplay, featureId }) {
   const [mediaUrl, setMediaUrl] = useState("");
   const [fileCodec, setFileCodec] = useState("");
   const [fileType, setFileType] = useState("");
@@ -129,6 +129,7 @@ function AddFeaturePost({ setDisplay }) {
           fileType={fileType}
           mediaUrl={mediaUrl}
           classes={classes}
+          featureId={featureId}
         />
       )}
       <Grid
@@ -178,6 +179,7 @@ export default AddFeaturePost;
 
 const ID_PROP = IDGenerator();
 const FeatureUploadpage = ({
+  featureId,
   fileCodec,
   fileType,
   classes,
@@ -238,15 +240,16 @@ const FeatureUploadpage = ({
           mediaUrl={mediaUrl}
           fileType={fileType}
           fileCodec={fileCodec}
+          featureId={featureId}
         />
       </Grid>
     </TransitionWrapper>
   );
 };
 
-const Footer = ({ classes, mediaUrl, fileType, fileCodec }) => {
+const Footer = ({ classes, mediaUrl, fileType, fileCodec, featureId }) => {
   const [caption, setCaption] = useState("");
-  const [progress, setProgress] = useState("");
+  const [progress, setProgress] = useState(0);
 
   const storeFile = useStorage();
   const storeImgFile = useStoreImage();
@@ -271,12 +274,12 @@ const Footer = ({ classes, mediaUrl, fileType, fileCodec }) => {
     const data = {
       caption,
       mediaUrl: storageUrl,
+      createdAt: Date.now(),
+      id: featureId,
+      type: fileCodec,
     };
 
-    console.log(data);
-
     await axios.post("/extra/addfeaturedpost", data);
-    console.log("Hello World");
     eventManager.publish("transition-wrapper", {
       direction: "vertical",
       display: false,

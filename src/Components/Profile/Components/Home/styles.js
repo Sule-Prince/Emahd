@@ -1,13 +1,12 @@
 import { makeStyles } from "@material-ui/core";
-import { BOTTOMTAB_HEIGHT } from "../../../../utils/constants";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: "#fff",
-    height: `calc(100% - ${BOTTOMTAB_HEIGHT})`,
-    maxHeight: `calc(100% - ${BOTTOMTAB_HEIGHT})`,
+    height: "100%",
+    maxHeight: "100%",
     color: "#000",
-    overflow: "hidden",
+    overflow: "hidden auto",
   },
   appBarRoot: {
     flexGrow: 1,
@@ -25,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
     width: "calc(45px + 2vmin)",
     color: "#fff",
     zIndex: 10,
-    background: "linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)",
+    backgroundColor: "#2196f3",
   },
   RefreshIcon: {
     marginTop: -28,

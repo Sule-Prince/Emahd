@@ -109,11 +109,11 @@ const AddMedia = () => {
             }}
             className={classes.addFab}
             onClick={() => {
-              setStyles((prev) => ({
+              /*  setStyles((prev) => ({
                 ...prev,
                 fabOpacity: [0, 0],
                 upperTranslate: ["-100vh", 0.5],
-              }));
+              })); */
             }}>
             <AddRounded style={{ color: "#fff" }} />
           </Fab>

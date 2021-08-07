@@ -17,7 +17,7 @@ export default (props) => {
         <Typography
           style={{ paddingBottom: "5vmin", fontWeight: "bold", color: "#000" }}
           variant="h4">
-          Join EMahd
+          Join Emahd
         </Typography>
         <Typography variant="body2">
           We'll help you create a new account in few easy steps

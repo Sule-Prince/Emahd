@@ -35,7 +35,11 @@ import {
   personalizedThunk,
   userDataThunk,
 } from "../../redux/userDataSlice";
-import { getPostsFromIndexDB, screamsDataThunk } from "../../redux/postsSlice";
+import {
+  getPostsFromIndexDB,
+  getTopPostsThunk,
+  screamsDataThunk,
+} from "../../redux/postsSlice";
 
 import { projectFirestore, projectAuth } from "../../firebase/FBConfig";
 import TalkBubble from "../SubComponents/TalkBubble";
@@ -119,6 +123,7 @@ const Profile = ({ selectedTab, setSelectedTab, ...props }) => {
     dispatch(userDataThunk());
     dispatch(getPostsFromIndexDB());
     dispatch(screamsDataThunk());
+    dispatch(getTopPostsThunk());
     dispatch(bannerPostsThunk());
     dispatch(getFeaturesThunk());
     dispatch(getFeaturedThunk());

@@ -24,6 +24,7 @@ import MessagePage from "./MessagePage";
 import FixedModal from "./FixedModal";
 import { closeSnackBar, openSnackBar } from "../../redux/userActionsSlice";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
+import useStyles from "../styles";
 
 const PostOptions = ({ user = false, postId, section, handle }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -171,6 +172,8 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
     );
   };
 
+  const classes = useStyles();
+
   return (
     <>
       <div>
@@ -190,7 +193,7 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
             horizontal: "right",
           }}>
           <Paper>
-            <MenuList>
+            <MenuList className={classes.menuList}>
               <MenuItem onClick={copyLink}>Copy Link</MenuItem>
               <MenuItem
                 onClick={() => {
@@ -207,7 +210,7 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
               {user ? (
                 <MenuItem onClick={handleDelete}>Delete Post</MenuItem>
               ) : (
-                <div>
+                <div style={{ padding: 0 }} className={classes.menuList}>
                   <MenuItem
                     onClick={() => {
                       handleFollowReq(handle);

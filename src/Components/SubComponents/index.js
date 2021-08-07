@@ -9,6 +9,8 @@ import ColorPalette from "./ColorPalette";
 import CommentField from "./CommentField";
 import CropRotate from "./CropRotate";
 import DisplayCardList from "./DisplayCardList";
+import DisplayStories from "./DisplayStories";
+import DisplayStory from "./DisplayStory";
 import DragElement from "./DragElement";
 import FixedModal from "./FixedModal";
 import FollowCard from "./FollowCard";
@@ -66,6 +68,8 @@ const SubComponents = {
   CommentField,
   CropRotate,
   DisplayCardList,
+  DisplayStories,
+  DisplayStory,
   DragElement,
   FixedModal,
   FollowCard,
@@ -126,6 +130,8 @@ export {
   CommentField,
   CropRotate,
   DisplayCardList,
+  DisplayStories,
+  DisplayStory,
   DragElement,
   FixedModal,
   FollowCard,

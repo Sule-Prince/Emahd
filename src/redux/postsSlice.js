@@ -13,6 +13,10 @@ const initialState = {
       scream: [],
     },
   },
+  topPosts: {
+    media: [],
+    scream: [],
+  },
   error: "",
   retries: 0,
   uploadProfilePic: {
@@ -42,6 +46,24 @@ export const screamsDataThunk = createAsyncThunk(
           dispatch(screamsDataThunk());
         }, 10000);
       }
+      return rejectWithValue("Cannot get posts, please try again later");
+    }
+  }
+);
+
+export const getTopPostsThunk = createAsyncThunk(
+  "topPosts/getData",
+  async (args, { rejectWithValue }) => {
+    try {
+      const data = (await axios.get("/admin/gettopposts")).data;
+
+      return data;
+    } catch (error) {
+      if (!navigator.onLine)
+        return rejectWithValue(
+          "Cannot get posts, please connect to the internet!!"
+        );
+
       return rejectWithValue("Cannot get posts, please try again later");
     }
   }
@@ -166,6 +188,10 @@ const screamsData = createSlice({
       if (state.retries === 3) {
         state.error = action.payload;
       }
+    },
+    [getTopPostsThunk.fulfilled]: (state, action) => {
+      state.topPosts.media = action.payload.posts.media;
+      state.topPosts.scream = action.payload.posts.screams;
     },
   },
 });
