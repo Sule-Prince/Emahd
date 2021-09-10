@@ -1,17 +1,13 @@
 import React, { useState } from "react";
-import {
-  CircularProgress,
-  Grid,
-  makeStyles,
-  Typography,
-} from "@material-ui/core";
-
-import SearchIcon from "@material-ui/icons/Search";
+import { CircularProgress, Grid, makeStyles } from "@material-ui/core";
 
 import SearchBar from "../../../SubComponents/SearchBar";
 import UserInfoButton from "../../../SubComponents/UserInfoButton";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import MediaPlaceholder from "../../../SubComponents/MediaPlaceholder";
+
+import searchSvg from "../../../assets/graphics/placeholder_svg/search.svg";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -53,19 +49,10 @@ const Search = () => {
               }}>
               {!isLoading && (
                 <>
-                  <span>
-                    <SearchIcon
-                      style={{ height: 80, width: 80 }}
-                      color="action"
-                    />
-                  </span>
-                  <Typography
-                    variant="h4"
-                    style={{ fontWeight: "bold" }}
-                    align="center"
-                    color="textSecondary">
-                    Search and connect with loved ones on Emahd
-                  </Typography>
+                  <MediaPlaceholder
+                    imageUrl={searchSvg}
+                    caption="Search and connect with loved ones on Emahd"
+                  />
                 </>
               )}
               {isLoading && (

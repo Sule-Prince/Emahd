@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 
 import { Grid, Paper, Typography } from "@material-ui/core";
-import NotificationsActiveIcon from "@material-ui/icons/NotificationsActive";
 import { useSelector } from "react-redux";
 import Notification from "./Notification";
 
@@ -9,6 +8,7 @@ import { useStyles } from "../Account/styles";
 import { projectFirestore } from "../../../../firebase/FBConfig";
 
 import notificationSvg from "../../../assets/graphics/placeholder_svg/push_notifications.svg";
+import MediaPlaceholder from "../../../SubComponents/MediaPlaceholder";
 
 export default () => {
   const readNotifications = useSelector(
@@ -52,39 +52,18 @@ export default () => {
     <div style={{ backgroundColor: "#f9f9f9", height: "calc(100vh - 60px)" }}>
       <Grid
         container
-        style={{ maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}
-        spacing={1}>
+        style={{ maxHeight: "calc(100vh - 56px)", overflowY: "auto" }}>
         <Grid item xs={12}>
           <Header />
         </Grid>
         {readNotifications.length === 0 && unreadNotifications.length === 0 ? (
-          <Grid
-            container
-            direction="column"
-            justify="center"
-            spacing={1}
-            style={{
-              padding: "0px 16px",
-              height: "calc(100vh - 100px - 1.6vmin)",
-            }}>
-            <Grid item>
-              <img
-                style={{ width: "100%" }}
-                src={notificationSvg}
-                alt="notifications placeholder"
-              />
-            </Grid>
-            <Grid item>
-              <Typography
-                variant="h5"
-                style={{ fontWeight: "bold" }}
-                align="center"
-                color="textSecondary">
-                Catch up with the activities going on around you, friends and
-                family.
-              </Typography>
-            </Grid>
-          </Grid>
+          <div style={{ height: "calc(100vh - 100px - 1.6vmin)" }}>
+            <MediaPlaceholder
+              imageUrl={notificationSvg}
+              caption="Catch up with the activities going on around you, friends and
+                family."
+            />
+          </div>
         ) : null}
 
         {unreadNotifications.map((notification) => {

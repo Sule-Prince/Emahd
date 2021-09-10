@@ -3,7 +3,6 @@ import { Grid } from "@material-ui/core";
 import Post from "./Post";
 
 import "./home.css";
-import RefreshWrapper from "../../../SubComponents/RefreshWrapper";
 
 const Posts = ({ posts, style = {} }) => {
   const rootRef = useRef(null);
@@ -21,9 +20,7 @@ const Posts = ({ posts, style = {} }) => {
           paddingBottom: 26,
         }}>
         {posts
-          ? posts.map((post) => (
-              <Post post={post} rootRef={rootRef} key={post.postId} />
-            ))
+          ? posts.map((post) => <Post post={post} key={post.postId} />)
           : null}
       </Grid>
     </div>

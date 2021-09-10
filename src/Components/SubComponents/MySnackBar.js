@@ -6,12 +6,13 @@ import { closeSnackBar } from "../../redux/userActionsSlice";
 
 const useStyles = makeStyles({
   alert: {
-    backgroundColor: "#aaa",
+    backgroundColor: "#555",
+    opacity: 0.2,
   },
   font: {
-    fontSize: 12.5,
-    paddingTop: 4,
-    paddingBottom: 4,
+    fontSize: 12,
+    paddingTop: 0,
+    paddingBottom: 0,
   },
 });
 
@@ -21,13 +22,11 @@ function SuccessAlert(props) {
   );
 }
 function InfoAlert(props) {
-  return <MuiAlert elevation={6} variant="filled" severity="info" {...props} />;
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
 }
 
 function ErrorAlert(props) {
-  return (
-    <MuiAlert elevation={6} variant="filled" severity="error" {...props} />
-  );
+  return <MuiAlert elevation={6} variant="filled" severity="info" {...props} />;
 }
 
 const LoadingAlert = (props) => {
@@ -81,12 +80,16 @@ const MySnackBar = () => {
           </SuccessAlert>
         )) ||
         (snackBarType === "error" && (
-          <ErrorAlert onClose={handleClose} className={classes.font}>
+          <ErrorAlert
+            onClose={handleClose}
+            className={classes.alert + " " + classes.font}>
             {snackBarInfo}
           </ErrorAlert>
         )) ||
         (snackBarType === "info" && (
-          <InfoAlert onClose={handleClose} className={classes.font}>
+          <InfoAlert
+            onClose={handleClose}
+            className={classes.alert + " " + classes.font}>
             {snackBarInfo}
           </InfoAlert>
         ))

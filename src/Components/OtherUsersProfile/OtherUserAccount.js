@@ -40,7 +40,8 @@ import Messages from "../Chat/Messages/Messages";
 import BottomModal from "../SubComponents/BottomModal";
 import PersonalizeUser from "./PersonalizeUser";
 import FeatureDisplay from "../Profile/Components/Account/Features/FeatureDisplay";
-import { DisplayStories } from "../SubComponents";
+import { DisplayStories, MessagePage } from "../SubComponents";
+import { closeSnackBar, openSnackBar } from "../../redux/userActionsSlice";
 
 export default ({ setSelectedTab }) => {
   const [bottomModal, setBottomModal] = useState(false);
@@ -84,6 +85,29 @@ export default ({ setSelectedTab }) => {
     else if (type === "report") setReport(bool);
   };
 
+  const sendData = (type) => {
+    return (message) => {
+      dispatch(
+        openSnackBar({
+          message: "Sending...",
+          shouldClose: false,
+          loading: true,
+        })
+      );
+      return axios.post("/user/feedback", { type, message }).then(() => {
+        dispatch(closeSnackBar());
+
+        dispatch(
+          openSnackBar({
+            message: "Report sent successfully.",
+            duration: 3000,
+          })
+        );
+      });
+    };
+  };
+  const sendReport = sendData("report");
+
   const classes = useStyles();
 
   if (isLoading) {
@@ -110,6 +134,20 @@ export default ({ setSelectedTab }) => {
       {personalize && (
         <PersonalizeUser setDisplay={setPersonalize} userId={userId} />
       )}
+
+      {report && (
+        <Portal container={document.body}>
+          <MessagePage
+            button="Send Report"
+            header="Report a problem"
+            mainText="Disturbed about user's content/behaviour on Emahd? Feel free to report it here and we'll review it"
+            commentSection="Type your issue here."
+            setDisplay={setReport}
+            sendData={sendReport}
+          />
+        </Portal>
+      )}
+
       <div
         className={classes.root}
         ref={rootRef}
@@ -177,6 +215,8 @@ const Header = ({
   setDisplayOptions,
   isLoading,
 }) => {
+  const dispatch = useDispatch();
+
   const { push } = useHistory();
   const handleBackButton = () => {
     push("/");
@@ -187,6 +227,19 @@ const Header = ({
       return state.user.personalized[userId].handle;
     else return null;
   });
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(`https://xemahd.com/user/${handle}`);
+
+    setBottomModal(false);
+
+    dispatch(
+      openSnackBar({
+        message: "Link copied successfully!",
+        duration: 3000,
+      })
+    );
+  };
 
   return (
     <>
@@ -218,16 +271,22 @@ const Header = ({
 
       <BottomModal setDisplay={setBottomModal} display={bottomModal}>
         <MenuList>
-          <MenuItem>Report</MenuItem>
           <MenuItem
             onClick={() => {
-              setDisplayOptions(true, "personalize");
               setBottomModal(false);
+              setDisplayOptions(true, "report");
+            }}>
+            Report
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setBottomModal(false);
+              setDisplayOptions(true, "personalize");
             }}>
             Personalize
           </MenuItem>
           <MenuItem>Block</MenuItem>
-          <MenuItem>Copy Profile Url</MenuItem>
+          <MenuItem onClick={() => copyLink()}>Copy Profile Url</MenuItem>
           {/* <MenuItem>About Account</MenuItem> */}
         </MenuList>
       </BottomModal>

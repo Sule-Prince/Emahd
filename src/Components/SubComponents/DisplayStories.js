@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { Link } from "react-router-dom";
 
-import { Grid, Typography, Avatar } from "@material-ui/core";
+import { Grid, Typography, Avatar, IconButton } from "@material-ui/core";
 import KeyboardBackspaceIcon from "@material-ui/icons/KeyboardBackspace";
 
 import DisplayStory from "./DisplayStory";
@@ -20,13 +20,12 @@ export default function DisplayStories({
   const [translate, setTranslate] = useState(0);
 
   return (
-    <Grid
-      container
-      direction="column"
+    <div
       style={{
         transition: "all .5s cubic-bezier(0, .4, .6, 1)",
         transform: `translateY(${index >= stories.length ? 100 : translate}vh)`,
         backgroundColor: "#000",
+        position: "relative",
         width: "100%",
         height: "100%",
         ...style,
@@ -35,20 +34,29 @@ export default function DisplayStories({
         setDisplay(false);
       }}
       {...props}>
-      <StoryBars
-        storyLength={stories.length}
-        stories={stories}
-        setIndex={setIndex}
-        index={index}
-      />
+      <div style={{ position: "absolute", zIndex: 10, width: "100%" }}>
+        <StoryBars
+          storyLength={stories.length}
+          stories={stories}
+          setIndex={setIndex}
+          index={index}
+        />
 
-      <StoryAvatar
-        handle={handle}
-        imageUrl={imageUrl}
-        setTranslate={setTranslate}
-      />
-
-      <Grid item style={{ flexGrow: 1 }}>
+        <StoryAvatar
+          handle={handle}
+          imageUrl={imageUrl}
+          setTranslate={setTranslate}
+        />
+      </div>
+      <div
+        style={{
+          top: 0,
+          left: 0,
+          zIndex: 0,
+          position: "absolute",
+          height: "100%",
+          width: "100%",
+        }}>
         <TapElement
           onTap={(e) => {
             if (e.location.which === "left" && index > 0)
@@ -63,8 +71,8 @@ export default function DisplayStories({
             }
           />
         </TapElement>
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 }
 
@@ -106,7 +114,7 @@ const StoryBars = ({ storyLength, style, setIndex, index, stories }) => {
           />
         ))}
       </div>
-      <div style={{ position: "absolute", top: 0, width: "100%", zIndex: 10 }}>
+      <div style={{ position: "absolute", top: 0, width: "100%" }}>
         {storyBars.map((i) => (
           <AnimateBar
             key={i}
@@ -125,9 +133,8 @@ const StoryBars = ({ storyLength, style, setIndex, index, stories }) => {
 
 const StoryBar = ({ style, classes }) => (
   <div
-    className={classes}
     style={{
-      height: "calc(1px + .8vmin)",
+      height: "calc(1px + .4vmin)",
       borderRadius: "calc(4px + .5rem)",
       display: "inline-block",
       backgroundColor: "#bbbd",
@@ -145,7 +152,7 @@ const AnimateBar = ({ index, i, barLength, duration, setIndex, style }) => {
       setWidth(0);
 
       setTimeout(() => {
-        setTransition(`all ${duration}s ease-in`);
+        setTransition(`all ${duration}s linear`);
         setWidth(barLength);
       }, 100);
     } else if (index < i) {
@@ -159,7 +166,7 @@ const AnimateBar = ({ index, i, barLength, duration, setIndex, style }) => {
   return (
     <div
       style={{
-        height: "calc(1px + .8vmin)",
+        height: "calc(1px + .4vmin)",
         borderRadius: "calc(4px + .5rem)",
         display: "inline-block",
         backgroundColor: "#fff",
@@ -175,7 +182,8 @@ const AnimateBar = ({ index, i, barLength, duration, setIndex, style }) => {
 };
 
 const StoryAvatar = ({ setTranslate, handle, imageUrl }) => {
-  const handleBackButton = () => {
+  const handleBackButton = (e) => {
+    e.stopPropagation();
     setTranslate(100);
   };
   return (
@@ -187,12 +195,9 @@ const StoryAvatar = ({ setTranslate, handle, imageUrl }) => {
       }}
       alignItems="center"
       container>
-      <Grid
-        onClick={handleBackButton}
-        style={{ padding: "0px 12px 0px 4px", height: 24 }}
-        item>
-        <KeyboardBackspaceIcon />
-      </Grid>
+      <IconButton onClick={handleBackButton} color="secondary">
+        <KeyboardBackspaceIcon style={{ color: "#fff" }} />
+      </IconButton>
       <Grid item style={{ marginRight: 8, padding: "8px 0px" }}>
         <Avatar src={imageUrl} style={{ height: 35, width: 35 }} />
       </Grid>

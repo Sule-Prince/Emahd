@@ -72,7 +72,7 @@ const Comment = ({
           className={classes.handle}
           gutterBottom={true}
           component="span">
-          <Link to={handle}>{personalizedHandle || handle}</Link>
+          <Link to={`/user/${handle}`}>{personalizedHandle || handle}</Link>
         </Typography>
         <Typography variant="body2" color="textPrimary" component="span">
           {comment}

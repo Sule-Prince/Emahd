@@ -76,18 +76,19 @@ const ProfilePic = ({ classes, imageUrl }) => {
             }}
             badgeContent={
               <label htmlFor={isLoading ? "" : "upload-profile-pic"}>
-                <IconButton
-                  color="primary"
-                  component="span"
-                  disabled={isLoading ? true : false}>
-                  <Grid
-                    container
-                    alignItems="center"
-                    justify="center"
-                    className={classes.uploadIconContainer}>
+                <Grid
+                  container
+                  alignItems="center"
+                  justify="center"
+                  className={classes.uploadIconContainer}>
+                  <IconButton
+                    color="primary"
+                    component="span"
+                    size="small"
+                    disabled={isLoading ? true : false}>
                     <AddAPhotoIcon style={{ fontSize: "1.1rem" }} />
-                  </Grid>
-                </IconButton>
+                  </IconButton>
+                </Grid>
               </label>
             }>
             <div

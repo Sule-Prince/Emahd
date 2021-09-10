@@ -5,6 +5,8 @@ import {
   InputAdornment,
   makeStyles,
   IconButton,
+  Avatar,
+  Grid,
 } from "@material-ui/core";
 import SendIcon from "@material-ui/icons/Send";
 
@@ -16,6 +18,10 @@ const useStyles = makeStyles({
     padding: "10px 5px",
     paddingBottom: 12,
     width: "100%",
+  },
+  avatar: {
+    height: "100%",
+    width: "auto",
   },
 });
 
@@ -29,7 +35,7 @@ const useMuiTextStyles = makeStyles(
   { name: "MuiOutlinedInput" }
 );
 
-const CommentField = ({ postId, setCommentNo }) => {
+const CommentField = ({ postId, setCommentNo, imageUrl }) => {
   const classes = useStyles();
   const textClasses = useMuiTextStyles();
 
@@ -38,32 +44,37 @@ const CommentField = ({ postId, setCommentNo }) => {
   const dispatch = useDispatch();
 
   return (
-    <div className={classes.commentContainer}>
-      <TextField
-        className={textClasses.root}
-        label="add a comment"
-        variant="outlined"
-        value={comment}
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                color="primary"
-                onClick={() => {
-                  handleAddComment(comment, postId, dispatch, setCommentNo);
-                  setComment("");
-                }}>
-                <SendIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        onChange={(e) => {
-          setComment(e.target.value);
-        }}
-      />
-    </div>
+    <Grid container alignItems="center" className={classes.commentContainer}>
+      <Grid item style={{ paddingLeft: 4, paddingRight: 8 }}>
+        <Avatar src={imageUrl ? imageUrl : null} />
+      </Grid>
+      <Grid item xs>
+        <TextField
+          className={textClasses.root}
+          label="add a comment"
+          variant="outlined"
+          value={comment}
+          fullWidth
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  color="primary"
+                  onClick={() => {
+                    handleAddComment(comment, postId, dispatch, setCommentNo);
+                    setComment("");
+                  }}>
+                  <SendIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          onChange={(e) => {
+            setComment(e.target.value);
+          }}
+        />
+      </Grid>
+    </Grid>
   );
 };
 

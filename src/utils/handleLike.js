@@ -6,7 +6,7 @@ import {
   updateUnlikedPosts,
 } from "../redux/userDataSlice";
 
-export const handleLike = (postId, dispatch, setLikes, scream) => {
+export const handleLike = (postId, dispatch, setLikes) => {
   const likeAudio = document.getElementById("like-audio");
   likeAudio.volume = 0.6;
   likeAudio.play();
@@ -15,7 +15,7 @@ export const handleLike = (postId, dispatch, setLikes, scream) => {
   axios
     .get(`/post/like/${postId}`)
     .then((res) => {
-      dispatch(updateLikedPosts(scream));
+      dispatch(updateLikedPosts(postId));
     })
     .catch((err) => {});
 };

@@ -14,6 +14,8 @@ import {
   useTheme,
 } from "@material-ui/core";
 
+import Skeleton from "@material-ui/lab/Skeleton";
+
 import { useSelector } from "react-redux";
 
 // Icons
@@ -39,10 +41,10 @@ import { screamsDataThunk } from "../../../../redux/postsSlice";
 import MultiPosts from "../../../SubComponents/MultiPosts";
 import useRefresh from "../../../../utils/customHooks/useRefresh";
 import FollowCardTwo from "../../../SubComponents/FollowCardTwo";
-import ContentLoader from "react-content-loader";
 import ScaleOnScroll, {
   ScrollChild,
 } from "../../../SubComponents/ScaleOnScroll";
+import IDGenerator from "../../../../utils/IDGenerator";
 
 const Home = ({ AccountTab }) => {
   const classes = useStyles();
@@ -197,6 +199,7 @@ const Media = ({ classes }) => {
       </div> */}
 
       <Divider />
+
       {isLoading && <PostSkeletons />}
       {!isLoading && posts.media.length > 0 && (
         <RefreshWrapper onRefresh={onRefresh}>
@@ -234,11 +237,13 @@ const UtilsNavBar = ({ classes, users }) => {
         </Grid>
       )}
       <Grid item xs={12}>
-        <ScaleOnScroll className={classes.utilsNavBar}>
+        {/* <ScaleOnScroll className={classes.utilsNavBar}> */}
+        <div className={classes.utilsNavBar}>
           {users.map((user, i) => (
             <FollowCardWithRef user={user} i={i} key={user.handle} />
           ))}
-        </ScaleOnScroll>
+        </div>
+        {/* </ScaleOnScroll> */}
       </Grid>
     </Grid>
   );
@@ -271,20 +276,34 @@ const FollowCardWithRef = ({ user, i }) => {
 };
 
 const PostSkeletons = () => {
-  const skeletons = new Array(5).fill(<></>).map(() => (
-    <ContentLoader
-      key={Math.round(Math.random() * 100000000000)}
-      viewBox="0 0 400 460"
-      backgroundColor="#d9d9d9"
-      foregroundColor="#e9e9e9"
-      style={{
-        marginBottom: 16,
-      }}>
-      <circle cx="31" cy="31" r="25" />
-      <rect x="70" y="18" rx="2" ry="2" width="170" height="10" />
-      <rect x="70" y="34" rx="2" ry="2" width="140" height="10" />
-      <rect x="0" y="65" rx="2" ry="2" width="400" height="400" />
-    </ContentLoader>
+  const skeletons = new Array(15).fill(<></>).map(() => (
+    <Grid container key={IDGenerator(20)} style={{ paddingBottom: 10 }}>
+      <Grid item container alignItems="center" style={{ padding: "8px 0px" }}>
+        <Grid item style={{ padding: "0px 4px" }}>
+          <Skeleton variant="circle" width={40} height={40} animation="wave" />
+        </Grid>
+        <Grid item xs>
+          <Skeleton variant="text" width="45%" animation="wave" />
+          <Skeleton variant="text" width="65%" animation="wave" />
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Skeleton
+          variant="rect"
+          animation="wave"
+          width="100%"
+          height={
+            window.innerWidth > 500
+              ? 500 - 500 * 0.2
+              : window.innerWidth - window.innerWidth * 0.2
+          }
+        />
+      </Grid>
+      <Grid item xs={12} style={{ padding: "0px 16px" }}>
+        <Skeleton variant="text" width="100%" animation="wave" />
+        <Skeleton variant="text" width="65%%" animation="wave" />
+      </Grid>
+    </Grid>
   ));
   return (
     <div

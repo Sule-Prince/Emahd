@@ -38,7 +38,9 @@ const LazyLoadMedia = ({
   rootRef,
   settings,
   mediaLoaded,
+  dbTapped,
   setMediaLoaded,
+  ActionComponent,
 }) => {
   const mediaPad = useState(() => {
     return 100 / settings.aspectRatio;
@@ -50,6 +52,9 @@ const LazyLoadMedia = ({
   const mediaRef = useRef(null);
   const thumbRef = useRef(null);
   const timeoutId = useRef(null);
+
+  const tappedRef = useRef(null);
+
   const classes = useStyles();
 
   useEffect(() => {
@@ -111,7 +116,38 @@ const LazyLoadMedia = ({
   }, []);
 
   return (
-    <>
+    <ActionComponent
+      onTouchStart={(e) => {
+        if (!tappedRef.current) {
+          //if tap is not set, set up single tap
+          tappedRef.current = setTimeout(function () {
+            tappedRef.current = null;
+            //insert things you want to do when single tapped
+          }, 300); //wait 300ms then run single click code
+        } else {
+          //tapped within 300ms of last tap. double tap
+          clearTimeout(tappedRef.current); //stop single tap callback
+          tappedRef.current = null;
+          //insert things you want to do when double tapped
+          dbTapped();
+        }
+      }}
+      onTouchEnd={(e) => {
+        e.preventDefault();
+
+        clearTimeout(timeoutId.current);
+        setPlayOpacity(1);
+        timeoutId.current = setTimeout(() => {
+          setPlayOpacity(0);
+        }, 3000);
+      }}
+      onClick={(e) => {
+        clearTimeout(timeoutId.current);
+        setPlayOpacity(1);
+        timeoutId.current = setTimeout(() => {
+          setPlayOpacity(0);
+        }, 3000);
+      }}>
       <div
         className={classes.root}
         style={{
@@ -158,7 +194,9 @@ const LazyLoadMedia = ({
               <IconButton
                 color="primary"
                 component="span"
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
+
                   if (mediaRef.current.paused) {
                     mediaRef.current.play();
                     timeoutId.current = setTimeout(() => {
@@ -170,14 +208,15 @@ const LazyLoadMedia = ({
 
                     setPlayOpacity(1);
                   }
-                }}>
+                }}
+                onTouchEnd={(e) => e.stopPropagation()}>
                 <PlayArrowIcon fontSize="large" />
               </IconButton>
             </span>
           </>
         )}
       </div>
-    </>
+    </ActionComponent>
   );
 };
 

@@ -5,7 +5,7 @@ import { Grid, Typography, makeStyles } from "@material-ui/core";
 const useStyles = makeStyles((theme) => ({
   mediaRoot: {
     height: "100%",
-    position: "relative",
+
     "& > *": {
       width: "100%",
       height: "auto",

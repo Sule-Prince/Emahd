@@ -72,7 +72,7 @@ const Account = () => {
   const userData = useSelector((state) => state.user.data);
   // const isLoading = useSelector(state => state.user.isLoading);
 
-  const posts = useSelector((state) => state.posts.posts);
+  const userPost = useSelector((state) => state.posts.userPost);
   const followSuggest = useSelector((state) => state.extra.followSuggest);
 
   const onRefresh = useRefresh(userDataThunk);
@@ -178,12 +178,12 @@ const Account = () => {
               <Grid
                 style={{
                   borderBottom: "1px solid #ccc",
-                  maxHeight: 230,
+                  maxHeight: "calc(223px + 2vw)",
                   overflow: "hidden",
                 }}
                 xs={12}
                 item>
-                {followSuggest.isLoading ? (
+                {followSuggest.isLoading && followSuggest.users.length === 0 ? (
                   <Loader />
                 ) : (
                   followSuggest.users.length > 0 && (
@@ -195,7 +195,7 @@ const Account = () => {
                 )}
               </Grid>
               <Grid container item xs>
-                <UserPosts posts={posts.userPost} rootRef={rootRef} />
+                <UserPosts posts={userPost} rootRef={rootRef} />
               </Grid>
             </RefreshWrapper>
           </Grid>

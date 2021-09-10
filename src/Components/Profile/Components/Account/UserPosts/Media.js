@@ -5,7 +5,7 @@ import { Grid, Typography, IconButton } from "@material-ui/core";
 import NoPostUpload from "./NoPostUpload";
 import AutorenewIcon from "@material-ui/icons/Autorenew";
 import PhotoCameraIcon from "@material-ui/icons/PhotoCamera";
-import MultiPosts from "../../../../SubComponents/MultiPosts";
+import MultiPost from "../../../../SubComponents/MultiPost";
 
 const Media = ({ posts, error, otherUser }) => {
   return (
@@ -45,9 +45,9 @@ const Media = ({ posts, error, otherUser }) => {
             </Typography>
           </NoPostUpload>
         )
-      ) : (
-        <MultiPosts posts={posts} userpost />
-      )}
+      ) : posts ? (
+        posts.map((post) => <MultiPost key={post.postId} mediaPost={post} />)
+      ) : null}
     </>
   );
 };

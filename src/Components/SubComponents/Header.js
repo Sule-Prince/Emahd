@@ -5,7 +5,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useStyles } from "../Profile/Components/Account/styles";
 import HeaderBase from "./HeaderBase";
 
-const Header = ({ setDisplay, data, imageUrl, sticky, ...props }) => {
+const Header = ({ setDisplay, data, imageUrl, backBtn, sticky, ...props }) => {
   const classes = useStyles();
 
   const handleCancelButton = () => {
@@ -30,7 +30,7 @@ const Header = ({ setDisplay, data, imageUrl, sticky, ...props }) => {
                 color="primary"
                 onClick={handleCancelButton}
                 style={{ marginRight: 5, marginLeft: "-1rem" }}>
-                <CloseIcon />
+                {backBtn || <CloseIcon />}
               </IconButton>
             </Grid>
 

@@ -14,6 +14,7 @@ import MySnackBar from "./Components/SubComponents/MySnackBar";
 import "./index.css";
 import Loading from "./Components/SubComponents/Loading";
 import Test from "./Components/SubComponents/Test";
+import PostPage from "./Components/SubComponents/PostPage";
 
 const theme = createMuiTheme({
   overrides: {
@@ -105,6 +106,7 @@ const App = () => {
                 <Route path="/signup" component={SignUp} />
                 <Route path="/forgot" component={ForgotPsw} />
                 <Route path="/test" component={Test} />
+                <Route path="/post/:postId" component={PostPage} />
 
                 <Route
                   path="/user/:user"

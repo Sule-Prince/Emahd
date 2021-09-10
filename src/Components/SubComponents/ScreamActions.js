@@ -13,15 +13,15 @@ import {
 
 import ShareOutlinedIcon from "@material-ui/icons/ShareOutlined";
 
-import FavoriteBorderSharpIcon from "@material-ui/icons/FavoriteBorderSharp";
-import FavoriteSharpIcon from "@material-ui/icons/FavoriteSharp";
-import ChatBubbleOutlineSharpIcon from "@material-ui/icons/ChatBubbleOutlineSharp";
-
+import FavoriteBorderRoundedIcon from "@material-ui/icons/FavoriteBorderRounded";
+import FavoriteRoundedIcon from "@material-ui/icons/FavoriteRounded";
+import ChatBubbleOutlineRoundedIcon from "@material-ui/icons/ChatBubbleOutlineRounded";
 import { handleLike, handleUnlike } from "../../utils/handleLike";
 
 // Assets import
 import likeSound from "../assets/audio/likeSound.mp3";
 import Comments from "../Profile/Components/Home/Comments";
+import { updatePost } from "../../redux/postsSlice";
 
 const useStyles = makeStyles((theme) => ({
   cardActions: {
@@ -29,17 +29,28 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
   },
   spanText: {
-    paddingLeft: 8,
+    paddingLeft: 4,
   },
 }));
 
-const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
-  const [isLiked, setIsLiked] = useState(false);
+const ScreamActions = ({
+  scream: { commentCount, postId, likeCount, handle, ...scream },
+  likeRef,
+  isLiked,
+  setIsLiked,
+}) => {
   const [likes, setLikes] = useState(likeCount);
   const [openComments, setOpenComments] = useState(false);
+
   const dispatch = useDispatch();
   const classes = useStyles();
   const likedPosts = useSelector((state) => state.user.likes);
+  const userHandle = useSelector((state) => state.user.data.handle);
+
+  // Update action data
+  const user = handle === userHandle ? true : false,
+    index = user ? scream.uIndex : scream.index,
+    type = scream.section;
 
   useEffect(() => {
     if (likedPosts.indexOf(postId) !== -1) {
@@ -48,6 +59,10 @@ const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
       setIsLiked(false);
     }
   }, [likedPosts, postId]);
+
+  /* useEffect(() => {
+
+  }, [initiateLike]); */
 
   const handleOpenComments = () => {
     setOpenComments(true);
@@ -59,18 +74,27 @@ const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
         <div>
           {isLiked ? (
             <IconButton
+              size="small"
               style={{ color: "#f00" }}
               onClick={() => {
+                dispatch(
+                  updatePost({ user, index, type, likeCount: likeCount - 1 })
+                );
                 handleUnlike(postId, dispatch, setLikes);
               }}>
-              <FavoriteSharpIcon fontSize="small" />
+              <FavoriteRoundedIcon fontSize="small" />
             </IconButton>
           ) : (
             <IconButton
+              size="small"
+              ref={likeRef}
               onClick={() => {
-                handleLike(postId, dispatch, setLikes, scream);
+                dispatch(
+                  updatePost({ user, index, type, likeCount: likeCount + 1 })
+                );
+                handleLike(postId, dispatch, setLikes);
               }}>
-              <FavoriteBorderSharpIcon fontSize="small" />
+              <FavoriteBorderRoundedIcon fontSize="small" />
             </IconButton>
           )}
 
@@ -86,23 +110,23 @@ const ScreamActions = ({ postId, likeCount, commentCount, scream }) => {
             variant="caption"
             className={classes.spanText}
             component="span">
-            {likes}
+            {likes === 0 ? "no likes" : `${likes} likes`}
           </Typography>
         </div>
         <div>
-          <IconButton onClick={handleOpenComments}>
-            <ChatBubbleOutlineSharpIcon fontSize="small" />
+          <IconButton onClick={handleOpenComments} size="small">
+            <ChatBubbleOutlineRoundedIcon fontSize="small" />
           </IconButton>
 
           <Typography
             variant="caption"
             className={classes.spanText}
             component="span">
-            {commentCount}
+            {commentCount === 0 ? "no comments" : `${commentCount} comments`}
           </Typography>
         </div>
         <div>
-          <IconButton>
+          <IconButton size="small">
             <ShareOutlinedIcon fontSize="small" />
           </IconButton>
         </div>

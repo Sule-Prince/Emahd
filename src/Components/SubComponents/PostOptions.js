@@ -3,32 +3,27 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
-  Grid,
   IconButton,
   MenuItem,
   MenuList,
   Paper,
   Popover,
   Portal,
-  Typography,
 } from "@material-ui/core";
-
-import CloseIcon from "@material-ui/icons/Close";
-
-import DoneIcon from "@material-ui/icons/Done";
 
 import MoreVertIcon from "@material-ui/icons/MoreVertRounded";
 import { axios } from "../../config/axiosConfig";
 import { screamsDataThunk } from "../../redux/postsSlice";
 import MessagePage from "./MessagePage";
-import FixedModal from "./FixedModal";
 import { closeSnackBar, openSnackBar } from "../../redux/userActionsSlice";
 import { addFriend, removeFriend } from "../../redux/userDataSlice";
 import useStyles from "../styles";
+import ConsentModal from "./ConsentModal";
 
 const PostOptions = ({ user = false, postId, section, handle }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [delModal, setDelModal] = useState(false);
   const [openReport, setOpenReport] = useState(false);
 
   const [followVal, setFollowVal] = useState("Follow");
@@ -50,6 +45,12 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
   const copyLink = () => {
     navigator.clipboard.writeText(`https://xemahd.com/post/${postId}`);
 
+    dispatch(
+      openSnackBar({
+        message: "Link copied successfully!",
+        duration: 3000,
+      })
+    );
     handleClose();
   };
 
@@ -149,27 +150,42 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
 
   const handleDelete = () => {
     setOpenModal(true);
+    setDelModal(true);
+
     handleClose();
   };
 
   const sendDeleteReq = async () => {
-    dispatch(
-      openSnackBar({
-        message: "Deleting post...",
-        shouldClose: false,
-        loading: true,
-      })
-    );
-    await axios.post(`/deletescream/${handle}`, { postId });
-    dispatch(screamsDataThunk());
-    dispatch(closeSnackBar());
-    dispatch(
-      openSnackBar({
-        type: "success",
-        message: "Post deleted successfully",
-        duration: 3000,
-      })
-    );
+    try {
+      dispatch(
+        openSnackBar({
+          message: "Deleting post...",
+          shouldClose: false,
+          loading: true,
+        })
+      );
+      setDelModal(false);
+
+      await axios.post(`/deletescream/${handle}`, { postId });
+      dispatch(screamsDataThunk());
+      dispatch(closeSnackBar());
+      dispatch(
+        openSnackBar({
+          type: "success",
+          message: "Post deleted successfully",
+          duration: 3000,
+        })
+      );
+    } catch (error) {
+      dispatch(closeSnackBar());
+      dispatch(
+        openSnackBar({
+          type: "error",
+          message: "Something went wrong!",
+          duration: 3000,
+        })
+      );
+    }
   };
 
   const classes = useStyles();
@@ -233,7 +249,7 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
           <MessagePage
             button="Send Report"
             header="Report a problem"
-            mainText="Is there a problem? Feel free to report it here"
+            mainText="Have an issue with this post? Let us know and we'll review it"
             commentSection="Type your issue here."
             setDisplay={setOpenReport}
             sendData={sendReport}
@@ -242,29 +258,24 @@ const PostOptions = ({ user = false, postId, section, handle }) => {
       )}
 
       {openModal && (
-        <FixedModal>
-          <>
-            <Typography variant="body2" gutterBottom>
-              Are you sure you want to delete post?
-            </Typography>
-            <Grid container style={{ padding: "4px 0px" }}>
-              <Grid item style={{ flexGrow: 1 }}>
-                <IconButton color="primary" onClick={() => setOpenModal(false)}>
-                  <CloseIcon />
-                </IconButton>
-              </Grid>
-              <Grid item>
-                <IconButton
-                  color="primary"
-                  onClick={() => {
-                    sendDeleteReq().then(() => setOpenModal(false));
-                  }}>
-                  <DoneIcon />
-                </IconButton>
-              </Grid>
-            </Grid>
-          </>
-        </FixedModal>
+        <ConsentModal
+          hide={!delModal}
+          headerText="Delete Post?"
+          consentText=" Are you sure you want to delete post?"
+          consentBtns={[
+            {
+              text: "Confirm",
+              color: "primary",
+              onClick: () => {
+                sendDeleteReq().then(() => setOpenModal(false));
+              },
+            },
+            {
+              text: "Cancel",
+              onClick: () => setOpenModal(false),
+            },
+          ]}
+        />
       )}
     </>
   );

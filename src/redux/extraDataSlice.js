@@ -64,7 +64,7 @@ const initialState = {
   },
   features: {
     feature: [],
-    data: [],
+    data: {},
     isLoading: false,
     error: "",
   },

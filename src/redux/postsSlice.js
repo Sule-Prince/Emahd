@@ -8,10 +8,10 @@ const initialState = {
   posts: {
     media: [],
     scream: [],
-    userPost: {
-      media: [],
-      scream: [],
-    },
+  },
+  userPost: {
+    media: [],
+    scream: [],
   },
   topPosts: {
     media: [],
@@ -71,7 +71,7 @@ export const getTopPostsThunk = createAsyncThunk(
 
 export const getPostsFromIndexDB = createAsyncThunk(
   "user/getIndexedData",
-  async (args, { rejectWithValue }) => {
+  async (args, { rejectWithValue, getState }) => {
     try {
       const posts = [];
       const postsArr = await dataEntries({
@@ -92,15 +92,21 @@ export const getPostsFromIndexDB = createAsyncThunk(
         const post = postsArr[index][1];
         if (post.multiple) {
           mediaUrl = mediaFiles[postId].map((mediaFile) =>
-            URL.createObjectURL(mediaFile)
+            mediaFile
+              ? URL.createObjectURL(mediaFile)
+              : URL.createObjectURL(new Blob([]))
           );
-        } else mediaUrl = URL.createObjectURL(mediaFiles[postId]);
+        } else
+          mediaUrl = mediaFiles[postId]
+            ? URL.createObjectURL(mediaFiles[postId])
+            : URL.createObjectURL(new Blob([]));
         const transPost = { ...post, mediaUrl };
 
         posts.push(transPost);
       }
 
-      return posts;
+      const { handle: user, imageUrl } = getState().user.data;
+      return { posts, user, imageUrl };
     } catch (error) {
       console.error(error);
       return rejectWithValue("Cannot get posts, please try again later");
@@ -141,34 +147,70 @@ const screamsData = createSlice({
     updatePost: (state, { payload: { index, user, type, ...data } }) => {
       if (user) {
         const newPost = {
-          ...state.posts.userPost[type][index],
+          ...state.userPost[type][index],
           [Object.keys(data)[0]]: Object.values(data)[0],
+          name: "hey",
         };
 
-        state.posts.userPost[type] = updateObjectInArray(
-          state.posts.userPost[type],
-          {
-            index,
-            item: newPost,
-          }
-        );
-        // state.posts.userPost[type][index] = { ...newPost };
+        state.userPost[type][index] = { ...newPost };
+
+        /*  state.userPost[type] = updateObjectInArray(state.userPost[type], {
+          index,
+          item: newPost,
+        }); */
+        // state.userPost[type][index] = { ...newPost };
       } else
         state.posts[type][index][Object.keys(data)[0]] = Object.values(data)[0];
     },
   },
   extraReducers: {
     [getPostsFromIndexDB.fulfilled]: (state, action) => {
-      const posts = action.payload,
+      if (state.posts.media.length > 0 || state.posts.scream.length > 0) return;
+      const { posts, user, imageUrl } = action.payload,
         media = [],
-        scream = [];
+        scream = [],
+        userMedia = [],
+        userScream = [];
+
+      let mediaIndex = 0,
+        mediaUIndex = 0,
+        screamIndex = 0,
+        screamUIndex = 0;
+
       for (let i = 0; i < posts.length; i++) {
         const post = posts[i];
-        if (post.section === "scream") scream.push(post);
-        else media.push(post);
+        if (post.section === "scream") {
+          if (post.handle === user) {
+            post.uIndex = screamUIndex;
+            post.imageUrl = imageUrl;
+            userScream.push(post);
+
+            screamUIndex += 1;
+          }
+
+          post.index = screamIndex;
+          scream.push(post);
+
+          screamIndex += 1;
+        } else {
+          if (post.handle === user) {
+            post.uIndex = mediaUIndex;
+            post.imageUrl = imageUrl;
+            userMedia.push(post);
+
+            mediaUIndex += 1;
+          }
+
+          post.index = mediaIndex;
+          media.push(post);
+
+          mediaIndex += 1;
+        }
       }
       state.posts.media = media;
       state.posts.scream = scream;
+      state.userPost.media = userMedia;
+      state.userPost.scream = userScream;
     },
     [screamsDataThunk.pending]: (state) => {
       state.isLoading = true;
@@ -205,18 +247,3 @@ export const {
 
 const screamDataReducer = screamsData.reducer;
 export default screamDataReducer;
-
-function updateObjectInArray(array, action) {
-  return array.map((item, index) => {
-    if (index !== action.index) {
-      // This isn't the item we care about - keep it as-is
-      return item;
-    }
-
-    // Otherwise, this is the one we want - return an updated value
-    return {
-      ...item,
-      ...action.item,
-    };
-  });
-}

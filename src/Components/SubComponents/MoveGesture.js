@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function MoveGesture({ children, setX, setY, onEventEnd, onEventStart }) {
+function MoveGesture({ children, setX, setY, onMoveEnd, onMoveStart }) {
   const [initPos, setInitPos] = useState({
     x: 0,
     y: 0,
@@ -8,7 +8,7 @@ function MoveGesture({ children, setX, setY, onEventEnd, onEventStart }) {
   return (
     <div
       onTouchStart={(e) => {
-        if (onEventStart) onEventStart();
+        if (onMoveStart) onMoveStart();
         setInitPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
       }}
       onTouchMove={(e) => {
@@ -22,7 +22,11 @@ function MoveGesture({ children, setX, setY, onEventEnd, onEventStart }) {
       }}
       onTouchEnd={(e) => {
         setInitPos({ x: 0, y: 0 });
-        if (onEventEnd) onEventEnd();
+        if (onMoveEnd)
+          onMoveEnd({
+            x: initPos.x - e.changedTouches[0].clientX,
+            y: initPos.y - e.changedTouches[0].clientY,
+          });
       }}
       onTouchCancel={(e) => {
         setInitPos({ x: 0, y: 0 });

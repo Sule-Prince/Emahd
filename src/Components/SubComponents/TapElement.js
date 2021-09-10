@@ -23,7 +23,7 @@ function TapElement({ children, onTap = () => {} }) {
         onTap={(e) => {
           let wWidth = window.innerWidth,
             intersectionPoint = wWidth / 2,
-            diff = wWidth * (5 / 100),
+            diff = wWidth * (10 / 100),
             lWidth = intersectionPoint - diff,
             rWidth = intersectionPoint + diff;
 

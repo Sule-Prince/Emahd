@@ -39,7 +39,11 @@ const Notification = ({ notification, color }) => {
       <CardActionArea style={{ height: 70, backgroundColor: color }}>
         <Link
           to={
-            notification.type === "follow" ? `/user/${notification.sender}` : ""
+            notification.type === "follow"
+              ? `/user/${notification.sender}`
+              : notification.type === "like" || notification.type === "comment"
+              ? `/post/${notification.postId}`
+              : ""
           }
           style={{ height: "inherit", width: "inherit" }}>
           <CardHeader

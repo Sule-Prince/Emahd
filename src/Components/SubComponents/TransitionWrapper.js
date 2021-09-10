@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import eventManager from "../../utils/EventPubSub";
+import { eventManager } from "../../utils/EventPubSub";
 
 function TransitionWrapper({
   setDisplay,
@@ -28,7 +28,6 @@ function TransitionWrapper({
     eventManager.subscribe(
       "transition-wrapper",
       ({ direction, display, id }) => {
-        console.log(" I was Initialized!!!");
         if (id !== idProp) return;
         if (display) return;
 

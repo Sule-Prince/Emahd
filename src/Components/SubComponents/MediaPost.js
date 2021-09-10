@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 
 import {
@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardContent,
   Avatar,
-  makeStyles,
   Typography,
 } from "@material-ui/core";
 
@@ -23,21 +22,8 @@ import PostOptions from "./PostOptions";
 import { useDataStore } from "../../utils/customHooks/persist";
 import toFile from "../../utils/toFile";
 import { urlToBlob } from "../../utils/helperFunctions";
-
-const useStyles = makeStyles((theme) => ({
-  avatar: {
-    height: 38,
-    width: 38,
-  },
-  commentContainer: {
-    padding: "10px 5px",
-    paddingBottom: 12,
-  },
-  media: {
-    height: "auto",
-    width: "100%",
-  },
-}));
+import TextTruncate from "./TextTruncate";
+import useExtraStyles from "./styles";
 
 const MediaPost = ({ post: scream, rootRef }) => {
   const {
@@ -56,12 +42,15 @@ const MediaPost = ({ post: scream, rootRef }) => {
     mediaType,
   } = scream;
 
+  const [isLiked, setIsLiked] = useState(false);
   const [commentNo, setCommentNo] = useState(commentCount);
   const [mediaLoaded, setMediaLoaded] = useState(false);
 
+  const likeRef = useRef(null);
+
   dayjs.extend(relativeTime);
 
-  const classes = useStyles();
+  const classes = useExtraStyles();
 
   // const [commentNo, setCommentNo] = useState(commentCount);
 
@@ -144,7 +133,7 @@ const MediaPost = ({ post: scream, rootRef }) => {
             <div>
               <Link
                 style={{ color: "#000", fontWeight: "bold" }}
-                to={`user/${handle}`}>
+                to={`/user/${handle}`}>
                 {personalizedHandle || handle}
               </Link>
               <Typography variant="caption" color="textSecondary" component="p">
@@ -153,33 +142,46 @@ const MediaPost = ({ post: scream, rootRef }) => {
             </div>
           }
         />
-        <CardContent>
-          <Typography variant="body2" color="textPrimary" component="div">
-            {post}
-          </Typography>
-        </CardContent>
-        <CardActionArea>
-          <LazyLoadMedia
-            type={mediaType}
-            src={mediaUrl}
-            rootRef={rootRef}
-            thumb={thumb}
-            settings={postSettings.media}
-            mediaLoaded={mediaLoaded}
-            setMediaLoaded={setMediaLoaded}
+        <CardContent className={classes.cardContent}>
+          <TextTruncate
+            width={
+              window.innerWidth -
+              16 * 2 /* Padding of both sides of the card content */
+            }
+            lineNo={2}
+            text={post}
           />
-        </CardActionArea>
+        </CardContent>
+
+        <LazyLoadMedia
+          thumb={thumb}
+          src={mediaUrl}
+          type={mediaType}
+          rootRef={rootRef}
+          dbTapped={() => {
+            if (isLiked) return;
+            likeRef.current.click();
+          }}
+          mediaLoaded={mediaLoaded}
+          settings={postSettings.media}
+          setMediaLoaded={setMediaLoaded}
+          ActionComponent={CardActionArea}
+        />
 
         {/* Card Actions */}
         <ScreamActions
+          likeRef={likeRef}
+          isLiked={isLiked}
           scream={scream}
-          postId={postId}
-          likeCount={likeCount}
-          commentCount={commentNo}
+          setIsLiked={setIsLiked}
         />
       </Card>
       {/* Comment Field  */}
-      <CommentField setCommentNo={setCommentNo} postId={postId} />
+      <CommentField
+        imageUrl={userImg}
+        setCommentNo={setCommentNo}
+        postId={postId}
+      />
     </div>
   );
 };

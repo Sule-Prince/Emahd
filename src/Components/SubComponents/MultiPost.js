@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardContent,
   Avatar,
-  makeStyles,
   Typography,
   MobileStepper,
 } from "@material-ui/core";
@@ -25,21 +24,9 @@ import PostOptions from "./PostOptions";
 import { replaciveMerge, urlToBlob } from "../../utils/helperFunctions";
 import toFile from "../../utils/toFile";
 import { useDataStore } from "../../utils/customHooks/persist";
+import TextTruncate from "./TextTruncate";
 
-const useStyles = makeStyles((theme) => ({
-  avatar: {
-    height: 38,
-    width: 38,
-  },
-  commentContainer: {
-    padding: "10px 5px",
-    paddingBottom: 12,
-  },
-  media: {
-    height: "auto",
-    width: "100%",
-  },
-}));
+import useExtraStyles from "./styles";
 
 function MultiPost({ mediaPost, rootRef }) {
   const {
@@ -50,6 +37,7 @@ function MultiPost({ mediaPost, rootRef }) {
     imageUrl: userImg,
     handle,
     postId,
+    type,
     likeCount,
     commentCount,
     createdAt,
@@ -58,9 +46,13 @@ function MultiPost({ mediaPost, rootRef }) {
   } = mediaPost;
   dayjs.extend(relativeTime);
 
+  const [isLiked, setIsLiked] = useState(false);
   const [commentNo, setCommentNo] = useState(commentCount);
 
-  const classes = useStyles();
+  const likeRef = useRef(null);
+  const tappedRef = useRef(null);
+
+  const classes = useExtraStyles();
 
   const user = useSelector((state) => state.user.data.handle);
   const personalizedHandle = useSelector((state) => {
@@ -78,6 +70,7 @@ function MultiPost({ mediaPost, rootRef }) {
       handle,
       userId,
       postId,
+      type,
       section,
       likeCount,
       commentCount,
@@ -110,35 +103,75 @@ function MultiPost({ mediaPost, rootRef }) {
           title={
             <Link
               style={{ color: "#000", fontWeight: "bold" }}
-              to={`user/${handle}`}>
+              to={`/user/${handle}`}>
               {personalizedHandle || handle}
             </Link>
           }
         />
-        <CardActionArea component="div">
-          {multiple ? (
-            <Multiple slides={slides} settings={postSettings} postId={postId} />
-          ) : (
+        {multiple ? (
+          <Multiple
+            isLiked={isLiked}
+            likeRef={likeRef}
+            slides={slides}
+            tappedRef={tappedRef}
+            settings={postSettings}
+            postId={postId}
+            type={type}
+            classes={classes}
+          />
+        ) : (
+          <CardActionArea
+            component="div"
+            onTouchStart={(e) => {
+              if (!tappedRef.current) {
+                //if tap is not set, set up single tap
+                tappedRef.current = setTimeout(function () {
+                  tappedRef.current = null;
+                  //insert things you want to do when single tapped
+                }, 300); //wait 300ms then run single click code
+              } else {
+                //tapped within 300ms of last tap. double tap
+                clearTimeout(tappedRef.current); //stop single tap callback
+                tappedRef.current = null;
+                //insert things you want to do when double tapped
+                if (isLiked) return;
+                likeRef.current.click();
+              }
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+            }}>
             <Single
               src={slides}
               aspectRatio={postSettings[0].aspectRatio}
               postId={postId}
+              type={type}
+              classes={classes}
             />
-          )}
-        </CardActionArea>
+          </CardActionArea>
+        )}
 
         {/* Card Actions */}
         <ScreamActions
           scream={mediaPost}
           postId={postId}
+          likeRef={likeRef}
+          isLiked={isLiked}
+          setIsLiked={setIsLiked}
           likeCount={likeCount}
           commentCount={commentNo}
         />
 
-        <CardContent>
-          <Typography variant="body2" color="textPrimary" component="div">
-            {post}
-          </Typography>
+        <CardContent className={classes.cardContent}>
+          <TextTruncate
+            width={
+              window.innerWidth -
+              16 * 2 /* Padding of both sides of the card content */
+            }
+            lineNo={2}
+            text={post}
+          />
+
           <Typography variant="caption" color="textSecondary" component="p">
             {dayjs(createdAt).fromNow()}
           </Typography>
@@ -146,14 +179,18 @@ function MultiPost({ mediaPost, rootRef }) {
       </Card>
 
       {/* Comment Field  */}
-      <CommentField setCommentNo={setCommentNo} postId={postId} />
+      <CommentField
+        imageUrl={userImg}
+        setCommentNo={setCommentNo}
+        postId={postId}
+      />
     </LazyLoad>
   );
 }
 
 export default MultiPost;
 
-const Single = ({ src, aspectRatio, postId }) => {
+const Single = ({ src, aspectRatio, postId, type, classes }) => {
   const [load, setLoad] = useState(false);
 
   const mediaPad = useState(() => {
@@ -199,28 +236,51 @@ const Single = ({ src, aspectRatio, postId }) => {
           }}></div>
       )}
 
-      <img
-        src={src}
-        alt="A post slide"
-        onLoad={() => {
-          setLoad(true);
-          createData();
-        }}
-        style={{
-          width: "100%",
-          height: "auto",
-          position: "absolute",
-          zIndex: 1,
-          top: 0,
-          left: 0,
-        }}
-      />
+      {type === "video" ? (
+        <video
+          alt="A media post"
+          className={classes.multiMedia}
+          onCanPlayThrough={() => {
+            setLoad(true);
+            createData();
+          }}
+        />
+      ) : (
+        <img
+          src={src}
+          alt="A media post"
+          className={classes.multiMedia}
+          onLoad={() => {
+            setLoad(true);
+            createData();
+          }}
+        />
+      )}
     </div>
   );
 };
 
-const Multiple = ({ slides, settings, postId }) => {
+const Multiple = ({
+  slides,
+  settings,
+  postId,
+  type,
+  tappedRef,
+  isLiked,
+  likeRef,
+  classes,
+}) => {
   const [index, setIndex] = useState(0);
+  const aspectRatio = useState(() => {
+    let aspRatio = 0;
+
+    settings.forEach((setting) => {
+      if (setting.aspectRatio > aspRatio) aspRatio = setting.aspectRatio;
+    });
+
+    return aspRatio;
+  })[0];
+
   const [createdFile, setCreatedFile] = useState(Array.from(slides).fill(""));
 
   const { setData, getData } = useDataStore();
@@ -251,20 +311,44 @@ const Multiple = ({ slides, settings, postId }) => {
   }, [createdFile]);
   return (
     <>
-      <SwipeableViews
-        enableMouseEvents
-        index={index}
-        onChangeIndex={(step) => setIndex(step)}>
-        {slides.map((slide, i) => (
-          <CarouselContent
-            key={i}
-            src={slide}
-            index={i}
-            setCreatedFile={setCreatedFile}
-            aspectRatio={settings[i].aspectRatio}
-          />
-        ))}
-      </SwipeableViews>
+      <CardActionArea
+        component="div"
+        onTouchStart={(e) => {
+          if (!tappedRef.current) {
+            //if tap is not set, set up single tap
+            tappedRef.current = setTimeout(function () {
+              tappedRef.current = null;
+              //insert things you want to do when single tapped
+            }, 300); //wait 300ms then run single click code
+          } else {
+            //tapped within 300ms of last tap. double tap
+            clearTimeout(tappedRef.current); //stop single tap callback
+            tappedRef.current = null;
+            //insert things you want to do when double tapped
+            if (isLiked) return;
+            likeRef.current.click();
+          }
+        }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+        }}>
+        <SwipeableViews
+          enableMouseEvents
+          index={index}
+          onChangeIndex={(step) => setIndex(step)}>
+          {slides.map((slide, i) => (
+            <CarouselContent
+              key={i}
+              src={slide}
+              index={i}
+              type={type}
+              classes={classes}
+              setCreatedFile={setCreatedFile}
+              aspectRatio={aspectRatio}
+            />
+          ))}
+        </SwipeableViews>
+      </CardActionArea>
       <MobileStepper
         position="static"
         variant="dots"
@@ -279,7 +363,14 @@ const Multiple = ({ slides, settings, postId }) => {
   );
 };
 
-const CarouselContent = ({ src, aspectRatio, index, setCreatedFile }) => {
+const CarouselContent = ({
+  src,
+  aspectRatio,
+  index,
+  setCreatedFile,
+  type,
+  classes,
+}) => {
   const [load, setLoad] = useState(false);
 
   const mediaPad = useState(() => {
@@ -317,7 +408,7 @@ const CarouselContent = ({ src, aspectRatio, index, setCreatedFile }) => {
             transform: "translate(-50%, -50%)",
           }}></div>
       )}
-      <img
+      {/*  <img
         src={src}
         alt="A post slide"
         onLoad={() => {
@@ -329,6 +420,27 @@ const CarouselContent = ({ src, aspectRatio, index, setCreatedFile }) => {
           position: "absolute",
         }}
       />
+ */}
+      {type === "video" ? (
+        <video
+          alt="A media post"
+          className={classes.media}
+          onCanPlayThrough={() => {
+            setLoad(true);
+            createData();
+          }}
+        />
+      ) : (
+        <img
+          src={src}
+          alt="A media post"
+          className={classes.multiMedia}
+          onLoad={() => {
+            setLoad(true);
+            createData();
+          }}
+        />
+      )}
     </div>
   );
 };

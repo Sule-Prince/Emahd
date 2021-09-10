@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import {
   Paper,
   Portal,
   makeStyles,
   ClickAwayListener,
 } from "@material-ui/core";
+import MoveGesture from "./MoveGesture";
 
 const useStyles = makeStyles((theme) => ({
+  clickaway: {
+    position: "fixed",
+    zIndex: theme.zIndex.snackbar - 1,
+  },
   root: {
     position: "fixed",
     zIndex: theme.zIndex.snackbar,
     width: "100%",
+    padding: 0,
     bottom: 0,
   },
   paper: {
@@ -36,13 +42,11 @@ const useStyles = makeStyles((theme) => ({
 function BottomModal({ children, display, setDisplay, ...props }) {
   return (
     <Portal>
-      <AnimatePresence>
-        {display && (
-          <MountModal setDisplay={setDisplay} {...props}>
-            {children}
-          </MountModal>
-        )}
-      </AnimatePresence>
+      {display && (
+        <MountModal setDisplay={setDisplay} {...props}>
+          {children}
+        </MountModal>
+      )}
     </Portal>
   );
 }
@@ -51,28 +55,8 @@ export default BottomModal;
 
 const MountModal = ({ setDisplay, children, ...props }) => {
   const [modalHeight, setModalHeight] = useState(0);
-  const dy = useRef(0);
+  const [shouldUnmount, setShouldUnmount] = useState(false);
   const modalRef = useRef(null);
-  const dragRef = useRef(0);
-
-  const modalVariant = {
-    initial: {
-      y: 0,
-    },
-    animate: {
-      y: 0,
-      transition: {
-        // stiffness: 50,
-        type: "spring",
-      },
-    },
-    exit: {
-      y: modalHeight,
-      transition: {
-        type: "spring",
-      },
-    },
-  };
 
   useEffect(() => {
     setModalHeight(modalRef.current.getBoundingClientRect().height);
@@ -80,34 +64,43 @@ const MountModal = ({ setDisplay, children, ...props }) => {
 
   const classes = useStyles();
   return (
-    <ClickAwayListener onClickAway={() => setDisplay(false)}>
-      <motion.div
-        ref={modalRef}
-        drag="y"
-        dragConstraints={dragRef}
-        dragElastic={0.1}
-        onDragStart={(e) => (dy.current = e.y)}
-        onDragEnd={(e) => {
-          if (e.y - dy.current > 0) setDisplay(false);
+    <ClickAwayListener
+      onClickAway={() => setDisplay(false)}
+      className={classes.clickaway}>
+      <MoveGesture
+        setY={(yDiff) => {
+          if (yDiff > 0) return;
+          modalRef.current.style.transform = `translateY(${-yDiff}px)`;
         }}
-        variants={modalVariant}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-        className={classes.root}
-        {...props}>
-        <Paper elevation={4} className={classes.paper}>
-          <div className={classes.handleBar} />
-          {children}
-        </Paper>
+        onMoveEnd={({ y }) => {
+          if (y < -(modalHeight * 0.3)) {
+            setShouldUnmount(true);
+            modalRef.current.style.transition = "all .5s ease-out";
+            modalRef.current.style.transform = `translateY(${
+              modalHeight + 10
+            }px)`;
+          } else {
+            setShouldUnmount(false);
+            modalRef.current.style.transition = "all .3s ease-out";
+            modalRef.current.style.transform = `translateY(0%)`;
+          }
+        }}>
         <div
-          ref={dragRef}
-          style={{
-            position: "fixed",
-            bottom: -100,
-            height: modalHeight + 100,
-          }}></div>
-      </motion.div>
+          ref={modalRef}
+          onTransitionEnd={() => {
+            if (!shouldUnmount) return;
+            setTimeout(() => {
+              setDisplay(false);
+            }, 500);
+          }}
+          className={classes.root}
+          {...props}>
+          <Paper elevation={4} className={classes.paper}>
+            <div className={classes.handleBar} />
+            {children}
+          </Paper>
+        </div>
+      </MoveGesture>
     </ClickAwayListener>
   );
 };

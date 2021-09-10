@@ -20,18 +20,9 @@ import ScreamActions from "./ScreamActions";
 
 import CommentField from "./CommentField";
 import PostOptions from "./PostOptions";
+import TextTruncate from "./TextTruncate";
 
-const useStyles = makeStyles((theme) => ({
-  avatar: {
-    height: 38,
-    width: 38,
-  },
-  media: {
-    height: "auto",
-    minHeight: "50vw",
-    width: "100%",
-  },
-}));
+import useExtraStyles from "./styles";
 
 const Textpost = ({ post: scream }) => {
   const {
@@ -47,7 +38,7 @@ const Textpost = ({ post: scream }) => {
 
   dayjs.extend(relativeTime);
 
-  const classes = useStyles();
+  const classes = useExtraStyles();
 
   const user = useSelector((state) => state.user.data.handle);
   const personalizedHandle = useSelector((state) => {
@@ -78,7 +69,7 @@ const Textpost = ({ post: scream }) => {
             <div>
               <Link
                 style={{ color: "#000", fontWeight: "bold" }}
-                to={`user/${handle}`}>
+                to={`/user/${handle}`}>
                 {personalizedHandle || handle}
               </Link>
               <Typography variant="caption" color="textSecondary" component="p">
@@ -88,10 +79,15 @@ const Textpost = ({ post: scream }) => {
           }
         />
 
-        <CardContent>
-          <Typography variant="body2" color="textPrimary" component="div">
-            {post}
-          </Typography>
+        <CardContent className={classes.cardContent}>
+          <TextTruncate
+            width={
+              window.innerWidth -
+              16 * 2 /* Padding of both sides of the card content */
+            }
+            lineNo={2}
+            text={post}
+          />
         </CardContent>
 
         {/* Card Actions */}
@@ -104,7 +100,11 @@ const Textpost = ({ post: scream }) => {
       </Card>
 
       {/* Comment Field  */}
-      <CommentField postId={postId} setCommentNo={setCommentNo} />
+      <CommentField
+        imageUrl={userImg}
+        postId={postId}
+        setCommentNo={setCommentNo}
+      />
     </div>
   );
 };
